@@ -1,0 +1,215 @@
+'use client';
+import React from 'react';
+import Link from 'next/link';
+import AppNav from '../../../components/AppNav';
+import styles from './dashboard.module.css';
+
+export default function Dashboard() {
+  return (
+    <div className={styles.dashboardRoot}>
+      <AppNav />
+
+      <div className={`${styles.dashboardContainer} animate-fade-in`}>
+        {/* DESKTOP SIDEBAR: Fixed and Architected */}
+        <aside className={styles.sidebar}>
+          <div className="reveal stagger">
+            <div className={styles.hubLabel}>Professional Ledger</div>
+            <div className={styles.hubTier}>Architect Tier</div>
+            <div className={styles.sideLinks}>
+              <Link href="/dashboard" className={`${styles.sideLink} ${styles.active}`}>
+                <span>⊞</span> Dashboard
+              </Link>
+              <Link href="/marketplace" className={styles.sideLink}>
+                <span>⇄</span> Marketplace
+              </Link>
+              <Link href="/escrow" className={styles.sideLink}>
+                <span>🛡️</span> Escrow Trust
+              </Link>
+              <Link href="/messages" className={styles.sideLink}>
+                <span>💬</span> Messages
+              </Link>
+              <Link href="/catalog" className={styles.sideLink}>
+                <span>📚</span> Learning Hub
+              </Link>
+              <Link href="/create-listing" className={styles.sideLink}>
+                <span>➕</span> Post Expert Skill
+              </Link>
+            </div>
+          </div>
+
+          <div className={`${styles.sidebarBottom} reveal`} style={{ animationDelay: '0.4s' }}>
+            <div className={styles.upgradeBox}>
+              <div className={styles.upgradeTitle}>PREMIUM NETWORK</div>
+              <div className={styles.upgradeText}>Unlock the Titan's exchange and C-level mentoring.</div>
+              <Link href="/subscriptions"><button className={`${styles.upgradeBtn} click-scale`}>View Plans</button></Link>
+            </div>
+            <Link href="/settings" className={styles.sideLink}>
+              <span>⚙️</span> Settings
+            </Link>
+            <Link href="/login" className={styles.sideLink}>
+              <span>🚪</span> Logout
+            </Link>
+          </div>
+        </aside>
+
+        {/* MAIN COMMAND CENTER */}
+        <main className={styles.mainContent}>
+          
+          <div className={`${styles.welcomeSection} reveal`}>
+            <div>
+              <span className={styles.welcomeSubtitle}>SYSTEM OVERVIEW</span>
+              <h1 className={styles.welcomeTitle}>Welcome, Architect Alex.</h1>
+              <p className={styles.welcomeText}>Your trust rating is in the Top 5%. 2 active swaps require your attention.</p>
+            </div>
+            <Link href="/marketplace" className={`${styles.ctaBtn} click-scale`}>
+              Open Discovery Hub →
+            </Link>
+          </div>
+
+          <div className={`${styles.statGrid} stagger`}>
+            {/* Momentum Tracker */}
+            <div className={`${styles.card} ${styles.momentumCard} reveal`}>
+              <div className={styles.momentumHeader} style={{ marginBottom: '1.5rem' }}>
+                <div>
+                  <h3 className={styles.sectionTitle} style={{ fontSize: '1.1rem' }}>Learning Momentum</h3>
+                  <span className={styles.swapRole}>Active Progress across 4 domains</span>
+                </div>
+                <div className={styles.swapBadge} style={{ background: '#d1fae5', color: '#065f46' }}>TOP 5%</div>
+              </div>
+              <div className={styles.progressList}>
+                <div className={styles.progressItem}>
+                  <div className={styles.progressHeader}>
+                    <span>Advanced Architecture Patterns</span>
+                    <span>82%</span>
+                  </div>
+                  <div className={styles.progressBarBg}>
+                    <div className={styles.progressBarFill} style={{ width: '82%' }}></div>
+                  </div>
+                </div>
+                <div className={styles.progressItem}>
+                  <div className={styles.progressHeader}>
+                    <span>Quantitative Risk Arbitrage</span>
+                    <span style={{ color: '#059669' }}>45%</span>
+                  </div>
+                  <div className={styles.progressBarBg}>
+                    <div className={`${styles.progressBarFill}`} style={{ width: '45%', background: '#4ade80' }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* KPI: Ledger Hours */}
+            <div className={`${styles.card} ${styles.kpiCard} reveal`}>
+              <span className={styles.kpiTitle}>LEDGER HOURS</span>
+              <span className={styles.kpiValue}>124.5</span>
+              <span className={styles.kpiSubtext}>↗ +12% Efficiency</span>
+            </div>
+
+            {/* KPI: Trust Score */}
+            <div className={`${styles.card} ${styles.kpiCard} reveal`}>
+              <span className={styles.kpiTitle}>TRUST SCORE</span>
+              <span className={styles.kpiValue}>998</span>
+              <span className={styles.swapRole}>Near-perfect exchange record</span>
+            </div>
+          </div>
+
+          {/* ACTIVE SWAPS */}
+          <section className="reveal" style={{ animationDelay: '0.3s' }}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Active Skill Exchanges</h2>
+              <Link href="/escrow" className={styles.viewAllLink}>Manage Contracts</Link>
+            </div>
+            <div className={`${styles.swapsGrid} stagger`}>
+              <div className={`${styles.card} ${styles.swapCard} reveal hover-lift`}>
+                <div className={styles.swapHeader}>
+                  <div className={styles.swapUser}>
+                    <div className={styles.swapAvatar}>👩🏼‍💻</div>
+                    <div>
+                      <div className={styles.swapName}>Elena Vance</div>
+                      <div className={styles.swapRole}>Senior Financial Architect</div>
+                    </div>
+                  </div>
+                  <span className={`${styles.swapBadge} ${styles.swapBadgeBlue}`}>PROTOCOL ACTIVE</span>
+                </div>
+                <div className={styles.swapData}>
+                  <div className={styles.swapCol}>
+                    <span className={styles.swapLabel}>OFFERING</span>
+                    <span className={styles.swapValue}>System Architecture</span>
+                  </div>
+                  <div style={{ color: '#cbd5e1', fontSize: '1.2rem' }}>⇄</div>
+                  <div className={styles.swapCol} style={{ textAlign: 'right' }}>
+                    <span className={styles.swapLabel}>RECEIVING</span>
+                    <span className={styles.swapValue} style={{ color: '#4ade80' }}>Risk Analysis</span>
+                  </div>
+                </div>
+                <div className={styles.swapActions}>
+                  <Link href="/messages" className={`${styles.btnSecondary} click-scale`}>Secure Inbox</Link>
+                  <button className={`${styles.btnPrimary} click-scale`}>Release Milestone</button>
+                </div>
+              </div>
+
+              <div className={`${styles.card} ${styles.swapCard} reveal hover-lift`}>
+                <div className={styles.swapHeader}>
+                  <div className={styles.swapUser}>
+                    <div className={styles.swapAvatar}>👨🏽‍💻</div>
+                    <div>
+                      <div className={styles.swapName}>Marcus Chen</div>
+                      <div className={styles.swapRole}>DevOps Lead</div>
+                    </div>
+                  </div>
+                  <span className={`${styles.swapBadge} ${styles.swapBadgeGreen}`}>PENDING SIG</span>
+                </div>
+                <div className={styles.swapData}>
+                  <div className={styles.swapCol}>
+                    <span className={styles.swapLabel}>OFFERING</span>
+                    <span className={styles.swapValue}>UI Systems</span>
+                  </div>
+                  <div style={{ color: '#cbd5e1', fontSize: '1.2rem' }}>⇄</div>
+                  <div className={styles.swapCol} style={{ textAlign: 'right' }}>
+                    <span className={styles.swapLabel}>RECEIVING</span>
+                    <span className={styles.swapValue} style={{ color: '#4ade80' }}>Kubernetes Core</span>
+                  </div>
+                </div>
+                <div className={styles.swapActions}>
+                  <button className={`${styles.btnSecondary} click-scale`}>Edit Contract</button>
+                  <Link href="/escrow" className={`${styles.btnPrimary} click-scale`}>Sign Protocol</Link>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* RECOMMENDED FOR YOU */}
+          <section className="reveal" style={{ animationDelay: '0.4s', marginTop: '4rem' }}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>Priority Partner Matches</h2>
+              <Link href="/catalog" className={styles.viewAllLink}>View All</Link>
+            </div>
+            <div className={`${styles.coursesGrid} stagger`}>
+              {[
+                { title: 'Global Executive Presence', tag: 'LEADERSHIP', icon: '👔', color: '#0c2b54', val: '$500/hr Equiv' },
+                { title: 'Advanced Digital Modeling', tag: 'ARCHITECTURE', icon: '🏢', color: '#1e293b', val: '$420/hr Equiv' },
+                { title: 'Visualizing Complexity', tag: 'DATA SCIENCE', icon: '📊', color: '#334155', val: '$380/hr Equiv' }
+              ].map((c, i) => (
+                <div key={i} className={`${styles.courseCard} reveal hover-lift`}>
+                  <div className={styles.courseVisual} style={{ background: c.color, color: 'white' }}>
+                    <span className={styles.courseTag}>{c.tag}</span>
+                    {c.icon}
+                  </div>
+                  <div className={styles.courseContent}>
+                    <div className={styles.courseRating}>★ 5.0 <span style={{ fontWeight: 400, color: '#94a3b8' }}>(Verified)</span></div>
+                    <h3 className={styles.courseTitle}>{c.title}</h3>
+                    <div className={styles.courseFooter}>
+                      <span className={styles.coursePrice} style={{ fontSize: '0.75rem', opacity: 0.6 }}>{c.val}</span>
+                      <button className={`${styles.courseCart} click-scale`}>⇄</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+        </main>
+      </div>
+    </div>
+  );
+}
