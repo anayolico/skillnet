@@ -1,0 +1,112 @@
+/* Nav is handled globally by AppNav component */
+
+.settingsRoot {
+  min-height: 100vh;
+  background-color: #f1f5f9;
+  font-family: var(--font-inter), sans-serif;
+  color: #0f172a;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 8rem;
+  display: flex;
+  gap: 3rem;
+}
+
+/* Settings Side Menu */
+.sideMenu {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.menuItem {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  user-select: none;
+}
+.menuItem:hover { background: #e2e8f0; }
+.menuItem.active { background: white; color: #0c2b54; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+
+.settingsContent { flex: 1; min-width: 0; }
+
+.pageHeader { margin-bottom: 2rem; }
+.pageTitle { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+.pageSubtitle { color: #64748b; font-size: 1rem; }
+
+.settingsCard {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+.cardTitle {
+  font-size: 1.25rem; font-weight: 800; margin-bottom: 1.5rem;
+  padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;
+}
+
+.formGroup { margin-bottom: 1.5rem; }
+.label {
+  display: block; font-size: 0.85rem; font-weight: 700; color: #0c2b54;
+  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;
+}
+.input {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  font-family: inherit;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.input:focus { border-color: #0c2b54; }
+
+.toggleRow {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 0; border-bottom: 1px solid #f1f5f9;
+}
+.toggleRow:last-child { border-bottom: none; }
+.toggleInfo { display: flex; flex-direction: column; gap: 0.25rem; }
+.toggleTitle { font-weight: 700; }
+.toggleDesc { font-size: 0.85rem; color: #64748b; }
+
+/* Custom toggle switch */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1; transition: .4s; border-radius: 24px;
+}
+.slider:before {
+  position: absolute; content: ""; height: 18px; width: 18px;
+  left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: #4ade80; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+.saveBtn {
+  background: #0c2b54; color: white; border: none;
+  padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s;
+}
+.saveBtn:hover { opacity: 0.9; }
+
+@media (max-width: 768px) {
+  .container { flex-direction: column; padding-top: 2rem; gap: 2rem; }
+  .sideMenu { width: 100%; flex-direction: row; overflow-x: auto; padding-bottom: 1rem; }
+  .menuItem { white-space: nowrap; }
+  .settingsCard { padding: 1.5rem; }
+}

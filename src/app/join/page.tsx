@@ -1,15 +1,20 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import AppNav from '../../../components/AppNav';
 import styles from '../auth.module.css';
 
 export default function Join() {
+  const router = useRouter();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    router.push('/onboarding');
   };
 
   return (
     <div className={styles.pageWrapper}>
+      <AppNav mode="public" />
 
       {/* Desktop Visual Side */}
       <div className={styles.authVisual}>
@@ -25,13 +30,7 @@ export default function Join() {
       </div>
 
       {/* Main Form Content Side */}
-      <div className={styles.authContent}>
-
-        {/* Desktop Header Links */}
-        <div className={styles.desktopHeader}>
-          <Link href="/login" className={styles.headerLink}>Sign In</Link>
-          <Link href="/join" className={`${styles.headerLink} ${styles.activeHeaderLink}`}>Create an account</Link>
-        </div>
+      <div className={styles.authContent} style={{ paddingBottom: '6rem' }}>
 
         <div className={styles.authCard}>
           <div className={styles.logo}>
@@ -98,7 +97,7 @@ export default function Join() {
             </button>
           </form>
 
-          <div className={styles.secureBadge}>
+          <div className={styles.secureBadgeText} style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.8rem', marginTop: '1rem' }}>
             🛡️ Escrow Trust Secured
           </div>
 
@@ -110,19 +109,6 @@ export default function Join() {
           </div>
           <p className={styles.avatarSubtext}>Join the verified community today.</p>
         </div>
-
-        {/* Mobile Nav */}
-        <nav className={styles.bottomNav}>
-          <Link href="/login" className={styles.navItem}>
-            <span className={styles.navIcon}>→]</span>
-            Login
-          </Link>
-          <Link href="/join" className={`${styles.navItem} ${styles.navItemActive}`}>
-            <span className={styles.navIcon}>👤+</span>
-            Join
-          </Link>
-        </nav>
-
       </div>
     </div>
   );

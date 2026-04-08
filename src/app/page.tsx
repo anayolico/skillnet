@@ -1,26 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
+import AppNav from '../../components/AppNav';
+import Footer from '../../components/Footer';
 
 export default function Home() {
   return (
     <>
-      <header>
-        <div className="container nav-container">
-          <div className="nav-logo"><a href="/">SkillNet</a></div>
-          <nav className="nav-links">
-            <a href="#">Home</a>
-            <a href="#">Catalog</a>
-            <a href="#">Marketplace</a>
-            <a href="#">Subscriptions</a>
-            <Link href="/login" style={{ fontWeight: 700, color: 'var(--color-primary)' }}>Login</Link>
-          </nav>
-          <div className="nav-actions">
-            <Link href="/join" className="btn btn-primary">Join Network</Link>
-          </div>
-        </div>
-      </header>
+      <AppNav mode="public" />
 
-      <main className="animate-fade-in">
+      <main className="animate-fade-in" style={{ paddingBottom: '6rem' }}>
         {/* Hero Section */}
         <section className="container">
           <div className="hero">
@@ -29,8 +17,8 @@ export default function Home() {
               <h1 className="animate-fade-in delay-200">Master the Art of the Exchange</h1>
               <p className="animate-fade-in delay-300">A sophisticated peer-to-peer ecosystem designed for professionals to architect their expertise through high-fidelity knowledge transfer.</p>
               <div className="hero-actions animate-fade-in delay-300">
-                <button className="btn btn-primary">Explore Courses</button>
-                <button className="btn btn-outline">Find a Swap Partner</button>
+                <Link href="/catalog" className="btn btn-primary">Explore Courses</Link>
+                <Link href="/marketplace" className="btn btn-outline">Find a Swap Partner</Link>
               </div>
             </div>
             <div className="hero-visual animate-fade-in delay-300">
@@ -68,19 +56,19 @@ export default function Home() {
               <div className="feature-icon">📚</div>
               <h3>1. Learn</h3>
               <p>Access a curriculum designed by industry architects. Deep-dive into technical taxonomies and professional methodologies.</p>
-              <a href="#" className="feature-link">Explore Curriculum →</a>
+              <Link href="/catalog" className="feature-link">Explore Curriculum →</Link>
             </div>
             <div className="feature-card">
               <div className="feature-icon">🔄</div>
               <h3>2. Swap</h3>
               <p>Engage in peer-to-peer knowledge arbitrage. Trade your technical mastery for another professional's expertise in a secure sandbox.</p>
-              <a href="#" className="feature-link">Find a Partner →</a>
+              <Link href="/marketplace" className="feature-link">Find a Partner →</Link>
             </div>
             <div className="feature-card">
               <div className="feature-icon">📈</div>
               <h3>3. Grow</h3>
               <p>Validate your growth through our architectural ledger. Build a portfolio of verified skills backed by real professional exchanges.</p>
-              <a href="#" className="feature-link">View Taxonomy →</a>
+              <Link href="/profile" className="feature-link">View Your Portfolio →</Link>
             </div>
           </div>
         </section>
@@ -173,55 +161,12 @@ export default function Home() {
             <h2>Ready to architect your expertise?</h2>
             <div className="cta-actions">
               <Link href="/join" className="btn btn-accent">Join the Network</Link>
-              <button className="btn btn-primary" style={{ border: '1px solid #ffffff30' }}>View Skill Taxonomy</button>
+              <Link href="/catalog" className="btn btn-primary" style={{ border: '1px solid #ffffff30' }}>View Skill Catalog</Link>
             </div>
           </div>
         </section>
       </main>
-
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-grid">
-            <div className="footer-brand">
-              <h4>SkillNet</h4>
-              <p style={{ marginBottom: '1rem' }}>Designing the future of professional knowledge exchange through architectural precision and peer-to-peer trust.</p>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <span>𝕏</span> <span>in</span> <span>gh</span>
-              </div>
-            </div>
-            <div className="footer-links">
-              <h5>Global Network</h5>
-              <ul>
-                <li><a href="#">Partner Directory</a></li>
-                <li><a href="#">Regional Nodes</a></li>
-                <li><a href="#">Exchange Marketplace</a></li>
-                <li><a href="#">Corporate Access</a></li>
-              </ul>
-            </div>
-            <div className="footer-links">
-              <h5>Protocol</h5>
-              <ul>
-                <li><a href="#">Trust & Safety</a></li>
-                <li><a href="#">Skill Taxonomy</a></li>
-                <li><a href="#">Privacy Protocol</a></li>
-                <li><a href="#">Security Audit</a></li>
-              </ul>
-            </div>
-            <div className="footer-links">
-              <h5>Company</h5>
-              <ul>
-                <li><a href="#">About the Ledger</a></li>
-                <li><a href="#">Architecture Blog</a></li>
-                <li><a href="#">Careers</a></li>
-                <li><a href="#">Contact</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>© {new Date().getFullYear()} SkillNet Architecture. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }
