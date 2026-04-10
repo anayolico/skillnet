@@ -2,7 +2,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import AppNav from '../../../components/AppNav';
 import styles from '../auth.module.css';
 
 export default function Join() {
@@ -14,8 +13,6 @@ export default function Join() {
 
   return (
     <div className={styles.pageWrapper}>
-      <AppNav mode="public" />
-
       {/* Desktop Visual Side */}
       <div className={styles.authVisual}>
         <div className={styles.authVisualBg}></div>
@@ -108,6 +105,13 @@ export default function Join() {
             <div className={styles.avatar} style={{ backgroundColor: '#f1f5f9', color: '#0f3d7b' }}>+12k</div>
           </div>
           <p className={styles.avatarSubtext}>Join the verified community today.</p>
+
+          <div className={styles.authFooter}>
+            Already have an account? 
+            <Link href="/login" className={styles.authFooterLink}>
+              Sign In
+            </Link>
+          </div>
         </div>
       </div>
     </div>

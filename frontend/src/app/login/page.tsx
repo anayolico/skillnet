@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import AppNav from '../../../components/AppNav';
 import styles from '../auth.module.css';
 
 export default function Login() {
@@ -11,8 +10,6 @@ export default function Login() {
 
   return (
     <div className={styles.pageWrapper}>
-      <AppNav mode="public" />
-
       {/* Desktop Visual Side */}
       <div className={styles.authVisual}>
         <div className={styles.authVisualBg}></div>
@@ -89,6 +86,13 @@ export default function Login() {
 
           <div className={styles.secureBadgeText} style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.6, fontSize: '0.8rem' }}>
             🛡️ Encrypted & Secure Session
+          </div>
+
+          <div className={styles.authFooter}>
+            New to SkillNet? 
+            <Link href="/join" className={styles.authFooterLink}>
+              Join Now
+            </Link>
           </div>
         </div>
       </div>

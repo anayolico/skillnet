@@ -165,6 +165,25 @@
 .avatarBg3 { background: #475569; }
 .avatarSubtext { text-align: center; font-size: 0.75rem; color: var(--color-text-secondary); }
 
+.authFooter {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.authFooterLink {
+  color: var(--color-primary);
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 0.5rem;
+  transition: color 0.2s;
+}
+
+.authFooterLink:hover {
+  color: #0c4a6e;
+}
+
 /* -------------------------------------------
    RESPONSIVENESS & DESKTOP OVERRIDE
 ------------------------------------------- */
