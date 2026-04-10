@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
 import { clerkMiddleware, getAuth, requireAuth } from './middleware/auth';
 
 // Load environment variables
@@ -8,6 +9,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
+const prisma = new PrismaClient();
 
 // Middleware
 app.use(cors());
@@ -28,14 +30,27 @@ app.get('/health', (req: Request, res: Response) => {
 
 /**
  * @api {get} /ready Readiness probe
- * Returns 200 if the server is ready to handle requests.
+ * Returns 200 if the server and database are both reachable.
  */
-app.get('/ready', (req: Request, res: Response) => {
-  // Add logic here to check for database connectivity or other dependencies
-  res.status(200).json({
-    ready: true,
-    timestamp: new Date().toISOString()
-  });
+app.get('/ready', async (req: Request, res: Response) => {
+  try {
+    // Attempt a simple query to verify database connectivity
+    await prisma.$queryRaw`SELECT 1`;
+    
+    res.status(200).json({
+      ready: true,
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('[database]: Connection failed', error);
+    res.status(503).json({
+      ready: false,
+      database: 'disconnected',
+      error: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Root endpoint
@@ -56,6 +71,14 @@ app.get('/me', requireAuth, (req: Request, res: Response) => {
 });
 
 // Start server
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
+  
+  // Test database connection on startup
+  try {
+    await prisma.$connect();
+    console.log('[database]: Connected successfully to Neon PostgreSQL');
+  } catch (error) {
+    console.error('[database]: Failed to connect to database at startup', error);
+  }
 });
