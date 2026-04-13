@@ -1,13 +1,10 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
+import { SignIn } from '@clerk/nextjs';
 import styles from '../auth.module.css';
 
 export default function Login() {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
-
   return (
     <div className={styles.pageWrapper}>
       {/* Desktop Visual Side */}
@@ -38,50 +35,18 @@ export default function Login() {
             Access your professional ledger and<br />continue building your expert network.
           </p>
 
-          <form onSubmit={handleSubmit}>
-            <div className={styles.formGroup}>
-              <div className={styles.labelWrapper}>
-                <label className={styles.label}>Email Address</label>
-              </div>
-              <input
-                type="email"
-                className={styles.input}
-                placeholder="name@company.com"
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <div className={styles.labelWrapper}>
-                <label className={styles.label}>Password</label>
-                <Link href="#" className={styles.forgotLink}>FORGOT?</Link>
-              </div>
-              <input
-                type="password"
-                className={styles.input}
-                placeholder="••••••••"
-                required
-              />
-            </div>
-
-            <button type="submit" className={styles.submitBtn}>
-              Login to SkillNet
-            </button>
-          </form>
-
-          <div className={styles.divider}>
-            <span className={styles.dividerText}>Or secure entry with</span>
-          </div>
-
-          <div className={styles.ssoGrid}>
-            <button className={styles.ssoBtn}>
-              <span style={{ color: '#EA4335', fontWeight: 'bold' }} className={styles.ssoIcon}>G</span>
-              Google
-            </button>
-            <button className={styles.ssoBtn}>
-              <span style={{ color: '#0A66C2', fontWeight: 'bold' }} className={styles.ssoIcon}>in</span>
-              LinkedIn
-            </button>
+          <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+            <SignIn routing="hash" appearance={{
+              elements: {
+                rootBox: "w-full",
+                card: "w-full shadow-none p-0 bg-transparent",
+                headerTitle: "hidden",
+                headerSubtitle: "hidden",
+                socialButtonsBlockButton: "border-gray-200 border text-black font-semibold",
+                formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
+                footerAction: "hidden"
+              }
+            }} />
           </div>
 
           <div className={styles.secureBadgeText} style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.6, fontSize: '0.8rem' }}>

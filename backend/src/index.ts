@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import { clerkMiddleware, getAuth, requireAuth } from './middleware/auth';
-
+import { clerkWebhookHandler } from './webhooks/clerk';
 // Load environment variables
 dotenv.config();
 
@@ -13,6 +13,9 @@ const prisma = new PrismaClient();
 
 // Middleware
 app.use(cors());
+// Webhook must be parsed as raw bytes for Svix signature verification
+app.post('/api/webhooks/clerk', express.raw({ type: 'application/json' }), clerkWebhookHandler);
+
 app.use(express.json());
 app.use(clerkMiddleware()); // Initialize Clerk
 

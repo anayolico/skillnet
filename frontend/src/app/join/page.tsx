@@ -1,15 +1,10 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { SignUp } from '@clerk/nextjs';
 import styles from '../auth.module.css';
 
 export default function Join() {
-  const router = useRouter();
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push('/onboarding');
-  };
 
   return (
     <div className={styles.pageWrapper}>
@@ -41,58 +36,19 @@ export default function Join() {
             Join 12,000+ Professionals sharing insights<br />and opportunities across the globe.
           </p>
 
-          <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '0 0.5rem 1rem 0', borderRadius: '16px', marginBottom: '1.5rem' }}>
-
-            <div className={styles.formGroup}>
-              <div className={styles.labelWrapper}>
-                <label className={styles.label}>Full Name</label>
-              </div>
-              <input
-                type="text"
-                className={styles.input}
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <div className={styles.labelWrapper}>
-                <label className={styles.label}>Email Address</label>
-              </div>
-              <input
-                type="email"
-                className={styles.input}
-                placeholder="you@professional.com"
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <div className={styles.labelWrapper}>
-                <label className={styles.label}>Password</label>
-              </div>
-              <div className={styles.inputWrapper}>
-                <input
-                  type="password"
-                  className={styles.input}
-                  placeholder="Create a strong password"
-                  required
-                />
-                <span className={styles.inputIcon}>👁️</span>
-              </div>
-            </div>
-
-            <div className={styles.checkboxWrapper}>
-              <input type="checkbox" className={styles.checkbox} required id="terms" />
-              <label htmlFor="terms" className={styles.checkboxText}>
-                I agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong>.
-              </label>
-            </div>
-
-            <button type="submit" className={styles.submitBtn}>
-              Join Network →
-            </button>
-          </form>
+          <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+            <SignUp routing="hash" appearance={{
+              elements: {
+                rootBox: "w-full",
+                card: "w-full shadow-none p-0 bg-transparent",
+                headerTitle: "hidden",
+                headerSubtitle: "hidden",
+                socialButtonsBlockButton: "border-gray-200 border text-black font-semibold",
+                formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
+                footerAction: "hidden"
+              }
+            }} />
+          </div>
 
           <div className={styles.secureBadgeText} style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.8rem', marginTop: '1rem' }}>
             🛡️ Escrow Trust Secured
