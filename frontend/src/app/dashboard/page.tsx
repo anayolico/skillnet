@@ -1,10 +1,46 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
 import styles from './dashboard.module.css';
+import { createClient } from '../../utils/supabase/client';
 
 export default function Dashboard() {
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUserData() {
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(`${apiUrl}/api/me`, {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+        const data = await res.json();
+        if (data.success) {
+          setUserData(data.user);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard data', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUserData();
+  }, []);
+
+  if (loading) return <div className={styles.dashboardRoot}><AppNav /></div>;
+
+  const displayName = userData?.firstName ? `${userData.firstName} ${userData.lastName || ''}` : 'SkillNet Expert';
+  const displayHeadline = userData?.profile?.headline || 'Expertise Arbitrageur';
+  const displayLevel = userData?.profile?.experienceLevel || 'Expert';
+
   return (
     <div className={styles.dashboardRoot}>
       <AppNav />
@@ -14,7 +50,7 @@ export default function Dashboard() {
         <aside className={styles.sidebar}>
           <div className="reveal stagger">
             <div className={styles.hubLabel}>Professional Ledger</div>
-            <div className={styles.hubTier}>Architect Tier</div>
+            <div className={styles.hubTier}>{displayLevel} Tier</div>
             <div className={styles.sideLinks}>
               <Link href="/dashboard" className={`${styles.sideLink} ${styles.active}`}>
                 <span>⊞</span> Dashboard
@@ -58,7 +94,7 @@ export default function Dashboard() {
           <div className={`${styles.welcomeSection} reveal`}>
             <div>
               <span className={styles.welcomeSubtitle}>SYSTEM OVERVIEW</span>
-              <h1 className={styles.welcomeTitle}>Welcome, Architect Alex.</h1>
+              <h1 className={styles.welcomeTitle}>Welcome, {displayName}.</h1>
               <p className={styles.welcomeText}>Your trust rating is in the Top 5%. 2 active swaps require your attention.</p>
             </div>
             <Link href="/marketplace" className={`${styles.ctaBtn} click-scale`}>

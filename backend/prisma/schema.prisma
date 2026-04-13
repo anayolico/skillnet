@@ -8,14 +8,39 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  imageUrl  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  supabaseId  String   @unique
+  email       String   @unique
+  firstName   String?
+  lastName    String?
+  imageUrl    String?
+  isOnboarded Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@index([clerkId])
+  profile     Profile?
+
+  @@index([supabaseId])
+}
+
+model Profile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Step 1: Professional Identity
+  headline        String?          // e.g. "Senior Software Architect"
+  bio             String?          // Professional summary
+
+  // Step 2: Skills Offered & Sought
+  skillsOffered   String[]         // Skills the user can teach
+  skillsSought    String[]         // Skills the user wants to learn
+
+  // Step 3: Preferences & Availability
+  experienceLevel String?          // "beginner", "intermediate", "senior", "executive"
+  availability    String?          // "part-time", "full-time", "weekends"
+  timezone        String?          // e.g. "Europe/London"
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
