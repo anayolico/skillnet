@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
+import { User, ArrowLeftRight, FileText } from 'lucide-react';
 import styles from './escrow.module.css';
 
 import Footer from '../../../components/Footer';
@@ -36,7 +37,9 @@ export default function Escrow() {
 
         <div className="reveal" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Open Intellectual Contracts</h2>
-          <button className={styles.secondaryBtn} style={{ fontSize: '0.8rem', padding: '0.5rem 1rem' }}>Download Ledger PDF</button>
+          <button className={styles.secondaryBtn} style={{ fontSize: '0.8rem', padding: '0.5rem 1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <FileText size={14} /> Download Ledger PDF
+          </button>
         </div>
 
         <div className={`${styles.contractList} stagger`}>
@@ -44,7 +47,9 @@ export default function Escrow() {
           <div className={`${styles.contractCard} reveal hover-lift`}>
             <div className={styles.contractHeader}>
               <div className={styles.contractPartner}>
-                <div className={styles.partnerAvatar}>👩🏼‍💻</div>
+                <div className={styles.partnerAvatar} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User size={20} color="#0c2b54" />
+                </div>
                 <div>
                   <div className={styles.partnerName}>Elena Vance</div>
                   <div className={styles.partnerRole}>Senior Financial Strategist</div>
@@ -80,7 +85,9 @@ export default function Escrow() {
           <div className={`${styles.contractCard} reveal hover-lift`} style={{ animationDelay: '0.2s' }}>
             <div className={styles.contractHeader}>
               <div className={styles.contractPartner}>
-                <div className={styles.partnerAvatar}>👨🏽‍💻</div>
+                <div className={styles.partnerAvatar} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <User size={20} color="#0c2b54" />
+                </div>
                 <div>
                   <div className={styles.partnerName}>Marcus Chen</div>
                   <div className={styles.partnerRole}>DevOps Lead</div>

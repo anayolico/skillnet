@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '../../utils/supabase/client';
+import { Shield, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import styles from '../auth.module.css';
 
 export default function Join() {
@@ -10,6 +11,7 @@ export default function Join() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -54,7 +56,7 @@ export default function Join() {
           console.error('Failed to sync new user to DB', e)
         }
       }
-      
+
       router.push('/onboarding');
     }
   };
@@ -65,7 +67,7 @@ export default function Join() {
       <div className={styles.authVisual}>
         <div className={styles.authVisualBg}></div>
         <div className={styles.authVisualLogo}>
-          <div className={styles.authVisualLogoShield}></div>
+          <Shield className={styles.authVisualLucideShield} size={32} fill="white" strokeWidth={1} />
           <a href='/'>SkillNet</a>
         </div>
         <div className={styles.authVisualContent}>
@@ -79,7 +81,7 @@ export default function Join() {
 
         <div className={styles.authCard}>
           <div className={styles.logo}>
-            <div className={styles.logoShield}></div>
+            <Shield className={styles.authVisualLucideShield} size={28} fill="#0c2b54" strokeWidth={1} style={{ marginRight: '0.5rem' }} />
             SkillNet
           </div>
 
@@ -126,14 +128,22 @@ export default function Join() {
               </div>
               <div className={styles.inputWrapper}>
                 <input
-                  type="password"
-                  className={styles.input}
+                  type={showPassword ? 'text' : 'password'}
+                  className={`${styles.input} ${styles.passwordInput}`}
                   placeholder="Create a strong password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <span className={styles.inputIcon}>👁️</span>
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
@@ -145,24 +155,30 @@ export default function Join() {
             </div>
 
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Creating Profile...' : 'Join Network →'}
+              {loading ? 'Creating Profile...' : (
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  Join Network <ArrowRight size={18} />
+                </span>
+              )}
             </button>
           </form>
 
-          <div className={styles.secureBadgeText} style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.8rem', marginTop: '1rem' }}>
-            🛡️ Escrow Trust Secured
+          <div className={styles.secureBadgeText} style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.8rem', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <Shield size={14} /> Escrow Trust Secured
           </div>
 
           <div className={styles.avatarGroup}>
-            <div className={`${styles.avatar} ${styles.avatarBg1}`}>👨</div>
-            <div className={`${styles.avatar} ${styles.avatarBg2}`}>👨🏻‍💼</div>
-            <div className={`${styles.avatar} ${styles.avatarBg3}`}>👨🏽‍💻</div>
-            <div className={styles.avatar} style={{ backgroundColor: '#f1f5f9', color: '#0f3d7b' }}>+12k</div>
+            {[1, 2, 3].map(i => (
+              <div key={i} className={`${styles.avatar} styles.avatarBg${i}`}>
+                <User size={16} color="white" />
+              </div>
+            ))}
+            <div className={styles.avatar} style={{ backgroundColor: '#f1f5f9', color: '#0f3d7b', fontSize: '10px' }}>+12k</div>
           </div>
           <p className={styles.avatarSubtext}>Join the verified community today.</p>
 
           <div className={styles.authFooter}>
-            Already have an account? 
+            Already have an account?
             <Link href="/login" className={styles.authFooterLink}>
               Sign In
             </Link>

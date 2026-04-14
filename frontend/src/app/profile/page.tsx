@@ -3,8 +3,20 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
 import Footer from '../../../components/Footer';
-import styles from './profile.module.css';
+import { 
+  Settings, 
+  Plus, 
+  ShieldCheck, 
+  FileText, 
+  History, 
+  ArrowUpCircle, 
+  ArrowDownCircle, 
+  Zap,
+  User,
+  Sparkles
+} from 'lucide-react';
 import { createClient } from '../../utils/supabase/client';
+import styles from './profile.module.css';
 
 export default function Profile() {
   const [userData, setUserData] = useState<any>(null);
@@ -50,11 +62,15 @@ export default function Profile() {
 
       <main className={`${styles.container} animate-fade-in`}>
         <div className={styles.coverImage}>
-          <div className={`${styles.profileAvatar} reveal-in`}>👨‍💻</div>
+          <div className={`${styles.profileAvatar} reveal-in`}>
+             <User size={64} strokeWidth={1.5} color="#0c2b54" />
+          </div>
           <div className={styles.headerActions}>
-            <Link href="/profile/edit" className={styles.editBtn}><span>⚙️</span> Edit Profile</Link>
+            <Link href="/profile/edit" className={styles.editBtn}>
+              <Settings size={16} /> Edit Profile
+            </Link>
             <Link href="/create-listing" className={styles.editBtn} style={{ background: '#4ade80', color: '#0c2b54', border: 'none' }}>
-              <span>➕</span> New Listing
+              <Plus size={16} /> New Listing
             </Link>
           </div>
         </div>
@@ -62,13 +78,17 @@ export default function Profile() {
         <div className="reveal">
           <h1 className={styles.userName}>{displayName}</h1>
           <p className={styles.userRole}>{displayRole}</p>
-          <div className={styles.trustBadge}>🛡️ Top 5% Escrow Trust Rating — 1.2k Verified Credits</div>
+          <div className={styles.trustBadge}>
+             <ShieldCheck size={16} style={{ marginRight: '8px' }} /> Top 5% Escrow Trust Rating — 1.2k Verified Credits
+          </div>
         </div>
 
         <div className={styles.mainLayout}>
           <div className="reveal stagger">
             <div className={styles.card}>
-              <h2 className={styles.sectionTitle}><span>📄</span> Professional Summary</h2>
+              <h2 className={styles.sectionTitle}>
+                <FileText size={20} style={{ marginRight: '8px' }} /> Professional Summary
+              </h2>
               <p style={{ color: '#64748b', lineHeight: 1.8, fontSize: '1rem' }}>
                 {displayBio}
               </p>
@@ -76,7 +96,9 @@ export default function Profile() {
 
             <div className={styles.card}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2 className={styles.sectionTitle} style={{ margin: 0 }}><span>📜</span> Verified Exchange History</h2>
+                <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
+                  <History size={20} style={{ marginRight: '8px' }} /> Verified Exchange History
+                </h2>
                 <Link href="/messages" className={styles.viewAllLink}>View Ledger</Link>
               </div>
               <div className={styles.reviewCard}>
@@ -92,7 +114,9 @@ export default function Profile() {
 
           <div className="reveal stagger" style={{ animationDelay: '0.2s' }}>
             <div className={styles.card}>
-              <h2 className={styles.sectionTitle}><span>⬆️</span> Skills Offered</h2>
+              <h2 className={styles.sectionTitle}>
+                <ArrowUpCircle size={20} style={{ marginRight: '8px' }} /> Skills Offered
+              </h2>
               <div className={styles.skillsGrid}>
                 {skillsOffered.length > 0 ? skillsOffered.map((skill: string) => (
                   <span key={skill} className={`${styles.skillTag} ${styles.give}`}>{skill}</span>
@@ -101,7 +125,9 @@ export default function Profile() {
             </div>
 
             <div className={styles.card}>
-              <h2 className={styles.sectionTitle}><span>⬇️</span> Skills Seeking</h2>
+              <h2 className={styles.sectionTitle}>
+                <ArrowDownCircle size={20} style={{ marginRight: '8px' }} /> Skills Seeking
+              </h2>
               <div className={styles.skillsGrid}>
                 {skillsSought.length > 0 ? skillsSought.map((skill: string) => (
                   <span key={skill} className={styles.skillTag}>{skill}</span>
@@ -110,11 +136,19 @@ export default function Profile() {
             </div>
 
             <div className={styles.card}>
-              <h2 className={styles.sectionTitle}><span>⚡</span> Network Actions</h2>
+              <h2 className={styles.sectionTitle}>
+                <Zap size={20} style={{ marginRight: '8px' }} /> Network Actions
+              </h2>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <Link href="/escrow" className={styles.actionLink}>🛡️ Active Trust Contracts</Link>
-                <Link href="/subscriptions" className={styles.actionLink}>✨ Upgrade to Executive Tier</Link>
-                <Link href="/settings" className={styles.actionLink}>⚙️ Security Preferences</Link>
+                <Link href="/escrow" className={styles.actionLink}>
+                  <ShieldCheck size={16} /> Active Trust Contracts
+                </Link>
+                <Link href="/subscriptions" className={styles.actionLink}>
+                  <Sparkles size={16} /> Upgrade to Executive Tier
+                </Link>
+                <Link href="/settings" className={styles.actionLink}>
+                  <Settings size={16} /> Security Preferences
+                </Link>
               </div>
             </div>
           </div>

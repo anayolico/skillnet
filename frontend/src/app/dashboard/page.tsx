@@ -2,8 +2,24 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
+import { 
+  LayoutDashboard, 
+  ArrowLeftRight, 
+  ShieldCheck, 
+  MessageSquare, 
+  BookOpen, 
+  PlusSquare, 
+  Settings, 
+  LogOut,
+  Star,
+  TrendingUp,
+  Briefcase,
+  Building2,
+  BarChart3
+} from 'lucide-react';
 import styles from './dashboard.module.css';
 import { createClient } from '../../utils/supabase/client';
+import { User } from 'lucide-react';
 
 export default function Dashboard() {
   const [userData, setUserData] = useState<any>(null);
@@ -53,22 +69,22 @@ export default function Dashboard() {
             <div className={styles.hubTier}>{displayLevel} Tier</div>
             <div className={styles.sideLinks}>
               <Link href="/dashboard" className={`${styles.sideLink} ${styles.active}`}>
-                <span>⊞</span> Dashboard
+                <LayoutDashboard size={18} strokeWidth={2.5} /> Dashboard
               </Link>
               <Link href="/marketplace" className={styles.sideLink}>
-                <span>⇄</span> Marketplace
+                <ArrowLeftRight size={18} strokeWidth={2.5} /> Marketplace
               </Link>
               <Link href="/escrow" className={styles.sideLink}>
-                <span>🛡️</span> Escrow Trust
+                <ShieldCheck size={18} strokeWidth={2.5} /> Escrow Trust
               </Link>
               <Link href="/messages" className={styles.sideLink}>
-                <span>💬</span> Messages
+                <MessageSquare size={18} strokeWidth={2.5} /> Messages
               </Link>
               <Link href="/catalog" className={styles.sideLink}>
-                <span>📚</span> Learning Hub
+                <BookOpen size={18} strokeWidth={2.5} /> Learning Hub
               </Link>
               <Link href="/create-listing" className={styles.sideLink}>
-                <span>➕</span> Post Expert Skill
+                <PlusSquare size={18} strokeWidth={2.5} /> Post Expert Skill
               </Link>
             </div>
           </div>
@@ -80,10 +96,10 @@ export default function Dashboard() {
               <Link href="/subscriptions"><button className={`${styles.upgradeBtn} click-scale`}>View Plans</button></Link>
             </div>
             <Link href="/settings" className={styles.sideLink}>
-              <span>⚙️</span> Settings
+              <Settings size={18} strokeWidth={2.5} /> Settings
             </Link>
             <Link href="/login" className={styles.sideLink}>
-              <span>🚪</span> Logout
+              <LogOut size={18} strokeWidth={2.5} /> Logout
             </Link>
           </div>
         </aside>
@@ -138,7 +154,9 @@ export default function Dashboard() {
             <div className={`${styles.card} ${styles.kpiCard} reveal`}>
               <span className={styles.kpiTitle}>LEDGER HOURS</span>
               <span className={styles.kpiValue}>124.5</span>
-              <span className={styles.kpiSubtext}>↗ +12% Efficiency</span>
+              <span className={styles.kpiSubtext} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <TrendingUp size={14} /> +12% Efficiency
+              </span>
             </div>
 
             {/* KPI: Trust Score */}
@@ -159,7 +177,9 @@ export default function Dashboard() {
               <div className={`${styles.card} ${styles.swapCard} reveal hover-lift`}>
                 <div className={styles.swapHeader}>
                   <div className={styles.swapUser}>
-                    <div className={styles.swapAvatar}>👩🏼‍💻</div>
+                    <div className={styles.swapAvatar}>
+                      <User size={20} color="white" />
+                    </div>
                     <div>
                       <div className={styles.swapName}>Elena Vance</div>
                       <div className={styles.swapRole}>Senior Financial Architect</div>
@@ -187,7 +207,9 @@ export default function Dashboard() {
               <div className={`${styles.card} ${styles.swapCard} reveal hover-lift`}>
                 <div className={styles.swapHeader}>
                   <div className={styles.swapUser}>
-                    <div className={styles.swapAvatar}>👨🏽‍💻</div>
+                    <div className={styles.swapAvatar}>
+                      <User size={20} color="white" />
+                    </div>
                     <div>
                       <div className={styles.swapName}>Marcus Chen</div>
                       <div className={styles.swapRole}>DevOps Lead</div>
@@ -222,21 +244,26 @@ export default function Dashboard() {
             </div>
             <div className={`${styles.coursesGrid} stagger`}>
               {[
-                { title: 'Global Executive Presence', tag: 'LEADERSHIP', icon: '👔', color: '#0c2b54', val: '$500/hr Equiv' },
-                { title: 'Advanced Digital Modeling', tag: 'ARCHITECTURE', icon: '🏢', color: '#1e293b', val: '$420/hr Equiv' },
-                { title: 'Visualizing Complexity', tag: 'DATA SCIENCE', icon: '📊', color: '#334155', val: '$380/hr Equiv' }
+                { title: 'Global Executive Presence', tag: 'LEADERSHIP', icon: Briefcase, color: '#0c2b54', val: '$500/hr Equiv' },
+                { title: 'Advanced Digital Modeling', tag: 'ARCHITECTURE', icon: Building2, color: '#1e293b', val: '$420/hr Equiv' },
+                { title: 'Visualizing Complexity', tag: 'DATA SCIENCE', icon: BarChart3, color: '#334155', val: '$380/hr Equiv' }
               ].map((c, i) => (
                 <div key={i} className={`${styles.courseCard} reveal hover-lift`}>
-                  <div className={styles.courseVisual} style={{ background: c.color, color: 'white' }}>
+                  <div className={styles.courseVisual} style={{ background: c.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span className={styles.courseTag}>{c.tag}</span>
-                    {c.icon}
+                    <c.icon size={48} strokeWidth={1.5} opacity={0.8} />
                   </div>
                   <div className={styles.courseContent}>
-                    <div className={styles.courseRating}>★ 5.0 <span style={{ fontWeight: 400, color: '#94a3b8' }}>(Verified)</span></div>
+                    <div className={styles.courseRating}>
+                      <Star size={14} fill="#fbbf24" color="#fbbf24" style={{ marginRight: '4px' }} /> 
+                      5.0 <span style={{ fontWeight: 400, color: '#94a3b8' }}>(Verified)</span>
+                    </div>
                     <h3 className={styles.courseTitle}>{c.title}</h3>
                     <div className={styles.courseFooter}>
                       <span className={styles.coursePrice} style={{ fontSize: '0.75rem', opacity: 0.6 }}>{c.val}</span>
-                      <button className={`${styles.courseCart} click-scale`}>⇄</button>
+                      <button className={`${styles.courseCart} click-scale`}>
+                        <ArrowLeftRight size={16} strokeWidth={2.5} />
+                      </button>
                     </div>
                   </div>
                 </div>

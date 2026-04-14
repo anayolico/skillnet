@@ -108,9 +108,29 @@
 .input:focus { border-bottom-color: var(--color-primary); }
 
 .inputWrapper { position: relative; }
-.inputIcon {
-  position: absolute; right: 0; top: 50%;
-  transform: translateY(-50%); color: #94a3b8; cursor: pointer;
+
+.passwordInput {
+  padding-right: 2.5rem;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+.passwordToggle:hover,
+.passwordToggle:focus-visible {
+  color: var(--color-primary);
 }
 
 .checkboxWrapper {

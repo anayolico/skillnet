@@ -2,6 +2,16 @@ import React from 'react';
 import Link from 'next/link';
 import AppNav from '../../components/AppNav';
 import Footer from '../../components/Footer';
+import { 
+  Zap, 
+  BookOpen, 
+  ArrowLeftRight, 
+  TrendingUp, 
+  ShieldCheck, 
+  Lock, 
+  Scale,
+  ChevronRight
+} from 'lucide-react';
 
 export default function Home() {
   return (
@@ -24,7 +34,9 @@ export default function Home() {
             <div className="hero-visual animate-fade-in delay-300">
               <img src="/images/hero.png" alt="SkillNet Dashboard" style={{ width: '100%', height: '400px', objectFit: 'cover', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }} />
               <div className="hero-widget animate-float">
-                <div className="hero-widget-icon">⚡</div>
+                <div className="hero-widget-icon">
+                  <Zap size={20} fill="#fbbf24" color="#fbbf24" strokeWidth={1} />
+                </div>
                 <div className="hero-widget-text">
                   <h4>12,482+</h4>
                   <p>Verified professionals currently exchanging high-value skillsets.</p>
@@ -53,22 +65,22 @@ export default function Home() {
           </div>
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">📚</div>
+              <div className="feature-icon"><BookOpen size={28} color="#0c2b54" /></div>
               <h3>1. Learn</h3>
               <p>Access a curriculum designed by industry architects. Deep-dive into technical taxonomies and professional methodologies.</p>
-              <Link href="/catalog" className="feature-link">Explore Curriculum →</Link>
+              <Link href="/catalog" className="feature-link">Explore Curriculum <ChevronRight size={16} /></Link>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">🔄</div>
+              <div className="feature-icon"><ArrowLeftRight size={28} color="#0c2b54" /></div>
               <h3>2. Swap</h3>
               <p>Engage in peer-to-peer knowledge arbitrage. Trade your technical mastery for another professional's expertise in a secure sandbox.</p>
-              <Link href="/marketplace" className="feature-link">Find a Partner →</Link>
+              <Link href="/marketplace" className="feature-link">Find a Partner <ChevronRight size={16} /></Link>
             </div>
             <div className="feature-card">
-              <div className="feature-icon">📈</div>
+              <div className="feature-icon"><TrendingUp size={28} color="#0c2b54" /></div>
               <h3>3. Grow</h3>
               <p>Validate your growth through our architectural ledger. Build a portfolio of verified skills backed by real professional exchanges.</p>
-              <Link href="/profile" className="feature-link">View Your Portfolio →</Link>
+              <Link href="/profile" className="feature-link">View Your Portfolio <ChevronRight size={16} /></Link>
             </div>
           </div>
         </section>
@@ -83,21 +95,27 @@ export default function Home() {
 
               <div className="protocol-list">
                 <div className="protocol-item">
-                  <div className="protocol-item-icon">🛡️</div>
+                  <div className="protocol-item-icon">
+                    <ShieldCheck size={24} color="#0c2b54" strokeWidth={2.5} />
+                  </div>
                   <div>
                     <h4>Identity Verification</h4>
                     <p>Every network member undergoes a multi-layer professional vetting process to ensure network integrity.</p>
                   </div>
                 </div>
                 <div className="protocol-item">
-                  <div className="protocol-item-icon">🔒</div>
+                  <div className="protocol-item-icon">
+                    <Lock size={24} color="#0c2b54" strokeWidth={2.5} />
+                  </div>
                   <div>
                     <h4>Milestone-based Release</h4>
                     <p>Credits and certifications are released proportionally as specific learning outcomes are documented.</p>
                   </div>
                 </div>
                 <div className="protocol-item">
-                  <div className="protocol-item-icon">⚖️</div>
+                  <div className="protocol-item-icon">
+                    <Scale size={24} color="#0c2b54" strokeWidth={2.5} />
+                  </div>
                   <div>
                     <h4>Conflict Resolution</h4>
                     <p>Our dedicated architectural board provides mediation for any discrepancies in knowledge transfer quality.</p>
