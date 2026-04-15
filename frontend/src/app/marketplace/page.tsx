@@ -3,6 +3,16 @@ import React from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
 import Footer from '../../../components/Footer';
+import { 
+  ShieldCheck, 
+  Search, 
+  Settings, 
+  Star, 
+  User, 
+  ArrowLeftRight,
+  Diamond,
+  ChevronRight
+} from 'lucide-react';
 import styles from './marketplace.module.css';
 
 export default function Marketplace() {
@@ -37,7 +47,9 @@ export default function Marketplace() {
                 <span className={styles.badgeGray}>2 IN PROGRESS</span>
               </div>
               <div className={styles.activeSwapItem}>
-                <div style={{fontSize: '2rem'}}>👩🏼‍💻</div>
+                <div className={styles.activeSwapAvatarBox}>
+                   <User size={32} color="#0c2b54" strokeWidth={1.5} />
+                </div>
                 <div className={styles.activeSwapInfo}>
                   <p>Python for UI Design</p>
                   <span>Session scheduled for tomorrow</span>
@@ -47,7 +59,7 @@ export default function Marketplace() {
 
             <div className={`${styles.mobileEscrowCard} reveal-in`} style={{animationDelay: '0.5s'}}>
               <div className={styles.escrowLabel}>
-                <span>🛡️</span> ESCROW TRUST PROTOCOL
+                <ShieldCheck size={18} style={{ marginRight: '6px' }} /> ESCROW TRUST PROTOCOL
               </div>
               <h3 className={styles.escrowTitle}>Swap with Peace of Mind</h3>
               <p className={styles.escrowDesc}>
@@ -59,7 +71,9 @@ export default function Marketplace() {
 
           <div className={`${styles.heroRight} reveal-in`} style={{animationDelay: '0.3s'}}>
             <div className={`${styles.floatingWidget} animate-float`}>
-              <div className={styles.floatingWidgetIcon}>💎</div>
+              <div className={styles.floatingWidgetIcon}>
+                <Diamond size={24} fill="#fbbf24" color="#fbbf24" strokeWidth={1} />
+              </div>
               <div className={styles.floatingWidgetText}>
                 <span>LATEST SWAP</span>
                 <strong>Python Dev for UI Design</strong>
@@ -101,10 +115,12 @@ export default function Marketplace() {
             </div>
             <div className={styles.discSearchArea}>
               <div className={styles.discSearchInput}>
-                <span>🔍</span>
+                <Search size={18} color="#94a3b8" />
                 <input type="text" placeholder="Search by skill or role..." />
               </div>
-              <button className={`${styles.filterBtn} click-scale`}><span>⚙️</span> Filters</button>
+              <button className={`${styles.filterBtn} click-scale`}>
+                <Settings size={16} /> Filters
+              </button>
             </div>
           </div>
 
@@ -113,8 +129,12 @@ export default function Marketplace() {
               <div key={partner.id} className={`${styles.partnerCard} reveal hover-lift`}>
                 <div className={styles.partnerHeader}>
                   <div className={styles.partnerAvatarBox}>
-                    <div className={styles.partnerAvatar}>{partner.avatar}</div>
-                    <div className={styles.ratingBadge}>★ {partner.rating}</div>
+                    <div className={styles.partnerAvatar}>
+                       <User size={32} strokeWidth={1.5} />
+                    </div>
+                    <div className={styles.ratingBadge}>
+                      <Star size={12} fill="white" color="white" /> {partner.rating}
+                    </div>
                   </div>
                   <div className={styles.availabilityStatus}>
                     AVAILABLE NOW
@@ -140,7 +160,9 @@ export default function Marketplace() {
             ))}
           </div>
           <div className={styles.viewAllArea}>
-            <Link href="/profile" className={styles.viewAllLink}>View All Partners &rarr;</Link>
+            <Link href="/profile" className={styles.viewAllLink}>
+              View All Partners <ChevronRight size={16} />
+            </Link>
           </div>
         </div>
 
