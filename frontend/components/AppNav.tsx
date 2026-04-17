@@ -1,6 +1,8 @@
 'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -15,8 +17,10 @@ import {
   Sparkles,
   LogOut,
   Settings,
-  PlusSquare
+  PlusSquare,
+  ChevronDown
 } from 'lucide-react';
+import { createClient } from '../src/utils/supabase/client';
 import styles from './AppNav.module.css';
 
 
@@ -25,8 +29,8 @@ const appNavItems = [
   { href: '/catalog', label: 'Learning', icon: BookOpen },
   { href: '/marketplace', label: 'Market', icon: ArrowLeftRight },
   { href: '/escrow', label: 'Trust', icon: ShieldCheck },
-  { href: '/messages', label: 'Inbox', icon: MessageSquare, notification: true },
-  { href: '/profile', label: 'Profile', icon: User },
+  { href: '/chats', label: 'Inbox', icon: MessageSquare, notification: true },
+  // { href: '/profile', label: 'Profile', icon: User },
 ];
 
 const publicNavItems = [
@@ -45,9 +49,18 @@ interface AppNavProps {
 
 export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
+  const [isDesktopProfileOpen, setIsDesktopProfileOpen] = useState(false);
   const active = activePage ?? pathname;
   const isApp = mode === 'app';
   const currentItems = isApp ? appNavItems : publicNavItems;
+  const supabase = createClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
 
   return (
     <>
@@ -60,13 +73,42 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         <div className={styles.mobileTopActions}>
           {isApp ? (
             <>
-              <Link href="/messages" className={styles.iconBtn} aria-label="Inbox">
+              <Link href="/chats" className={styles.iconBtn} aria-label="Inbox">
                 <MessageSquare size={20} strokeWidth={2.5} />
               </Link>
               <Link href="/create-listing" className={styles.iconBtn} aria-label="Post skill">
                 <Plus size={20} strokeWidth={2.5} />
               </Link>
-              <Link href="/profile" className={styles.avatarBtn} aria-label="Profile">A</Link>
+              
+              <div className={styles.profileDropdownWrapper}>
+                <button 
+                  className={styles.avatarBtn} 
+                  aria-label="Profile actions"
+                  onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
+                >
+                  A
+                </button>
+                
+                {isMobileProfileOpen && (
+                  <>
+                    <div className={styles.dropdownOverlay} onClick={() => setIsMobileProfileOpen(false)} />
+                    <div className={styles.profileDropdown}>
+                      <div className={styles.dropdownHeader}>
+                        <p className="font-bold">Account</p>
+                      </div>
+                      <Link href="/profile" className={styles.dropdownItem} onClick={() => setIsMobileProfileOpen(false)}>
+                        <User size={18} /> Profile
+                      </Link>
+                      <Link href="/settings" className={styles.dropdownItem} onClick={() => setIsMobileProfileOpen(false)}>
+                        <Settings size={18} /> Settings
+                      </Link>
+                      <button className={`${styles.dropdownItem} ${styles.logoutItem}`} onClick={() => { setIsMobileProfileOpen(false); handleLogout(); }}>
+                        <LogOut size={18} /> Logout
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </>
           ) : (
             <Link href="/login" className={styles.postBtn} style={{ padding: '0.4rem 1rem' }}>Login</Link>
@@ -141,13 +183,41 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
               <Link href="/create-listing" className={styles.postBtn}>
                 <Plus size={16} strokeWidth={3} /> Post a Skill
               </Link>
-              <Link href="/messages" className={styles.notifBtn} aria-label="Messages">
+              <Link href="/chats" className={styles.notifBtn} aria-label="Messages">
                 <MessageSquare size={18} strokeWidth={2.5} />
               </Link>
               <button className={styles.notifBtn} aria-label="Notifications">
                 <Bell size={18} strokeWidth={2.5} />
               </button>
-              <Link href="/profile" className={styles.avatarDesktop} aria-label="Profile">A</Link>
+              <div className={styles.profileDropdownWrapper}>
+                <button 
+                  className={styles.avatarDesktop} 
+                  aria-label="Profile actions"
+                  onClick={() => setIsDesktopProfileOpen(!isDesktopProfileOpen)}
+                >
+                  A
+                </button>
+                
+                {isDesktopProfileOpen && (
+                  <>
+                    <div className={styles.dropdownOverlay} onClick={() => setIsDesktopProfileOpen(false)} />
+                    <div className={styles.profileDropdown}>
+                      <div className={styles.dropdownHeader}>
+                        <p className="font-bold">Account</p>
+                      </div>
+                      <Link href="/profile" className={styles.dropdownItem} onClick={() => setIsDesktopProfileOpen(false)}>
+                        <User size={18} /> Profile
+                      </Link>
+                      <Link href="/settings" className={styles.dropdownItem} onClick={() => setIsDesktopProfileOpen(false)}>
+                        <Settings size={18} /> Settings
+                      </Link>
+                      <button className={`${styles.dropdownItem} ${styles.logoutItem}`} onClick={() => { setIsDesktopProfileOpen(false); handleLogout(); }}>
+                        <LogOut size={18} /> Logout
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </>
           ) : (
             <>

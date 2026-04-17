@@ -2,9 +2,9 @@
 import React from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
-import styles from './messages.module.css';
+import styles from './chats.module.css';
 
-export default function Messages() {
+export default function Chats() {
   return (
     <div className={`${styles.messagesRoot} animate-fade-in`}>
       <AppNav />
@@ -62,8 +62,8 @@ export default function Messages() {
             <Link href="/escrow" className={`${styles.proposeBtn} click-scale`}>Lock Protocol</Link>
           </div>
 
-          <div className={`${styles.messagesArea} reveal`}>
-            <div className={`${styles.message} ${styles.received}`}>
+          <div className={`${styles.chatsArea} reveal`}>
+            <div className={`${styles.chat} ${styles.received}`}>
               Hi Alex! I reviewed your post for Architecture Mentoring. I have 6 years of experience in Corporate Risk Analysis.
               I'm looking for guidance on vertical scalability. Shall we lock the 2-hour swap?
             </div>

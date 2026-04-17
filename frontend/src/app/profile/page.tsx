@@ -99,7 +99,7 @@ export default function Profile() {
                 <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
                   <History size={20} style={{ marginRight: '8px' }} /> Verified Exchange History
                 </h2>
-                <Link href="/messages" className={styles.viewAllLink}>View Ledger</Link>
+                <Link href="/chats" className={styles.viewAllLink}>View Ledger</Link>
               </div>
               <div className={styles.reviewCard}>
                 <div className={styles.reviewer}>Elena Vance — Senior Financial Strategist</div>

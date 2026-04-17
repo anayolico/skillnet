@@ -77,7 +77,7 @@ export default function Dashboard() {
               <Link href="/escrow" className={styles.sideLink}>
                 <ShieldCheck size={18} strokeWidth={2.5} /> Escrow Trust
               </Link>
-              <Link href="/messages" className={styles.sideLink}>
+              <Link href="/chats" className={styles.sideLink}>
                 <MessageSquare size={18} strokeWidth={2.5} /> Messages
               </Link>
               <Link href="/catalog" className={styles.sideLink}>
@@ -199,7 +199,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className={styles.swapActions}>
-                  <Link href="/messages" className={`${styles.btnSecondary} click-scale`}>Secure Inbox</Link>
+                  <Link href="/chats" className={`${styles.btnSecondary} click-scale`}>Secure Inbox</Link>
                   <button className={`${styles.btnPrimary} click-scale`}>Release Milestone</button>
                 </div>
               </div>
