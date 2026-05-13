@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
-import Footer from '../../../components/Footer';
 import { 
   Settings, 
   Plus, 
@@ -15,24 +14,23 @@ import {
   User,
   Sparkles
 } from 'lucide-react';
-import { createClient } from '../../utils/supabase/client';
+import { useSession } from 'next-auth/react';
 import styles from './profile.module.css';
 
 export default function Profile() {
+  const { data: session } = useSession();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchUserData() {
       try {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const res = await fetch(`${apiUrl}/api/me`, {
           headers: {
-            'Authorization': `Bearer ${session.access_token}`
+            'Authorization': `Bearer ${(session as any).accessToken || ''}`
           }
         });
         const data = await res.json();
@@ -45,8 +43,11 @@ export default function Profile() {
         setLoading(false);
       }
     }
-    fetchUserData();
-  }, []);
+    if (session) {
+      fetchUserData();
+    }
+  }, [session]);
+
 
   if (loading) return <div className={styles.profileRoot}><AppNav /></div>;
 
@@ -154,8 +155,6 @@ export default function Profile() {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

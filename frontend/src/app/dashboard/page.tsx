@@ -18,24 +18,23 @@ import {
   BarChart3
 } from 'lucide-react';
 import styles from './dashboard.module.css';
-import { createClient } from '../../utils/supabase/client';
+import { useSession, signOut } from 'next-auth/react';
 import { User } from 'lucide-react';
 
 export default function Dashboard() {
+  const { data: session } = useSession();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchUserData() {
       try {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
         if (!session) return;
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const res = await fetch(`${apiUrl}/api/me`, {
           headers: {
-            'Authorization': `Bearer ${session.access_token}`
+            'Authorization': `Bearer ${(session as any).accessToken || ''}`
           }
         });
         const data = await res.json();
@@ -48,8 +47,13 @@ export default function Dashboard() {
         setLoading(false);
       }
     }
-    fetchUserData();
-  }, []);
+    if (session) {
+      fetchUserData();
+    } else {
+      // If no session after some time, could redirect to login
+    }
+  }, [session]);
+
 
   if (loading) return <div className={styles.dashboardRoot}><AppNav /></div>;
 
@@ -75,7 +79,7 @@ export default function Dashboard() {
                 <ArrowLeftRight size={18} strokeWidth={2.5} /> Marketplace
               </Link>
               <Link href="/escrow" className={styles.sideLink}>
-                <ShieldCheck size={18} strokeWidth={2.5} /> Escrow Trust
+                <ShieldCheck size={18} strokeWidth={2.5} /> Swap Requests
               </Link>
               <Link href="/chats" className={styles.sideLink}>
                 <MessageSquare size={18} strokeWidth={2.5} /> Messages
@@ -98,9 +102,9 @@ export default function Dashboard() {
             <Link href="/settings" className={styles.sideLink}>
               <Settings size={18} strokeWidth={2.5} /> Settings
             </Link>
-            <Link href="/login" className={styles.sideLink}>
+            <button onClick={() => signOut({ callbackUrl: '/login' })} className={styles.sideLink} style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
               <LogOut size={18} strokeWidth={2.5} /> Logout
-            </Link>
+            </button>
           </div>
         </aside>
 
@@ -171,7 +175,7 @@ export default function Dashboard() {
           <section className="reveal" style={{ animationDelay: '0.3s' }}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>Active Skill Exchanges</h2>
-              <Link href="/escrow" className={styles.viewAllLink}>Manage Contracts</Link>
+              <Link href="/escrow" className={styles.viewAllLink}>Manage Swaps</Link>
             </div>
             <div className={`${styles.swapsGrid} stagger`}>
               <div className={`${styles.card} ${styles.swapCard} reveal hover-lift`}>

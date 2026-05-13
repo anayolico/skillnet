@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AppNav from '@/components/AppNav';
-import Footer from '@/components/Footer';
 import {
   ShieldCheck,
   Search,
@@ -18,12 +18,15 @@ import {
 import styles from './marketplace.module.css';
 import { useMarketplace } from '../../utils/useMarketplace';
 import { DEFAULT_SKILLS } from '../../utils/skills';
+import { useToast } from '@/components/Toast';
 
 export default function Marketplace() {
+  const router = useRouter();
   const {
     listings,
     stats,
     loading,
+    error,
     searchQuery,
     setSearchQuery,
     category,
@@ -32,6 +35,8 @@ export default function Marketplace() {
     hasMore,
     requestSwap
   } = useMarketplace();
+
+  const { showToast } = useToast();
 
   const [showFilters, setShowFilters] = React.useState(false);
   const [selectedListingId, setSelectedListingId] = React.useState<string | null>(null);
@@ -53,13 +58,16 @@ export default function Marketplace() {
   const handleSwapRequest = async () => {
     if (!selectedListingId) return;
     setIsSubmitting(true);
-    // Ideally we would have a listing ID, but we only have partner data. Let's use partner.id.
     const success = await requestSwap(selectedListingId, swapMessage);
     setIsSubmitting(false);
+    
     if (success) {
-      alert('Swap request sent successfully!');
+      showToast('Swap request sent successfully!', 'success');
       setSelectedListingId(null);
       setSwapMessage('');
+      router.push('/escrow');
+    } else {
+      showToast(error || 'Failed to send swap request', 'error');
     }
   };
 
@@ -225,7 +233,7 @@ export default function Marketplace() {
                <div className={styles.emptyState}>
                  <Frown size={48} className={styles.emptyStateIcon} />
                  <h3>No active listings found</h3>
-                 <p>Try adjusting your search or be the first to post a skill offer!</p>
+                 <p>Try adjusting your search or check back later!</p>
                </div>
             ) : (
               listings.map(listing => (
@@ -297,7 +305,6 @@ export default function Marketplace() {
           <div className={styles.promoIconBg}></div>
         </div>
       </main>
-      <Footer />
 
       {selectedListingId && (
         <div className={styles.modalOverlay}>

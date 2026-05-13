@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '../../utils/supabase/client';
+import { signIn } from 'next-auth/react';
 import { Shield, Linkedin, Eye, EyeOff } from 'lucide-react';
 import styles from '../auth.module.css';
 
@@ -14,48 +14,27 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const supabase = createClient();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+    const result = await signIn('credentials', {
       email,
       password,
+      redirect: false,
     });
 
-    if (signInError) {
-      setError(signInError.message);
+    if (result?.error) {
+      setError('Invalid email or password');
       setLoading(false);
     } else {
-      // Verification check: Ensure user exists in our local DB
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-        const verifyRes = await fetch(`${apiUrl}/api/auth/verify`, {
-          headers: {
-            'Authorization': `Bearer ${signInData.session?.access_token}`
-          }
-        });
-
-        if (!verifyRes.ok) {
-          const detail = await verifyRes.json();
-          setError(detail.error || "Access Denied: Account not found in our professional records.");
-          await supabase.auth.signOut();
-          setLoading(false);
-          return;
-        }
-
-        const verifyData = await verifyRes.json();
-        router.push(verifyData.isOnboarded ? '/dashboard' : '/onboarding');
-      } catch (err) {
-        setError("System synchronization error. Please try again later.");
-        await supabase.auth.signOut();
-        setLoading(false);
-      }
+      // Redirect to a check page or dashboard
+      // The verify logic should ideally be handled by middleware or a higher level component
+      router.push('/dashboard');
     }
   };
+
 
   return (
     <div className={styles.pageWrapper}>
@@ -140,10 +119,7 @@ export default function Login() {
           </div>
 
           <div className={styles.ssoGrid}>
-            <button className={styles.ssoBtn} onClick={() => supabase.auth.signInWithOAuth({
-              provider: 'google',
-              options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` }
-            })}>
+            <button className={styles.ssoBtn} onClick={() => signIn('google', { callbackUrl: '/dashboard' })}>
               <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -152,10 +128,7 @@ export default function Login() {
               </svg>
               Google
             </button>
-            <button className={styles.ssoBtn} onClick={() => supabase.auth.signInWithOAuth({
-              provider: 'linkedin_oidc',
-              options: { redirectTo: `${window.location.origin}/auth/callback?next=/dashboard` }
-            })}>
+            <button className={styles.ssoBtn} onClick={() => signIn('linkedin', { callbackUrl: '/dashboard' })}>
               <Linkedin size={18} color="#0A66C2" />
               LinkedIn
             </button>

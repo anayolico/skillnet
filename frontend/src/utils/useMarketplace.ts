@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { createClient } from './supabase/client';
+import { useSession } from 'next-auth/react';
 
 export interface Listing {
   id: string;
@@ -29,7 +29,7 @@ export interface MarketplaceStats {
 }
 
 export function useMarketplace() {
-  const supabase = createClient();
+  const { data: session } = useSession();
   
   const [listings, setListings] = useState<Listing[]>([]);
   const [stats, setStats] = useState<MarketplaceStats | null>(null);
@@ -40,18 +40,18 @@ export function useMarketplace() {
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const getAccessToken = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
-    return session.access_token;
+    return (session as any).accessToken || '';
   };
 
   // Stats fetching
   const fetchStats = useCallback(async () => {
     try {
       const token = await getAccessToken();
-      const res = await fetch('http://localhost:3001/api/marketplace/stats', {
+      const res = await fetch(`${apiUrl}/api/marketplace/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch stats');
@@ -77,7 +77,7 @@ export function useMarketplace() {
       if (searchQuery) queryParams.append('search', searchQuery);
       if (category) queryParams.append('category', category);
 
-      const res = await fetch(`http://localhost:3001/api/marketplace/listings?${queryParams}`, {
+      const res = await fetch(`${apiUrl}/api/marketplace/listings?${queryParams}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -92,7 +92,7 @@ export function useMarketplace() {
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, category]);
+  }, [page, searchQuery, category, session]);
 
   const loadMore = () => {
     if (!loading && hasMore) {
@@ -110,13 +110,15 @@ export function useMarketplace() {
 
   // Initial stats fetch
   useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+    if (session) {
+      fetchStats();
+    }
+  }, [fetchStats, session]);
 
   const requestSwap = async (listingId: string, message: string) => {
     try {
       const token = await getAccessToken();
-      const res = await fetch('http://localhost:3001/api/marketplace/swap-requests', {
+      const res = await fetch(`${apiUrl}/api/marketplace/swap-requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

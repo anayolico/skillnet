@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppNav from '../../../components/AppNav';
 import styles from './onboarding.module.css';
-import { createClient } from '../../utils/supabase/client';
+import { useSession } from 'next-auth/react';
 import { DEFAULT_SKILLS } from '../../utils/skills';
 
 export default function Onboarding() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +52,6 @@ export default function Onboarding() {
     setError(null);
 
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) throw new Error("No active session found.");
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -61,7 +59,7 @@ export default function Onboarding() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${(session as any).accessToken || ''}`
         },
         body: JSON.stringify({
           headline,

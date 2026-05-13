@@ -136,8 +136,9 @@
   letter-spacing: 0.05em;
 }
 
-.badge.active { background: #e0f2fe; color: #0369a1; }
+.badge.active { background: #dcfce7; color: #166534; }
 .badge.pending { background: #fef3c7; color: #92400e; }
+.badge.declined { background: #fee2e2; color: #991b1b; }
 
 .contractBody {
   padding: 2rem;
@@ -250,4 +251,65 @@
   .progressArea {
     max-width: 100%;
   }
+}
+
+.tabContainer {
+  display: flex;
+  background: #f1f5f9;
+  padding: 0.25rem;
+  border-radius: 12px;
+  gap: 0.25rem;
+}
+
+.tabBtn {
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabBtn:hover {
+  color: #1e293b;
+}
+
+.activeTab {
+  background: white;
+  color: #0c2b54;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.swapDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.swapListingTitle {
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.swapMessage {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-style: italic;
+  line-height: 1.5;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.loadingState, .emptyState {
+  padding: 4rem 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 24px;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
 }

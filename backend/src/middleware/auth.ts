@@ -1,10 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_ANON_KEY!
-);
+import jwt from 'jsonwebtoken';
+import prisma from '../lib/prisma';
 
 // Extend the Request interface to include the auth payload
 declare global {
@@ -20,7 +16,7 @@ declare global {
 }
 
 /**
- * Basic middleware to verify the Supabase JWT via Supabase's own API.
+ * Basic middleware to verify the custom JWT.
  * Use this for endpoints like /sync where the user record might not exist yet.
  */
 export const verifySession = async (req: Request, res: Response, next: NextFunction) => {
@@ -34,17 +30,23 @@ export const verifySession = async (req: Request, res: Response, next: NextFunct
   const token = authHeader.split(' ')[1];
 
   try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
+    const secret = process.env.AUTH_SECRET || process.env.SUPABASE_JWT_SECRET;
+    if (!secret) {
+      throw new Error('AUTH_SECRET is not defined');
+    }
 
-    if (error || !user) {
-      console.error('[auth]: ❌ Supabase token verification failed:', error?.message);
+    const decoded = jwt.verify(token, secret) as any;
+
+    if (!decoded) {
+      console.error('[auth]: ❌ JWT verification failed');
       return res.status(401).json({ error: 'Unauthorized: Invalid token' });
     }
 
-    console.log('[auth]: ✅ Token verified for user:', user.id);
+    console.log('[auth]: ✅ Token verified for user:', decoded.sub || decoded.userId);
     req.auth = {
-      userId: user.id,
-      email: user.email,
+      userId: decoded.sub || decoded.userId || decoded.id,
+      email: decoded.email,
+      metadata: decoded.metadata || {},
     };
     next();
   } catch (error: any) {
@@ -58,11 +60,8 @@ export const verifySession = async (req: Request, res: Response, next: NextFunct
  * Use this for all standard protected application routes.
  */
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
-  // First, verify the session via Supabase
+  // First, verify the session
   await verifySession(req, res, async () => {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-
     try {
       if (!req.auth?.userId) {
         return res.status(401).json({ error: 'Unauthorized: Invalid session' });
@@ -70,7 +69,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
       // Check if the user exists in our local database
       const userInDb = await prisma.user.findUnique({
-        where: { supabaseId: req.auth.userId }
+        where: { id: req.auth.userId }
       });
 
       if (!userInDb) {
@@ -86,3 +85,4 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     }
   });
 };
+
