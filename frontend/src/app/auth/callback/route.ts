@@ -1,3 +1,8 @@
+// This file is currently disabled because Supabase is marked as "Legacy/Disabled" 
+// and the required utility files (utils/supabase/server) are missing.
+// This allows the build to pass while the project migrates to NextAuth.
+
+/*
 import { NextResponse } from 'next/server'
 import { createClient } from '../../../utils/supabase/server'
 
@@ -51,4 +56,9 @@ export async function GET(request: Request) {
 
   // Redirect to login if there's no code or code exchange failed
   return NextResponse.redirect(`${origin}/login?error=true`)
+}
+*/
+
+export async function GET() {
+  return new Response("Supabase callback is disabled.", { status: 404 });
 }

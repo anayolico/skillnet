@@ -2,7 +2,6 @@
 import React from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
-import Footer from '../../../components/Footer';
 import { Search, ChevronDown, ShieldCheck, User, Star, ArrowRight } from 'lucide-react';
 import styles from './catalog.module.css';
 
@@ -141,7 +140,6 @@ export default function Catalog() {
           </button>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

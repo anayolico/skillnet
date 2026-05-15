@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export const supabaseWebhookHandler = async (req: Request, res: Response) => {
   // Normally, you would verify a shared secret here to ensure the webhook comes from Supabase.
   const { type, record } = req.body;
+  
+  console.log(`[webhook/supabase]: Received ${type} event for user ${record?.id}`);
 
   if (type === 'INSERT' && record) {
     try {
-      await prisma.user.upsert({
+      const user = await prisma.user.upsert({
         where: { supabaseId: record.id },
         update: {
           email: record.email,
@@ -21,9 +21,9 @@ export const supabaseWebhookHandler = async (req: Request, res: Response) => {
           lastName: record.raw_user_meta_data?.last_name || '',
         }
       });
-      console.log(`[database]: User ${record.id} was created via Supabase Webhook`);
+      console.log(`[webhook/supabase]: ✅ User ${record.id} successfully synced via webhook (ID: ${user.id})`);
     } catch (error) {
-      console.error('[database]: Error syncing user', error);
+      console.error('[webhook/supabase]: ❌ Error syncing user via webhook', error);
       return res.status(500).json({ error: 'Database sync failed' });
     }
   } else if (type === 'DELETE' && record) {
@@ -31,9 +31,9 @@ export const supabaseWebhookHandler = async (req: Request, res: Response) => {
       await prisma.user.delete({
         where: { supabaseId: record.id }
       });
-      console.log(`[database]: User ${record.id} was deleted via Supabase Webhook`);
+      console.log(`[webhook/supabase]: 🗑️ User ${record.id} deleted via webhook`);
     } catch (error) {
-      console.error('[database]: Error deleting user', error);
+      console.error('[webhook/supabase]: ❌ Error deleting user via webhook', error);
     }
   }
 

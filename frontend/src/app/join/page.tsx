@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '../../utils/supabase/client';
+import { signIn } from 'next-auth/react';
 import { Shield, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import styles from '../auth.module.css';
 
@@ -15,8 +15,6 @@ export default function Join() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const supabase = createClient();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -25,41 +23,40 @@ export default function Join() {
     const [firstName, ...lastNames] = fullName.split(' ');
     const lastName = lastNames.join(' ');
 
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          last_name: lastName || '',
-        }
-      }
-    });
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const regRes = await fetch(`${apiUrl}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, firstName, lastName })
+      });
 
-    if (signUpError) {
-      setError(signUpError.message);
+      if (!regRes.ok) {
+        const data = await regRes.json();
+        setError(data.error || 'Registration failed');
+        setLoading(false);
+        return;
+      }
+
+      // Automatically sign in
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError('Login failed after registration');
+        setLoading(false);
+      } else {
+        router.push('/onboarding');
+      }
+    } catch (err) {
+      setError('System error during registration');
       setLoading(false);
-    } else {
-      if (signUpData?.session) {
-        // Sync user to backend immediately if session exists
-        try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
-          await fetch(`${apiUrl}/api/auth/sync`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${signUpData.session.access_token}`
-            },
-            body: JSON.stringify({ metadata: signUpData.user?.user_metadata })
-          })
-        } catch (e) {
-          console.error('Failed to sync new user to DB', e)
-        }
-      }
-
-      router.push('/onboarding');
     }
   };
+
 
   return (
     <div className={styles.pageWrapper}>

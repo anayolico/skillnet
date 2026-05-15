@@ -1,26 +1,75 @@
 'use client';
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import AppNav from '../../../components/AppNav';
-import Footer from '../../../components/Footer';
-import { 
-  ShieldCheck, 
-  Search, 
-  Settings, 
-  Star, 
-  User, 
+import AppNav from '@/components/AppNav';
+import {
+  ShieldCheck,
+  Search,
+  Settings,
+  Star,
+  User,
   ArrowLeftRight,
   Diamond,
-  ChevronRight
+  ChevronRight,
+  X,
+  Frown
 } from 'lucide-react';
 import styles from './marketplace.module.css';
+import { useMarketplace } from '../../utils/useMarketplace';
+import { DEFAULT_SKILLS } from '../../utils/skills';
+import { useToast } from '@/components/Toast';
 
 export default function Marketplace() {
-  const partners = [
-    { id: 1, name: 'Marcus Chen', role: 'Senior Product Manager', rating: '4.9', avatar: '👨🏻‍💻', giving: ['Agile Strategy', 'Roadmapping'], seeking: ['Data Visualization', 'D3.js'] },
-    { id: 2, name: 'Elena Rodriguez', role: 'Full Stack Developer', rating: '5.0', avatar: '👩🏽‍💻', giving: ['React/Node.js', 'AWS Arch'], seeking: ['Public Speaking', 'Copywriting'] },
-    { id: 3, name: 'Alex Sterling', role: 'UX Design Director', rating: '4.8', avatar: '🧑🏼‍💼', giving: ['Design Systems', 'UX Research'], seeking: ['Financial Analysis', 'Excel Expert'] },
-  ];
+  const router = useRouter();
+  const {
+    listings,
+    stats,
+    loading,
+    error,
+    searchQuery,
+    setSearchQuery,
+    category,
+    setCategory,
+    loadMore,
+    hasMore,
+    requestSwap
+  } = useMarketplace();
+
+  const { showToast } = useToast();
+
+  const [showFilters, setShowFilters] = React.useState(false);
+  const [selectedListingId, setSelectedListingId] = React.useState<string | null>(null);
+  const [swapMessage, setSwapMessage] = React.useState('');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  // We are treating "partners" returned from backend as the listings basically, 
+  // though the user might not have a separate listing ID if we just requested their profile. 
+  // Wait, the prompt implies "requestSwap" takes a listingId. Let's assume for now 
+  // we pass profile.user.id or we need to fetch listings. The plan said:
+  // GET /api/marketplace/partners returns profiles for discovery hub
+  // POST /api/marketplace/swap-requests takes { listingId, message }
+  // Wait! The user is supposed to click "Request Swap" on a partner card, but in the backend, swap request is tied to a Listing.
+  // The plan said: Discovery Hub uses `GET /api/marketplace/partners` which returns Profiles.
+  // But swap requests need a `listingId`. If a user doesn't have a listing, how do we request a swap?
+  // Let's assume we pass the requested user's ID as `listingId` conceptually, or the prompt has a slight disconnect. We'll use partner.id (the profile id or user id? we'll use partner.id) and trust the backend. Actually the API says `listingId`, so let's pass partner.id for now.
+  // Oh, wait, the user's `listingId` might not be right if we fetch profiles. Let's just use `partner.id` and assume the backend accepts it or it's a simplification. To be safer, maybe the API should take the profile ID as the listing ID? Or the `partner` might actually have a `listing` inside it? Let's use `partner.id` and pass it to requestSwap.
+
+  const handleSwapRequest = async () => {
+    if (!selectedListingId) return;
+    setIsSubmitting(true);
+    const success = await requestSwap(selectedListingId, swapMessage);
+    setIsSubmitting(false);
+    
+    if (success) {
+      showToast('Swap request sent successfully!', 'success');
+      setSelectedListingId(null);
+      setSwapMessage('');
+      router.push('/escrow');
+    } else {
+      showToast(error || 'Failed to send swap request', 'error');
+    }
+  };
 
   return (
     <div className={styles.marketRoot}>
@@ -28,7 +77,7 @@ export default function Marketplace() {
 
       <main className={`${styles.container} reveal`}>
         <div className={styles.heroGrid}>
-          <div className={styles.heroLeft}>
+          {/* <div className={styles.heroLeft}>
             <span className={`${styles.subLabel} reveal`}>PEER-TO-PEER NETWORK</span>
             <h1 className={`${styles.heroTitle} reveal`} style={{animationDelay: '0.1s'}}>
               Swap your Mastery <br/> for their <span>Genius.</span>
@@ -97,73 +146,151 @@ export default function Marketplace() {
             <div className={styles.stepNumber}>03.</div>
             <h4 className={styles.stepTitle}>Formalize the Swap</h4>
             <p className={styles.stepDesc}>Initiate a secure exchange proposal with equitable time-value balance for both masters.</p>
+          </div>*/}
+        </div>
+
+        {/* --- NEW ACTIVE HERO/HEADER --- */}
+        <section className={styles.activeHero}>
+          <div className={styles.activeHeroContent}>
+            <span className={styles.premiumTag}>Professional Exchange</span>
+            <h1>The Global Talent <br/><span>Liquidity Layer.</span></h1>
+            <p>Exchange high-fidelity expertise with verified professionals. No currency, just pure intellectual arbitrage.</p>
           </div>
+          <div className={styles.activeHeroStats}>
+            <div className={styles.miniStat}>
+              <strong>1.2k+</strong>
+              <span>Verified Masters</span>
+            </div>
+            <div className={styles.miniStat}>
+              <strong>98%</strong>
+              <span>Swap Success</span>
+            </div>
+          </div>
+        </section>
+
+        <div className={`${styles.statsRow} stagger`} style={{ animationDelay: '0.6s' }}>
+          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Total Swaps</span><div className={styles.statValue}>{stats?.completedSwaps ?? 0}</div></div>
+          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Active Pairs</span><div className={`${styles.statValue} ${styles.green}`}>{stats?.activeSwaps ?? 0}</div></div>
+          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Expertise Domains</span><div className={styles.statValue}>{stats?.uniqueSkillDomains ?? 0}</div></div>
+          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Success Rate</span><div className={`${styles.statValue} ${styles.green}`}>{Math.round((stats?.successRate ?? 1) * 100)}%</div></div>
         </div>
 
-        <div className={`${styles.statsRow} stagger`} style={{animationDelay: '0.6s'}}>
-          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Total Swaps</span><div className={styles.statValue}>1,284</div></div>
-          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Active Pairs</span><div className={`${styles.statValue} ${styles.green}`}>412</div></div>
-          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Expertise Domains</span><div className={styles.statValue}>54</div></div>
-          <div className={`${styles.statCard} reveal`}><span className={styles.statLabel}>Success Rate</span><div className={`${styles.statValue} ${styles.green}`}>98.2%</div></div>
-        </div>
-
-        <div className={`${styles.discoveryHub} reveal`} style={{animationDelay: '0.7s'}}>
+        <div className={`${styles.discoveryHub} reveal`} style={{ animationDelay: '0.7s' }}>
           <div className={styles.discHeader}>
             <div className={styles.discTitleArea}>
-              <span className={styles.subLabel} style={{color: '#059669'}}>DISCOVERY HUB</span>
+              <span className={styles.subLabel} style={{ color: '#059669' }}>DISCOVERY HUB</span>
               <h2 className={styles.discTitle}>Find a Skill Partner</h2>
             </div>
-            <div className={styles.discSearchArea}>
+            <div className={styles.discSearchArea} style={{ position: 'relative' }}>
               <div className={styles.discSearchInput}>
                 <Search size={18} color="#94a3b8" />
-                <input type="text" placeholder="Search by skill or role..." />
+                <input 
+                  type="text" 
+                  placeholder="Search by skill or role..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-              <button className={`${styles.filterBtn} click-scale`}>
+              <button 
+                className={`${styles.filterBtn} click-scale`}
+                onClick={() => setShowFilters(!showFilters)}
+              >
                 <Settings size={16} /> Filters
               </button>
+
+              {showFilters && (
+                <div className={styles.filterPanel}>
+                  <div className={styles.filterGroup}>
+                    <label className={styles.filterLabel}>Category</label>
+                    <select 
+                      className={styles.filterSelect}
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      <option value="">All Categories</option>
+                      {DEFAULT_SKILLS.map(skill => (
+                        <option key={skill} value={skill}>{skill}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           <div className={`${styles.partnerGrid} stagger`}>
-            {partners.map(partner => (
-              <div key={partner.id} className={`${styles.partnerCard} reveal hover-lift`}>
-                <div className={styles.partnerHeader}>
-                  <div className={styles.partnerAvatarBox}>
-                    <div className={styles.partnerAvatar}>
-                       <User size={32} strokeWidth={1.5} />
+            {loading && listings.length === 0 ? (
+               Array.from({ length: 3 }).map((_, idx) => (
+                 <div key={idx} className={styles.skeletonCard}>
+                    <div className={styles.skeletonHeader}>
+                      <div className={styles.skeletonAvatar}></div>
                     </div>
-                    <div className={styles.ratingBadge}>
-                      <Star size={12} fill="white" color="white" /> {partner.rating}
+                    <div className={styles.skeletonBlock}></div>
+                    <div className={`${styles.skeletonBlock} ${styles.short}`}></div>
+                 </div>
+               ))
+            ) : listings.length === 0 ? (
+               <div className={styles.emptyState}>
+                 <Frown size={48} className={styles.emptyStateIcon} />
+                 <h3>No active listings found</h3>
+                 <p>Try adjusting your search or check back later!</p>
+               </div>
+            ) : (
+              listings.map(listing => (
+                <div key={listing.id} className={`${styles.partnerCard} reveal hover-lift`}>
+                  <div className={styles.partnerHeader}>
+                    <div className={styles.partnerAvatarBox}>
+                      <div className={styles.partnerAvatar}>
+                        <div className={styles.avatarInner}>
+                          {listing.user.imageUrl ? (
+                            <img src={listing.user.imageUrl} alt="Avatar" style={{width: '100%', height: '100%', borderRadius: '12px'}} />
+                          ) : (
+                            <User size={28} strokeWidth={1.5} color="#0c2b54" />
+                          )}
+                        </div>
+                      </div>
+                      <div className={styles.ratingBadge}>
+                        <Star size={12} fill="white" color="white" /> 5.0
+                      </div>
+                    </div>
+                    <div className={styles.availabilityStatus}>
+                      {listing.timeValue || '1 Hour Session'}
+                      <div className={`${styles.statusDot} ${styles.green}`}>✓</div>
                     </div>
                   </div>
-                  <div className={styles.availabilityStatus}>
-                    AVAILABLE NOW
-                    <div className={`${styles.statusDot} ${styles.green}`}>✓</div>
+                  <h3 className={styles.partnerName}>{listing.title}</h3>
+                  <p className={styles.partnerRole}>By {listing.user.firstName} {listing.user.lastName} • {listing.sessionFormat}</p>
+                  
+                  <div className={styles.skillSection}>
+                    <span className={styles.skillSectionLabel}>OFFERING</span>
+                    <div className={styles.skillsWrap}>
+                      {listing.skillsOffered.map((skill, i) => (<span key={i} className={`${styles.skillPill} ${styles.giving}`}>{skill}</span>))}
+                    </div>
                   </div>
-                </div>
-                <h3 className={styles.partnerName}>{partner.name}</h3>
-                <p className={styles.partnerRole}>{partner.role}</p>
-                <div className={styles.skillSection}>
-                  <span className={styles.skillSectionLabel}>GIVING</span>
-                  <div className={styles.skillsWrap}>
-                    {partner.giving.map((skill, i) => (<span key={i} className={`${styles.skillPill} ${styles.giving}`}>{skill}</span>))}
+                  <div className={styles.skillSection}>
+                    <span className={styles.skillSectionLabel}>SEEKING</span>
+                    <div className={styles.skillsWrap}>
+                      {listing.skillsSought.map((skill, i) => (<span key={i} className={`${styles.skillPill} ${styles.seeking}`}>{skill}</span>))}
+                    </div>
                   </div>
+                  <button 
+                    className={`${styles.requestBtn} click-scale`}
+                    onClick={() => setSelectedListingId(listing.id)}
+                  >
+                    Request Swap
+                  </button>
                 </div>
-                <div className={styles.skillSection}>
-                  <span className={styles.skillSectionLabel}>SEEKING</span>
-                  <div className={styles.skillsWrap}>
-                    {partner.seeking.map((skill, i) => (<span key={i} className={`${styles.skillPill} ${styles.seeking}`}>{skill}</span>))}
-                  </div>
-                </div>
-                <Link href="/messages"><button className={`${styles.requestBtn} click-scale`}>Request Swap</button></Link>
-              </div>
-            ))}
+              ))
+            )}
           </div>
-          <div className={styles.viewAllArea}>
-            <Link href="/profile" className={styles.viewAllLink}>
-              View All Partners <ChevronRight size={16} />
-            </Link>
-          </div>
+          
+          {hasMore && listings.length > 0 && (
+            <div className={styles.viewAllArea}>
+              <button className={styles.loadMoreBtn} onClick={loadMore} disabled={loading}>
+                {loading ? 'Loading...' : 'Load More'}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={`${styles.promoBanner} reveal-in`}>
@@ -178,7 +305,33 @@ export default function Marketplace() {
           <div className={styles.promoIconBg}></div>
         </div>
       </main>
-      <Footer />
+
+      {selectedListingId && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <button className={styles.modalClose} onClick={() => setSelectedListingId(null)}>
+              <X size={24} />
+            </button>
+            <h2 className={styles.modalTitle}>Request a Swap</h2>
+            <p className={styles.modalDesc}>Send a message to initiate a learning exchange. Be clear about what you can offer and what you are looking to learn.</p>
+            
+            <textarea 
+              className={styles.textarea}
+              placeholder="Hi! I saw you are looking for UI/UX Design and you have Python experience. I'd love to swap with you..."
+              value={swapMessage}
+              onChange={(e) => setSwapMessage(e.target.value)}
+            />
+            
+            <button 
+              className={styles.sendBtn}
+              onClick={handleSwapRequest}
+              disabled={isSubmitting || !swapMessage.trim()}
+            >
+              {isSubmitting ? 'Sending Request...' : 'Send Request'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

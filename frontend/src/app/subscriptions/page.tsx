@@ -2,7 +2,6 @@
 import React from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
-import Footer from '../../../components/Footer';
 import styles from './subscriptions.module.css';
 
 export default function Subscriptions() {
@@ -125,7 +124,6 @@ export default function Subscriptions() {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 }

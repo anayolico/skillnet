@@ -1,0 +1,240 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SkillNet API",
+    "version": "1.0.0",
+    "description": "SkillNet Backend API Documentation"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Local Development Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Liveness Probe",
+        "description": "Returns 200 OK status if the Express app is running.",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "summary": "Readiness Probe",
+        "description": "Returns 200 OK status if the database connection is verified.",
+        "responses": {
+          "200": { "description": "OK" }
+        }
+      }
+    },
+    "/api/auth/sync": {
+      "post": {
+        "summary": "Sync Supabase User",
+        "description": "Syncs the current Supabase session identity to the Prisma User table.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "full_name": { "type": "string" },
+                      "avatar_url": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Success sync" }
+        }
+      }
+    },
+    "/api/auth/verify": {
+      "get": {
+        "summary": "Verify Onboarding Status",
+        "description": "Checks if the authenticated user has completed full onboarding.",
+        "responses": {
+          "200": { "description": "Status payload" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Logout",
+        "description": "Handle server-side logout operations.",
+        "responses": {
+          "200": { "description": "Successfully logged out" }
+        }
+      }
+    },
+    "/api/onboarding": {
+      "post": {
+        "summary": "Submit Onboarding",
+        "description": "Creates or updates a user's Profile.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Profile updated" }
+        }
+      }
+    },
+    "/api/me": {
+      "get": {
+        "summary": "Current User Profile",
+        "description": "Returns the current authenticated user joined with their full Profile.",
+        "responses": {
+          "200": { "description": "User profile data" }
+        }
+      }
+    },
+    "/api/marketplace/partners": {
+      "get": {
+        "summary": "Fetch Discovery Partners",
+        "description": "Fetches paginated profiles for the Discovery Hub. Excludes the current caller.",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "string" } },
+          { "name": "limit", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "List of partners" }
+        }
+      }
+    },
+    "/api/marketplace/stats": {
+      "get": {
+        "summary": "Live Marketplace Stats",
+        "description": "Calculates and returns the live swap performance statistics.",
+        "responses": {
+          "200": { "description": "Stats payload" }
+        }
+      }
+    },
+    "/api/marketplace/listings": {
+      "get": {
+        "summary": "Get Active Listings",
+        "description": "Retrieves all globally active listings.",
+        "responses": {
+          "200": { "description": "Listings payload" }
+        }
+      },
+      "post": {
+        "summary": "Create a Listing",
+        "description": "Posts a new skill offer to the marketplace.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "category": { "type": "string" },
+                  "sessionFormat": { "type": "string" },
+                  "timeValue": { "type": "string" },
+                  "skillsOffered": { "type": "array", "items": { "type": "string" } },
+                  "skillsSought": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Created listing" }
+        }
+      }
+    },
+    "/api/marketplace/listings/{id}": {
+      "get": {
+        "summary": "Retrieve Listing",
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Listing payload" } }
+      },
+      "put": {
+        "summary": "Update Listing",
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object" } } } },
+        "responses": { "200": { "description": "Updated listing" } }
+      },
+      "delete": {
+        "summary": "Deactivate Listing",
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "responses": { "200": { "description": "Success" } }
+      }
+    },
+    "/api/marketplace/swap-requests": {
+      "post": {
+        "summary": "Initiate Swap Request",
+        "description": "Propose an experiential swap.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "listingId": { "type": "string" },
+                  "message": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Swap created" } }
+      },
+      "get": {
+        "summary": "Fetch Swap Requests",
+        "description": "Returns both sent and received requests natively.",
+        "responses": { "200": { "description": "Sent and received payloads" } }
+      }
+    },
+    "/api/marketplace/swap-requests/{id}": {
+      "put": {
+        "summary": "Accept/Decline Swap Request",
+        "parameters": [ { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } } ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": { "type": "string", "enum": ["accepted", "declined"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Swap accepted/declined" } }
+      }
+    }
+  }
+}

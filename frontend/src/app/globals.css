@@ -156,6 +156,11 @@ header { border-bottom: 1px solid var(--color-border); background-color: white; 
   .features-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .footer-brand { grid-column: span 2; }
+  
+  /* Prevent content from being hidden behind fixed mobile bottom nav */
+  main {
+    padding-bottom: 120px !important;
+  }
 }
 
 @media (max-width: 768px) {

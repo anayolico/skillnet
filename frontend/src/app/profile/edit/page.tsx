@@ -4,11 +4,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AppNav from '../../../../components/AppNav';
 import styles from './edit.module.css';
-import { createClient } from '../../../utils/supabase/client';
+import { useSession } from 'next-auth/react';
 import { DEFAULT_SKILLS } from '../../../utils/skills';
 
 export default function EditProfile() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<'profile' | 'skills' | 'preferences'>('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -42,20 +43,16 @@ export default function EditProfile() {
     }
   };
 
-  const supabase = createClient();
-
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          router.push('/login');
           return;
         }
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const res = await fetch(`${apiUrl}/api/me`, {
-          headers: { 'Authorization': `Bearer ${session.access_token}` }
+          headers: { 'Authorization': `Bearer ${(session as any).accessToken || ''}` }
         });
         const data = await res.json();
 
@@ -79,8 +76,10 @@ export default function EditProfile() {
         setLoading(false);
       }
     }
-    fetchProfile();
-  }, []);
+    if (session) {
+      fetchProfile();
+    }
+  }, [session]);
 
   const toggleSkill = (skill: string, type: 'offered' | 'sought') => {
     if (type === 'offered') {
@@ -97,7 +96,6 @@ export default function EditProfile() {
     setError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Authentication required.");
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -105,7 +103,7 @@ export default function EditProfile() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`
+          'Authorization': `Bearer ${(session as any).accessToken || ''}`
         },
         body: JSON.stringify({
           firstName,

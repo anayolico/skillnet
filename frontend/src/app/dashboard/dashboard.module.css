@@ -139,8 +139,15 @@
 .welcomeSection {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   margin-bottom: 3rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.welcomeSection > div {
+  flex: 1;
+  min-width: 300px;
 }
 
 .welcomeSubtitle {
