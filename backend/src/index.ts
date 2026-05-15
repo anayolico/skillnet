@@ -1,9 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
+import axios from 'axios';
 
 // Load environment variables as early as possible
 dotenv.config();
@@ -106,6 +108,8 @@ wss.on('connection', (ws: WebSocket) => {
 
 // Middleware
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Request logging
 app.use((req, res, next) => {
@@ -170,6 +174,123 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('[register] Error:', error);
     res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
+/**
+ * @api {post} /api/auth/login Login with credentials
+ */
+app.post('/api/auth/login', async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.password) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.AUTH_SECRET || process.env.SUPABASE_JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        imageUrl: user.imageUrl,
+      }
+    });
+  } catch (error) {
+    console.error('[login] Error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+/**
+ * @api {post} /api/auth/google Google OAuth login
+ */
+app.post('/api/auth/google', async (req: Request, res: Response) => {
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ error: 'Authorization code required' });
+  }
+
+  try {
+    // Exchange code for tokens
+    const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'postmessage',
+      grant_type: 'authorization_code'
+    });
+
+    const { access_token } = tokenRes.data;
+
+    // Get user info from Google
+    const userRes = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${access_token}` }
+    });
+
+    const googleUser = userRes.data;
+
+    // Find or create user
+    let user = await prisma.user.findUnique({
+      where: { email: googleUser.email }
+    });
+
+    if (!user) {
+      // Create new user from Google data
+      user = await prisma.user.create({
+        data: {
+          email: googleUser.email,
+          firstName: googleUser.given_name || '',
+          lastName: googleUser.family_name || '',
+          imageUrl: googleUser.picture || null,
+          emailVerified: new Date(),
+          // Generate a random password since it's required
+          password: await bcrypt.hash(Math.random().toString(36), 10)
+        }
+      });
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.AUTH_SECRET || process.env.SUPABASE_JWT_SECRET || 'fallback-secret',
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        imageUrl: user.imageUrl,
+      }
+    });
+  } catch (error: any) {
+    console.error('[google-auth] Error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Google authentication failed' });
   }
 });
 

@@ -18,7 +18,7 @@ import {
   Settings,
   PlusSquare,
 } from 'lucide-react';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { useToast } from './Toast';
 import styles from './AppNav.module.css';
 
@@ -45,7 +45,7 @@ interface AppNavProps {
 export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
   const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
   const [isDesktopProfileOpen, setIsDesktopProfileOpen] = useState(false);
   const [counts, setCounts] = useState({ swapRequests: 0, messages: 0 });
@@ -56,7 +56,8 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
 
   const fetchCounts = async () => {
     try {
-      if (!session) return;
+      const token = localStorage.getItem('token');
+      if (!token) return;
 
       const getApiUrl = () => {
         if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
@@ -68,7 +69,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
 
       const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/api/notifications/counts`, {
-        headers: { 'Authorization': `Bearer ${(session as any).accessToken || ''}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success && data.counts) {
@@ -82,7 +83,8 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
 
   const markSwapsViewed = async () => {
     try {
-      if (!session) return;
+      const token = localStorage.getItem('token');
+      if (!token) return;
       const getApiUrl = () => {
         if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
         if (typeof window !== 'undefined') {
@@ -94,7 +96,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
       const apiUrl = getApiUrl();
       await fetch(`${apiUrl}/api/notifications/mark-swaps-viewed`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${(session as any).accessToken || ''}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       setCounts(prev => ({ ...prev, swapRequests: 0 }));
     } catch (err) {}
@@ -109,12 +111,13 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
       let socket: WebSocket | null = null;
       
       async function setupWS() {
-        if (!session) return;
+        const token = localStorage.getItem('token');
+        if (!token) return;
         
         // Need our DB userId
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const meRes = await fetch(`${apiUrl}/api/me`, {
-          headers: { 'Authorization': `Bearer ${(session as any).accessToken || ''}` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         const meData = await meRes.json();
         if (!meData.success) return;
@@ -162,16 +165,16 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         socket?.close();
       };
     }
-  }, [isApp, session]);
+  }, [isApp]);
 
   useEffect(() => {
     if (pathname === '/escrow') {
       markSwapsViewed();
     }
-  }, [pathname, session]);
+  }, [pathname]);
 
   const handleLogout = async () => {
-    await signOut({ redirect: false });
+    logout();
     router.push('/login');
   };
 
@@ -206,7 +209,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                   aria-label="Profile actions"
                   onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
                 >
-                  A
+                  {user?.firstName?.[0] || user?.email?.[0] || 'A'}
                 </button>
                 
                 {isMobileProfileOpen && (
@@ -214,7 +217,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                     <div className={styles.dropdownOverlay} onClick={() => setIsMobileProfileOpen(false)} />
                     <div className={styles.profileDropdown}>
                       <div className={styles.dropdownHeader}>
-                        <p className="font-bold">Account</p>
+                        <p className="font-bold">{user?.firstName || user?.email || 'Account'}</p>
                       </div>
                       <Link href="/profile" className={styles.dropdownItem} onClick={() => setIsMobileProfileOpen(false)}>
                         <User size={18} /> Profile
@@ -297,12 +300,37 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         <div className={styles.desktopRight}>
           {isApp ? (
             <>
-
               <Link href="/chats" className={styles.notifBtn} aria-label="Messages">
                 <MessageSquare size={18} strokeWidth={2.5} />
               </Link>
               <div className={styles.profileDropdownWrapper}>
-                <Link href="/profile" className={styles.avatarDesktop} aria-label="View Profile">A</Link>
+                <button 
+                  className={styles.avatarDesktop} 
+                  aria-label="View Profile"
+                  onClick={() => setIsDesktopProfileOpen(!isDesktopProfileOpen)}
+                >
+                  {user?.firstName?.[0] || user?.email?.[0] || 'A'}
+                </button>
+                
+                {isDesktopProfileOpen && (
+                  <>
+                    <div className={styles.dropdownOverlay} onClick={() => setIsDesktopProfileOpen(false)} />
+                    <div className={`${styles.profileDropdown} ${styles.desktopDropdown}`}>
+                      <div className={styles.dropdownHeader}>
+                        <p className="font-bold">{user?.firstName || user?.email || 'Account'}</p>
+                      </div>
+                      <Link href="/profile" className={styles.dropdownItem} onClick={() => setIsDesktopProfileOpen(false)}>
+                        <User size={18} /> Profile
+                      </Link>
+                      <Link href="/settings" className={styles.dropdownItem} onClick={() => setIsDesktopProfileOpen(false)}>
+                        <Settings size={18} /> Settings
+                      </Link>
+                      <button className={`${styles.dropdownItem} ${styles.logoutItem}`} onClick={() => { setIsDesktopProfileOpen(false); handleLogout(); }}>
+                        <LogOut size={18} /> Logout
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </>
           ) : (

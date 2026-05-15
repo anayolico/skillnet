@@ -18,23 +18,24 @@ import {
   BarChart3
 } from 'lucide-react';
 import styles from './dashboard.module.css';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { User } from 'lucide-react';
 
 export default function Dashboard() {
-  const { data: session } = useSession();
+  const { user, logout, getToken } = useAuth();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchUserData() {
       try {
-        if (!session) return;
+        if (!user) return;
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const token = getToken();
         const res = await fetch(`${apiUrl}/api/me`, {
           headers: {
-            'Authorization': `Bearer ${(session as any).accessToken || ''}`
+            'Authorization': `Bearer ${token || ''}`
           }
         });
         const data = await res.json();
@@ -47,12 +48,12 @@ export default function Dashboard() {
         setLoading(false);
       }
     }
-    if (session) {
+    if (user) {
       fetchUserData();
     } else {
-      // If no session after some time, could redirect to login
+      // If no user after some time, could redirect to login
     }
-  }, [session]);
+  }, [user]);
 
 
   if (loading) return <div className={styles.dashboardRoot}><AppNav /></div>;
@@ -102,7 +103,7 @@ export default function Dashboard() {
             <Link href="/settings" className={styles.sideLink}>
               <Settings size={18} strokeWidth={2.5} /> Settings
             </Link>
-            <button onClick={() => signOut({ callbackUrl: '/login' })} className={styles.sideLink} style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
+            <button onClick={() => logout()} className={styles.sideLink} style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
               <LogOut size={18} strokeWidth={2.5} /> Logout
             </button>
           </div>

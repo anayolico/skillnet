@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { Shield, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import styles from '../auth.module.css';
 
 export default function Join() {
   const router = useRouter();
+  const { login } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -39,14 +40,10 @@ export default function Join() {
       }
 
       // Automatically sign in
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
+      const result = await login(email, password);
 
-      if (result?.error) {
-        setError('Login failed after registration');
+      if (!result.success) {
+        setError(result.error || 'Login failed after registration');
         setLoading(false);
       } else {
         router.push('/onboarding');

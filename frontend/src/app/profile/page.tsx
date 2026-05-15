@@ -14,23 +14,24 @@ import {
   User,
   Sparkles
 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../../contexts/AuthContext';
 import styles from './profile.module.css';
 
 export default function Profile() {
-  const { data: session } = useSession();
+  const { user, getToken } = useAuth();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchUserData() {
       try {
-        if (!session) return;
+        const token = getToken();
+        if (!token) return;
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const res = await fetch(`${apiUrl}/api/me`, {
           headers: {
-            'Authorization': `Bearer ${(session as any).accessToken || ''}`
+            'Authorization': `Bearer ${token}`
           }
         });
         const data = await res.json();
@@ -43,10 +44,10 @@ export default function Profile() {
         setLoading(false);
       }
     }
-    if (session) {
+    if (user) {
       fetchUserData();
     }
-  }, [session]);
+  }, [user]);
 
 
   if (loading) return <div className={styles.profileRoot}><AppNav /></div>;

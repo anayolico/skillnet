@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppNav from '../../../components/AppNav';
 import styles from './onboarding.module.css';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { DEFAULT_SKILLS } from '../../utils/skills';
 
 export default function Onboarding() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, getToken } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,14 +52,15 @@ export default function Onboarding() {
     setError(null);
 
     try {
-      if (!session) throw new Error("No active session found.");
+      if (!user) throw new Error("No active session found.");
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = getToken();
       const response = await fetch(`${apiUrl}/api/onboarding`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(session as any).accessToken || ''}`
+          'Authorization': `Bearer ${token || ''}`
         },
         body: JSON.stringify({
           headline,

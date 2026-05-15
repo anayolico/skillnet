@@ -4,12 +4,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AppNav from '../../../../components/AppNav';
 import styles from './edit.module.css';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { DEFAULT_SKILLS } from '../../../utils/skills';
 
 export default function EditProfile() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { user, getToken } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'skills' | 'preferences'>('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -46,13 +46,16 @@ export default function EditProfile() {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        if (!session) {
+        const token = getToken();
+        if (!token) {
           return;
         }
 
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${apiUrl}/api/me`, {
-          headers: { 'Authorization': `Bearer ${(session as any).accessToken || ''}` }
+        const res = await fetch(`${apiUrl}/api/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
         const data = await res.json();
 
@@ -76,10 +79,8 @@ export default function EditProfile() {
         setLoading(false);
       }
     }
-    if (session) {
-      fetchProfile();
-    }
-  }, [session]);
+    fetchProfile();
+  }, []);
 
   const toggleSkill = (skill: string, type: 'offered' | 'sought') => {
     if (type === 'offered') {
@@ -96,22 +97,28 @@ export default function EditProfile() {
     setError(null);
 
     try {
-      if (!session) throw new Error("Authentication required.");
+      const token = getToken();
+      if (!token) throw new Error("Authentication required.");
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/api/onboarding`, {
+      const payload = {
+        firstName,
+        lastName,
+        headline,
+        bio,
+        skillsOffered,
+        skillsSought,
+        experienceLevel,
+        availability,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      const res = await fetch(`${apiUrl}/api/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(session as any).accessToken || ''}`
+          'Authorization': `Bearer ${token || ''}`
         },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          headline,
-          bio,
-          skillsOffered,
-          skillsSought,
+        body: JSON.stringify(payload)
           experienceLevel,
           availability,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone

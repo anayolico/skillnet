@@ -4,9 +4,10 @@ import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
 import { User, Send, Shield, Lock, ChevronLeft } from 'lucide-react';
 import styles from './chats.module.css';
-import { createClient } from '../../utils/supabase/client';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function Chats() {
+  const { user, getToken } = useAuth();
   const [swaps, setSwaps] = useState<any[]>([]);
   const [selectedSwap, setSelectedSwap] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -27,22 +28,21 @@ export default function Chats() {
 
   const fetchSwaps = async () => {
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const token = getToken();
+      if (!token) return;
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
       // Get me
       const meRes = await fetch(`${apiUrl}/api/me`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const meData = await meRes.json();
       if (meData.success) setCurrentUser(meData.user);
 
       // Get swaps
       const res = await fetch(`${apiUrl}/api/swaps`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -70,11 +70,11 @@ export default function Chats() {
 
   const fetchMessages = async (swapId: string) => {
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = getToken();
+      if (!token) return;
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const res = await fetch(`${apiUrl}/api/swaps/${swapId}/messages`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -88,12 +88,12 @@ export default function Chats() {
 
   const markMessagesRead = async (swapId: string) => {
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const token = getToken();
+      if (!token) return;
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       await fetch(`${apiUrl}/api/notifications/mark-messages-read/${swapId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
     } catch (err) {}
   };

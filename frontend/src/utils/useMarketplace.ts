@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '../contexts/AuthContext';
 
 export interface Listing {
   id: string;
@@ -29,7 +29,7 @@ export interface MarketplaceStats {
 }
 
 export function useMarketplace() {
-  const { data: session } = useSession();
+  const { getToken, user } = useAuth();
   
   const [listings, setListings] = useState<Listing[]>([]);
   const [stats, setStats] = useState<MarketplaceStats | null>(null);
@@ -42,9 +42,10 @@ export function useMarketplace() {
   const [hasMore, setHasMore] = useState(true);
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-  const getAccessToken = async () => {
-    if (!session) throw new Error('Not authenticated');
-    return (session as any).accessToken || '';
+  const getAccessToken = () => {
+    const token = getToken();
+    if (!token) throw new Error('Not authenticated');
+    return token;
   };
 
   // Stats fetching
@@ -92,7 +93,7 @@ export function useMarketplace() {
     } finally {
       setLoading(false);
     }
-  }, [page, searchQuery, category, session]);
+  }, [page, searchQuery, category, user]);
 
   const loadMore = () => {
     if (!loading && hasMore) {
@@ -110,10 +111,10 @@ export function useMarketplace() {
 
   // Initial stats fetch
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetchStats();
     }
-  }, [fetchStats, session]);
+  }, [fetchStats, user]);
 
   const requestSwap = async (listingId: string, message: string) => {
     try {

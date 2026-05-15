@@ -4,11 +4,11 @@ import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
 import { User, FileText, Check, X, Clock, ArrowRight } from 'lucide-react';
 import styles from './escrow.module.css';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/src/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
 
 export default function Escrow() {
-  const { data: session } = useSession();
+  const { user, getToken } = useAuth();
   const [sentRequests, setSentRequests] = useState<any[]>([]);
   const [receivedRequests, setReceivedRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,12 +18,13 @@ export default function Escrow() {
 
   const fetchRequests = async () => {
     try {
-      if (!session) return;
+      const token = getToken();
+      if (!token) return;
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const res = await fetch(`${apiUrl}/api/marketplace/swap-requests`, {
         headers: {
-          'Authorization': `Bearer ${(session as any).accessToken || ''}`
+          'Authorization': `Bearer ${token}`
         }
       });
       const data = await res.json();
@@ -39,7 +40,7 @@ export default function Escrow() {
   };
 
   useEffect(() => {
-    if (session) {
+    if (!user) {
       fetchRequests();
     }
 
@@ -51,20 +52,21 @@ export default function Escrow() {
 
     window.addEventListener('new-notification', handleNotif);
     return () => window.removeEventListener('new-notification', handleNotif);
-  }, [session]);
+  }, [user, activeTab]);
 
   const handleUpdateStatus = async (requestId: string, status: 'accepted' | 'declined') => {
     const actionKey = `${requestId}-${status}`;
     setProcessingAction(actionKey);
     try {
-      if (!session) return;
+      const token = getToken();
+      if (!token) return;
 
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const res = await fetch(`${apiUrl}/api/marketplace/swap-requests/${requestId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(session as any).accessToken || ''}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ status })
       });
