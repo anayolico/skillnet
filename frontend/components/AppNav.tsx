@@ -45,7 +45,7 @@ interface AppNavProps {
 export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
   const [isDesktopProfileOpen, setIsDesktopProfileOpen] = useState(false);
   const [counts, setCounts] = useState({ swapRequests: 0, messages: 0 });
@@ -187,6 +187,8 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
     return null;
   };
 
+  if (isLoading) return null;
+
   return (
     <>
       {/* -------- MOBILE: sticky top bar -------- */}
@@ -265,7 +267,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
       </nav>
 
       {/* -------- DESKTOP: sticky top bar -------- */}
-      <nav className={styles.desktopNav} aria-label="Desktop navigation">
+      <nav className={`${styles.desktopNav} ${isApp ? styles.desktopAppNav : styles.desktopPublicNav}`} aria-label="Desktop navigation">
         <div className={styles.desktopLeft}>
           <Link href="/" className={styles.logo}>
             <div className={styles.logoShield} />

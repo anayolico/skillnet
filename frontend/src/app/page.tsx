@@ -1,131 +1,208 @@
 import React from 'react';
 import Link from 'next/link';
-import AppNav from '../../components/AppNav';
 import Footer from '../../components/Footer';
-import { 
-  Zap, 
-  BookOpen, 
-  ArrowLeftRight, 
-  TrendingUp, 
-  ShieldCheck, 
-  Lock, 
+import {
+  Zap,
+  BookOpen,
+  ArrowLeftRight,
+  TrendingUp,
+  ShieldCheck,
+  Lock,
   Scale,
-  ChevronRight
+  ChevronRight,
+  ArrowRight,
 } from 'lucide-react';
 
 export default function Home() {
   return (
     <>
-      <AppNav mode="public" />
+      {/* ── PUBLIC MARKETING NAV ── */}
+      <header className="public-nav">
+        <div className="public-nav-inner">
+          <Link href="/" className="public-nav-logo">
+            <div className="public-nav-shield" />
+            SkillNet
+          </Link>
 
-      <main className="animate-fade-in" style={{ paddingBottom: '6rem' }}>
-        {/* Hero Section */}
-        <section className="container">
-          <div className="hero">
-            <div className="hero-content">
-              <span className="tag animate-fade-in delay-100">The Knowledge Exchange Protocol</span>
-              <h1 className="animate-fade-in delay-200">Master the Art of the Exchange</h1>
-              <p className="animate-fade-in delay-300">A sophisticated peer-to-peer ecosystem designed for professionals to architect their expertise through high-fidelity knowledge transfer.</p>
-              <div className="hero-actions animate-fade-in delay-300">
-                <Link href="/catalog" className="btn btn-primary">Explore Courses</Link>
-                <Link href="/marketplace" className="btn btn-outline">Find a Swap Partner</Link>
+          <nav className="public-nav-links" aria-label="Main navigation">
+            <Link href="/catalog" className="public-nav-link">Courses</Link>
+            <Link href="/marketplace" className="public-nav-link">Marketplace</Link>
+            <Link href="/join" className="public-nav-link">Pricing</Link>
+          </nav>
+
+          <div className="public-nav-actions">
+            <Link href="/login" className="public-nav-login">Log in</Link>
+            <Link href="/join" className="public-nav-cta">
+              Get Started <ArrowRight size={14} />
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        {/* ── HERO ── */}
+        <section className="lp-hero">
+          <div className="lp-hero-inner">
+            <div className="lp-hero-content">
+              <div className="lp-eyebrow">
+                <span className="lp-eyebrow-dot" />
+                The Knowledge Exchange Protocol
+              </div>
+              <h1 className="lp-h1">
+                Master the Art of<br />
+                <span>the Exchange.</span>
+              </h1>
+              <p className="lp-hero-desc">
+                A sophisticated peer-to-peer ecosystem where professionals architect their expertise through high-fidelity knowledge transfer — no currency, just pure intellectual arbitrage.
+              </p>
+              <div className="lp-hero-actions">
+                <Link href="/join" className="lp-btn-primary">
+                  Join the Network <ArrowRight size={16} />
+                </Link>
+                <Link href="/marketplace" className="lp-btn-secondary">
+                  Find a Swap Partner
+                </Link>
+              </div>
+              <div className="lp-hero-stats">
+                <div>
+                  <span className="lp-hero-stat-value">12,482+</span>
+                  <span className="lp-hero-stat-label">Verified Experts</span>
+                </div>
+                <div>
+                  <span className="lp-hero-stat-value">98%</span>
+                  <span className="lp-hero-stat-label">Swap Success Rate</span>
+                </div>
+                <div>
+                  <span className="lp-hero-stat-value">340+</span>
+                  <span className="lp-hero-stat-label">Skill Domains</span>
+                </div>
               </div>
             </div>
-            <div className="hero-visual animate-fade-in delay-300">
-              <img src="/images/hero.png" alt="SkillNet Dashboard" style={{ width: '100%', height: '400px', objectFit: 'cover', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }} />
-              <div className="hero-widget animate-float">
-                <div className="hero-widget-icon">
-                  <Zap size={20} fill="#fbbf24" color="#fbbf24" strokeWidth={1} />
+
+            <div className="lp-hero-visual animate-fade-in">
+              <div className="lp-hero-image-wrap">
+                <img src="/images/hero.png" alt="SkillNet platform preview" />
+              </div>
+              <div className="lp-floating-card animate-float">
+                <div className="lp-floating-card-icon">
+                  <Zap size={22} fill="white" color="white" strokeWidth={1} />
                 </div>
-                <div className="hero-widget-text">
+                <div>
                   <h4>12,482+</h4>
-                  <p>Verified professionals currently exchanging high-value skillsets.</p>
+                  <p>Professionals exchanging high-value skillsets right now.</p>
                 </div>
               </div>
             </div>
           </div>
+        </section>
 
-          <div className="trusted-by">
-            <h5>Trusted by professionals from global leaders</h5>
-            <div className="trusted-logos">
-              <span>FINTECH_CORP</span>
-              <span>NEXUS_ARCH</span>
-              <span>GLOBAL_LEDGER</span>
-              <span>TECH_MINT</span>
-              <span>VALUATION_PRO</span>
+        {/* ── TRUSTED BY ── */}
+        <div className="lp-trusted">
+          <div className="lp-trusted-inner">
+            <p className="lp-trusted-label">Trusted by professionals from</p>
+            <div className="lp-trusted-logos">
+              <span>Fintech Corp</span>
+              <span>Nexus Arch</span>
+              <span>Global Ledger</span>
+              <span>Tech Mint</span>
+              <span>Valuation Pro</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── HOW IT WORKS ── */}
+        <section className="lp-section">
+          <div className="lp-section-inner">
+            <span className="lp-section-tag">Our Framework</span>
+            <h2 className="lp-section-title">How SkillNet Operates</h2>
+            <p className="lp-section-subtitle">
+              Three precise steps to transform your professional trajectory through the power of knowledge exchange.
+            </p>
+
+            <div className="lp-steps">
+              <div className="lp-step">
+                <div className="lp-step-number">Step 01</div>
+                <div className="lp-step-icon">
+                  <BookOpen size={26} color="#0c2b54" strokeWidth={2} />
+                </div>
+                <h3>Learn</h3>
+                <p>Access a curriculum designed by industry architects. Deep-dive into technical taxonomies and professional methodologies curated for real-world application.</p>
+                <Link href="/catalog" className="lp-step-link">
+                  Explore Curriculum <ChevronRight size={15} />
+                </Link>
+              </div>
+
+              <div className="lp-step">
+                <div className="lp-step-number">Step 02</div>
+                <div className="lp-step-icon">
+                  <ArrowLeftRight size={26} color="#0c2b54" strokeWidth={2} />
+                </div>
+                <h3>Swap</h3>
+                <p>Engage in peer-to-peer knowledge arbitrage. Trade your technical mastery for another professional's expertise in a secure, milestoned sandbox.</p>
+                <Link href="/marketplace" className="lp-step-link">
+                  Find a Partner <ChevronRight size={15} />
+                </Link>
+              </div>
+
+              <div className="lp-step">
+                <div className="lp-step-number">Step 03</div>
+                <div className="lp-step-icon">
+                  <TrendingUp size={26} color="#0c2b54" strokeWidth={2} />
+                </div>
+                <h3>Grow</h3>
+                <p>Validate your growth through our architectural ledger. Build a verifiable portfolio of skills backed by real professional exchanges.</p>
+                <Link href="/join" className="lp-step-link">
+                  Build Your Portfolio <ChevronRight size={15} />
+                </Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="container section-padding">
-          <div className="section-header">
-            <p>Our Framework</p>
-            <h2>How SkillNet Operates</h2>
-          </div>
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon"><BookOpen size={28} color="#0c2b54" /></div>
-              <h3>1. Learn</h3>
-              <p>Access a curriculum designed by industry architects. Deep-dive into technical taxonomies and professional methodologies.</p>
-              <Link href="/catalog" className="feature-link">Explore Curriculum <ChevronRight size={16} /></Link>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><ArrowLeftRight size={28} color="#0c2b54" /></div>
-              <h3>2. Swap</h3>
-              <p>Engage in peer-to-peer knowledge arbitrage. Trade your technical mastery for another professional's expertise in a secure sandbox.</p>
-              <Link href="/marketplace" className="feature-link">Find a Partner <ChevronRight size={16} /></Link>
-            </div>
-            <div className="feature-card">
-              <div className="feature-icon"><TrendingUp size={28} color="#0c2b54" /></div>
-              <h3>3. Grow</h3>
-              <p>Validate your growth through our architectural ledger. Build a portfolio of verified skills backed by real professional exchanges.</p>
-              <Link href="/profile" className="feature-link">View Your Portfolio <ChevronRight size={16} /></Link>
-            </div>
-          </div>
-        </section>
+        {/* ── ESCROW PROTOCOL ── */}
+        <section className="lp-protocol">
+          <div className="lp-protocol-inner">
+            <div className="lp-protocol-content">
+              <span className="lp-protocol-tag">Secure Exchange Protocol</span>
+              <h2>The Escrow<br />Trust Protocol</h2>
+              <p className="lead">
+                Institutional-grade security for every intellectual exchange. Our ledger ensures value transfers only when professional milestones are verified and met.
+              </p>
 
-        {/* Protocol Section */}
-        <section className="protocol-section">
-          <div className="container protocol-grid">
-            <div className="protocol-content">
-              <span className="tag">Secure Exchange Protocol</span>
-              <h2>The Escrow Trust Protocol</h2>
-              <p className="lead">We prioritize institutional-grade security for every intellectual exchange. Our ledger ensures that value is transferred only when professional milestones are met.</p>
-
-              <div className="protocol-list">
-                <div className="protocol-item">
-                  <div className="protocol-item-icon">
-                    <ShieldCheck size={24} color="#0c2b54" strokeWidth={2.5} />
+              <div className="lp-protocol-items">
+                <div className="lp-protocol-item">
+                  <div className="lp-protocol-item-icon">
+                    <ShieldCheck size={22} color="#6bf0a5" strokeWidth={2.5} />
                   </div>
                   <div>
                     <h4>Identity Verification</h4>
-                    <p>Every network member undergoes a multi-layer professional vetting process to ensure network integrity.</p>
+                    <p>Every member undergoes a multi-layer professional vetting process to ensure network integrity and trust.</p>
                   </div>
                 </div>
-                <div className="protocol-item">
-                  <div className="protocol-item-icon">
-                    <Lock size={24} color="#0c2b54" strokeWidth={2.5} />
+                <div className="lp-protocol-item">
+                  <div className="lp-protocol-item-icon">
+                    <Lock size={22} color="#6bf0a5" strokeWidth={2.5} />
                   </div>
                   <div>
                     <h4>Milestone-based Release</h4>
-                    <p>Credits and certifications are released proportionally as specific learning outcomes are documented.</p>
+                    <p>Credits and certifications are released proportionally as specific learning outcomes are documented and validated.</p>
                   </div>
                 </div>
-                <div className="protocol-item">
-                  <div className="protocol-item-icon">
-                    <Scale size={24} color="#0c2b54" strokeWidth={2.5} />
+                <div className="lp-protocol-item">
+                  <div className="lp-protocol-item-icon">
+                    <Scale size={22} color="#6bf0a5" strokeWidth={2.5} />
                   </div>
                   <div>
                     <h4>Conflict Resolution</h4>
-                    <p>Our dedicated architectural board provides mediation for any discrepancies in knowledge transfer quality.</p>
+                    <p>Our dedicated architectural board provides expert mediation for any discrepancies in knowledge transfer quality.</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="protocol-visual animate-fade-in delay-300">
-              <img src="/images/protocol.png" alt="Secure Escrow Protocol" style={{ width: '100%', height: '400px', objectFit: 'cover', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)' }} />
-              <div className="protocol-badge animate-pulse-glow">
+
+            <div className="lp-protocol-visual animate-fade-in">
+              <img src="/images/protocol.png" alt="Secure Escrow Protocol" />
+              <div className="lp-protocol-badge animate-pulse-glow">
                 100%
                 <span>Secure Delivery</span>
               </div>
@@ -133,57 +210,84 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Success Stories */}
-        <section className="container section-padding testimonials">
-          <div className="section-header">
-            <p>Professional Outcomes</p>
-            <h2>Professional Success Stories</h2>
-          </div>
-          <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="testimonial-author">
-                <div className="testimonial-avatar"></div>
-                <div>
-                  <h4>Elena Vance</h4>
-                  <span>Senior Financial Architect</span>
-                </div>
-              </div>
-              <p className="testimonial-quote">"SkillNet allowed me to trade my quantitative analysis mastery for expert-level Python automation. The structured exchange made it feel like a professional collaboration rather than a simple course."</p>
+        {/* ── TESTIMONIALS ── */}
+        <section className="lp-testimonials">
+          <div className="lp-testimonials-inner">
+            <div className="lp-testimonials-header">
+              <span className="lp-section-tag">Professional Outcomes</span>
+              <h2 className="lp-section-title">Trusted by Industry Leaders</h2>
+              <p className="lp-section-subtitle" style={{ margin: '0 auto' }}>
+                Real professionals. Real exchanges. Real results.
+              </p>
             </div>
-            <div className="testimonial-card">
-              <div className="testimonial-author">
-                <div className="testimonial-avatar"></div>
-                <div>
-                  <h4>Marcus Thorne</h4>
-                  <span>Cloud Infrastructure Lead</span>
+
+            <div className="lp-testimonials-grid">
+              <div className="lp-testimonial-card">
+                <div className="lp-testimonial-stars">★★★★★</div>
+                <p className="lp-testimonial-quote">
+                  "SkillNet allowed me to trade my quantitative analysis mastery for expert-level Python automation. The structured exchange felt like a true professional collaboration."
+                </p>
+                <div className="lp-testimonial-author">
+                  <div className="lp-testimonial-avatar">EV</div>
+                  <div>
+                    <div className="lp-testimonial-name">Elena Vance</div>
+                    <div className="lp-testimonial-role">Senior Financial Architect</div>
+                  </div>
                 </div>
               </div>
-              <p className="testimonial-quote">"Having a swap partner who actually understands the nuances of enterprise-grade DevOps was a game changer. The Escrow Protocol gives me peace of mind."</p>
-            </div>
-            <div className="testimonial-card">
-              <div className="testimonial-author">
-                <div className="testimonial-avatar"></div>
-                <div>
-                  <h4>Julian Rossi</h4>
-                  <span>Head of Product Strategy</span>
+
+              <div className="lp-testimonial-card">
+                <div className="lp-testimonial-stars">★★★★★</div>
+                <p className="lp-testimonial-quote">
+                  "Having a swap partner who understands the nuances of enterprise-grade DevOps was a game changer. The Escrow Protocol gives me complete peace of mind."
+                </p>
+                <div className="lp-testimonial-author">
+                  <div className="lp-testimonial-avatar">MT</div>
+                  <div>
+                    <div className="lp-testimonial-name">Marcus Thorne</div>
+                    <div className="lp-testimonial-role">Cloud Infrastructure Lead</div>
+                  </div>
                 </div>
               </div>
-              <p className="testimonial-quote">"The knowledge taxonomy here is unprecedented. I've architected a completely new skillset in strategic operations through high-fidelity swaps that actually stick."</p>
+
+              <div className="lp-testimonial-card">
+                <div className="lp-testimonial-stars">★★★★★</div>
+                <p className="lp-testimonial-quote">
+                  "The knowledge taxonomy here is unprecedented. I've architected a completely new skillset in strategic operations through high-fidelity swaps that actually stick."
+                </p>
+                <div className="lp-testimonial-author">
+                  <div className="lp-testimonial-avatar">JR</div>
+                  <div>
+                    <div className="lp-testimonial-name">Julian Rossi</div>
+                    <div className="lp-testimonial-role">Head of Product Strategy</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="cta-section section-padding">
-          <div className="container">
-            <h2>Ready to architect your expertise?</h2>
-            <div className="cta-actions">
-              <Link href="/join" className="btn btn-accent">Join the Network</Link>
-              <Link href="/catalog" className="btn btn-primary" style={{ border: '1px solid #ffffff30' }}>View Skill Catalog</Link>
+        {/* ── CTA ── */}
+        <section className="lp-cta">
+          <div className="lp-cta-inner">
+            <div className="lp-cta-card">
+              <h2>Ready to architect<br />your expertise?</h2>
+              <p>
+                Join 12,000+ professionals already exchanging high-value skillsets on the world's most trusted knowledge exchange network.
+              </p>
+              <div className="lp-cta-actions">
+                <Link href="/join" className="lp-cta-btn-primary">
+                  Join the Network <ArrowRight size={16} />
+                </Link>
+                <Link href="/catalog" className="lp-cta-btn-secondary">
+                  Explore Courses
+                </Link>
+              </div>
             </div>
           </div>
         </section>
       </main>
+
       <Footer />
     </>
   );

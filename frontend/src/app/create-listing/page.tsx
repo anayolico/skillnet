@@ -2,14 +2,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '../../utils/supabase/client';
+import { useAuth } from '../../contexts/AuthContext';
 import AppNav from '../../../components/AppNav';
 import styles from './create-listing.module.css';
 import { DEFAULT_SKILLS } from '../../utils/skills';
 
 export default function CreateListing() {
   const router = useRouter();
-  const supabase = createClient();
+  const { getToken } = useAuth();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -37,9 +37,8 @@ export default function CreateListing() {
     setError('');
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Not authenticated');
-      const token = session.access_token;
+      const token = getToken();
+      if (!token) throw new Error('Not authenticated');
       // Clean up skillsSought by splitting commas
       const skillsSoughtArray = formData.skillsSought
         .split(',')

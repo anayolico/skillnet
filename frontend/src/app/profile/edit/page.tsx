@@ -119,10 +119,6 @@ export default function EditProfile() {
           'Authorization': `Bearer ${token || ''}`
         },
         body: JSON.stringify(payload)
-          experienceLevel,
-          availability,
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-        })
       });
 
       if (!res.ok) throw new Error("Failed to update profile.");
