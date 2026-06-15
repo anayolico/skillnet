@@ -170,7 +170,7 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
       }
     });
 
-    res.status(201).json({ success: true, user: { id: user.id, email: user.email } });
+    res.status(201).json({ success: true, user: { id: user.id, email: user.email, isOnboarded: user.isOnboarded } });
   } catch (error) {
     console.error('[register] Error:', error);
     res.status(500).json({ error: 'Registration failed' });
@@ -213,6 +213,7 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
         firstName: user.firstName,
         lastName: user.lastName,
         imageUrl: user.imageUrl,
+        isOnboarded: user.isOnboarded,
       }
     });
   } catch (error) {
@@ -291,6 +292,7 @@ app.post('/api/auth/google', async (req: Request, res: Response) => {
         firstName: user.firstName,
         lastName: user.lastName,
         imageUrl: user.imageUrl,
+        isOnboarded: user.isOnboarded,
       }
     });
   } catch (error: any) {

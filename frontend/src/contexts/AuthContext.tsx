@@ -49,11 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       if (res.ok) {
         const data = await res.json();
+        document.cookie = `onboarded=${data.user.isOnboarded}; path=/; max-age=86400; SameSite=Lax`;
         setUser(data.user);
       } else {
         // Token invalid, clear it
         localStorage.removeItem('token');
+        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'onboarded=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
         setToken(null);
+        setUser(null);
       }
     } catch (error) {
       console.error('Failed to fetch user:', error);
@@ -78,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       localStorage.setItem('token', data.token);
       document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `onboarded=${data.user.isOnboarded}; path=/; max-age=86400; SameSite=Lax`;
       setToken(data.token);
       setUser(data.user);
       return { success: true };
@@ -122,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       localStorage.setItem('token', data.token);
       document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `onboarded=${data.user.isOnboarded}; path=/; max-age=86400; SameSite=Lax`;
       setToken(data.token);
       setUser(data.user);
       return { success: true };
@@ -133,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     localStorage.removeItem('token');
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    document.cookie = 'onboarded=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     setToken(null);
     setUser(null);
   };
