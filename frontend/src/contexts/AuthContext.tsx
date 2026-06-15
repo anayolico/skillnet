@@ -34,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
+      document.cookie = `token=${storedToken}; path=/; max-age=86400; SameSite=Lax`;
       setToken(storedToken);
       fetchUser(storedToken);
     } else {
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       localStorage.setItem('token', data.token);
+      document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
       setToken(data.token);
       setUser(data.user);
       return { success: true };
@@ -119,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       localStorage.setItem('token', data.token);
+      document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
       setToken(data.token);
       setUser(data.user);
       return { success: true };
@@ -129,6 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem('token');
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     setToken(null);
     setUser(null);
   };
