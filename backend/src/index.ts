@@ -233,12 +233,17 @@ app.post('/api/auth/google', async (req: Request, res: Response) => {
 
   try {
     // Exchange code for tokens
-    const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
-      code,
-      client_id: process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'postmessage',
-      grant_type: 'authorization_code'
+    const params = new URLSearchParams();
+    params.append('code', code);
+    params.append('client_id', process.env.GOOGLE_CLIENT_ID || '');
+    params.append('client_secret', process.env.GOOGLE_CLIENT_SECRET || '');
+    params.append('redirect_uri', process.env.GOOGLE_REDIRECT_URI || 'postmessage');
+    params.append('grant_type', 'authorization_code');
+
+    const tokenRes = await axios.post('https://oauth2.googleapis.com/token', params.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     });
 
     const { access_token } = tokenRes.data;

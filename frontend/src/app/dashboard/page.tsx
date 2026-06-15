@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import AppNav from '../../../components/AppNav';
 import { 
   LayoutDashboard, 
@@ -23,6 +24,7 @@ import { User } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, logout, getToken } = useAuth();
+  const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -103,7 +105,7 @@ export default function Dashboard() {
             <Link href="/settings" className={styles.sideLink}>
               <Settings size={18} strokeWidth={2.5} /> Settings
             </Link>
-            <button onClick={() => logout()} className={styles.sideLink} style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
+            <button onClick={() => { logout(); router.push('/login'); }} className={styles.sideLink} style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
               <LogOut size={18} strokeWidth={2.5} /> Logout
             </button>
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 
@@ -9,6 +9,7 @@ export default function GoogleCallback() {
   const searchParams = useSearchParams();
   const { googleLogin } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     const code = searchParams.get('code');
@@ -17,6 +18,9 @@ export default function GoogleCallback() {
       setError('No authorization code received');
       return;
     }
+
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
     const handleLogin = async () => {
       const result = await googleLogin(code);
