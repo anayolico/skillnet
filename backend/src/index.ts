@@ -235,7 +235,7 @@ app.post('/api/auth/google', async (req: Request, res: Response) => {
     // Exchange code for tokens
     const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
       code,
-      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_id: process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
       redirect_uri: process.env.GOOGLE_REDIRECT_URI || 'postmessage',
       grant_type: 'authorization_code'
