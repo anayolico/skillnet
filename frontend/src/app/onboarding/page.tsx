@@ -77,6 +77,8 @@ export default function Onboarding() {
         throw new Error("Failed to save profile.");
       }
 
+      // Update cookie so middleware knows user is onboarded
+      document.cookie = 'onboarded=true; path=/; max-age=86400; SameSite=Lax';
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");

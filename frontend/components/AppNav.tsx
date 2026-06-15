@@ -198,11 +198,13 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
           SkillNet
         </Link>
         <div className={styles.mobileTopActions}>
-          {isApp ? (
+          {(isApp || user) ? (
             <>
-              <Link href="/chats" className={styles.iconBtn} aria-label="Inbox">
-                <MessageSquare size={20} strokeWidth={2.5} />
-              </Link>
+              {isApp && (
+                <Link href="/chats" className={styles.iconBtn} aria-label="Inbox">
+                  <MessageSquare size={20} strokeWidth={2.5} />
+                </Link>
+              )}
 
               
               <div className={styles.profileDropdownWrapper}>
@@ -300,11 +302,13 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         )}
 
         <div className={styles.desktopRight}>
-          {isApp ? (
+          {(isApp || user) ? (
             <>
-              <Link href="/chats" className={styles.notifBtn} aria-label="Messages">
-                <MessageSquare size={18} strokeWidth={2.5} />
-              </Link>
+              {isApp && (
+                <Link href="/chats" className={styles.notifBtn} aria-label="Messages">
+                  <MessageSquare size={18} strokeWidth={2.5} />
+                </Link>
+              )}
               <div className={styles.profileDropdownWrapper}>
                 <button 
                   className={styles.avatarDesktop} 
