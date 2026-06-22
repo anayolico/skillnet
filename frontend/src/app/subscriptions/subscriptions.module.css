@@ -9,13 +9,13 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 6rem 1.5rem 8rem;
+  padding: clamp(2rem, 5vh, 3rem) 1.5rem 4rem;
   flex: 1;
 }
 
 .hero {
   text-align: center;
-  margin-bottom: 5rem;
+  margin-bottom: clamp(2rem, 4vh, 3rem);
 }
 
 .tag {
@@ -28,30 +28,30 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .title {
-  font-size: 3.5rem;
+  font-size: clamp(2.4rem, 4.6vw, 3.4rem);
   font-weight: 800;
   color: #1e293b;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   line-height: 1.1;
 }
 
 .subtitle {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 1.6vw, 1.16rem);
   color: #64748b;
   max-width: 600px;
   margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .pricingGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
-  margin-top: 4rem;
+  margin-top: 0;
   max-width: 900px;
   margin-left: auto;
   margin-right: auto;
@@ -59,8 +59,8 @@
 
 .priceCard {
   background: white;
-  border-radius: 24px;
-  padding: 3rem;
+  border-radius: 8px;
+  padding: clamp(2rem, 3vw, 2.6rem);
   display: flex;
   flex-direction: column;
   border: 1px solid #e2e8f0;
@@ -103,11 +103,11 @@
   display: flex;
   align-items: baseline;
   gap: 0.25rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .amount {
-  font-size: 3rem;
+  font-size: clamp(2.5rem, 4vw, 3rem);
   font-weight: 800;
 }
 
@@ -125,8 +125,8 @@
 .featureList {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 3rem;
+  gap: 0.85rem;
+  margin-bottom: 2rem;
   flex: 1;
 }
 
@@ -140,12 +140,13 @@
 .checkIcon {
   color: #4ade80;
   font-weight: bold;
+  flex: 0 0 auto;
 }
 
 .ctaBtn {
   width: 100%;
-  padding: 1.25rem;
-  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 1rem;
   border: 1px solid #e2e8f0;
@@ -173,7 +174,7 @@
 }
 
 .trustSection {
-  margin-top: 8rem;
+  margin-top: clamp(4rem, 8vh, 6rem);
   text-align: center;
 }
 
@@ -199,7 +200,14 @@
 }
 
 .trustIcon {
-  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #0c2b54;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0.8;
 }
 
@@ -216,6 +224,10 @@
 }
 
 @media (max-width: 1024px) {
+  .container {
+    padding-top: 2rem;
+  }
+
   .pricingGrid {
     grid-template-columns: 1fr;
     max-width: 500px;
@@ -232,5 +244,23 @@
   }
   .title {
     font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 1.5rem 1rem 7rem;
+  }
+
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .title {
+    font-size: 2.2rem;
+  }
+
+  .priceCard {
+    padding: 1.5rem;
   }
 }

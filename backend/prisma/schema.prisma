@@ -29,6 +29,7 @@ model User {
   swapsAsB             Swap[]        @relation("SwapsAsB")
   swapRequestsReceived SwapRequest[] @relation("SwapRequestsReceived")
   swapRequestsSent     SwapRequest[] @relation("SwapRequestsSent")
+  transactions         Transaction[]
 
   @@index([email])
 }
@@ -151,4 +152,20 @@ model Message {
   swap      Swap     @relation(fields: [swapId], references: [id], onDelete: Cascade)
 
   @@index([swapId])
+}
+
+model Transaction {
+  id            String   @id @default(cuid())
+  userId        String
+  txRef         String   @unique
+  amount        Float
+  currency      String
+  status        String   @default("pending") // pending, successful, failed
+  flutterwaveId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([txRef])
 }

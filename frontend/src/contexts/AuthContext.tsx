@@ -13,6 +13,7 @@ interface User {
   subscriptionTier?: string;
   profile?: {
     experienceLevel?: string;
+    headline?: string;
   };
 }
 

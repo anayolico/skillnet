@@ -1,21 +1,15 @@
 'use client';
 import React from 'react';
-import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
 import styles from './settings.module.css';
 
 export default function Settings() {
   return (
-    <div className={`${styles.settingsRoot} reveal`}>
+    <div className={styles.settingsRoot}>
       <AppNav />
 
-      <main className={styles.container}>
-        <div className={styles.sideMenu}>
-          <div className={`${styles.menuItem} ${styles.active}`}><span>⚙️</span> Account Settings</div>
-          <div className={styles.menuItem}><span>🔔</span> Notifications</div>
-          <div className={styles.menuItem}><span>🔒</span> Privacy &amp; Security</div>
-          <div className={styles.menuItem}><span>💳</span> Payments &amp; Escrow</div>
-        </div>
+      <main className={`${styles.container} reveal`}>
+        {/* Side menu removed */}
 
         <div className={styles.settingsContent}>
           <div className={styles.pageHeader}>

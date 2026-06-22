@@ -8,11 +8,20 @@
 }
 
 .container {
-  max-width: 1000px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 3rem 1.5rem 8rem;
   display: flex;
   gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: none;
+    margin: 0;
+    padding: 3rem 3rem 8rem;
+  }
 }
 
 /* Settings Side Menu */

@@ -264,7 +264,13 @@ export default function Marketplace() {
                     </div>
                   </div>
                   <h3 className={styles.partnerName}>{listing.title}</h3>
-                  <p className={styles.partnerRole}>By {listing.user.firstName} {listing.user.lastName} • {listing.sessionFormat}</p>
+                  <p className={styles.partnerRole}>
+                    By {listing.user.firstName} {listing.user.lastName}
+                    {listing.user.subscriptionTier === 'professional' && (
+                      <span title="Verified Expert" style={{marginLeft: '0.4rem', fontSize: '0.65rem', background: '#eab308', color: 'white', padding: '0.1rem 0.4rem', borderRadius: '4px', fontWeight: 'bold', verticalAlign: 'middle'}}>PRO</span>
+                    )}
+                    <span style={{margin: '0 0.4rem'}}>•</span>{listing.sessionFormat}
+                  </p>
                   
                   <div className={styles.skillSection}>
                     <span className={styles.skillSectionLabel}>OFFERING</span>

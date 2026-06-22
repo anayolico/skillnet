@@ -5,35 +5,40 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
-  BookOpen,
   ArrowLeftRight,
   ShieldCheck,
   MessageSquare,
   User,
-  Search,
-  Bell,
-  Plus,
   Sparkles,
   LogOut,
   Settings,
   PlusSquare,
+  type LucideIcon,
 } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useToast } from './Toast';
 import styles from './AppNav.module.css';
 
-const appNavItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/marketplace', label: 'Marketplace', icon: ArrowLeftRight },
-  { href: '/escrow', label: 'Swap Requests', icon: ShieldCheck, type: 'swaps' },
-  { href: '/chats', label: 'Messages', icon: MessageSquare, type: 'messages' },
-  { href: '/create-listing', label: 'Post Expert Skill', icon: PlusSquare },
+type NavItem = {
+  href: string;
+  label: string;
+  mobileLabel: string;
+  icon: LucideIcon;
+  type?: 'swaps' | 'messages';
+};
+
+const appNavItems: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', mobileLabel: 'Home', icon: LayoutDashboard },
+  { href: '/marketplace', label: 'Marketplace', mobileLabel: 'Market', icon: ArrowLeftRight },
+  { href: '/escrow', label: 'Swap Requests', mobileLabel: 'Swaps', icon: ShieldCheck, type: 'swaps' },
+  { href: '/chats', label: 'Messages', mobileLabel: 'Messages', icon: MessageSquare, type: 'messages' },
+  { href: '/create-listing', label: 'Post Expert Skill', mobileLabel: 'Post', icon: PlusSquare },
 ];
 
-const publicNavItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/marketplace', label: 'Marketplace', icon: ArrowLeftRight },
-  { href: '/escrow', label: 'Swap Requests', icon: ShieldCheck },
+const publicNavItems: NavItem[] = [
+  { href: '/dashboard', label: 'Dashboard', mobileLabel: 'Home', icon: LayoutDashboard },
+  { href: '/marketplace', label: 'Marketplace', mobileLabel: 'Market', icon: ArrowLeftRight },
+  { href: '/escrow', label: 'Swap Requests', mobileLabel: 'Swaps', icon: ShieldCheck },
 ];
 
 interface AppNavProps {
@@ -98,7 +103,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setCounts(prev => ({ ...prev, swapRequests: 0 }));
-    } catch (err) { }
+    } catch { }
   };
 
   useEffect(() => {
@@ -164,7 +169,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         socket?.close();
       };
     }
-  }, [isApp]);
+  }, [isApp, showToast]);
 
   useEffect(() => {
     if (pathname === '/escrow') {
@@ -243,26 +248,31 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
       </header>
 
       {/* -------- MOBILE: fixed bottom bar -------- */}
-      <nav className={styles.mobileBottomNav} aria-label="Mobile navigation">
-        {currentItems.map(({ href, label, icon: Icon, type }: any) => (
+      <nav
+        className={styles.mobileBottomNav}
+        aria-label="Mobile navigation"
+        style={{ gridTemplateColumns: `repeat(${currentItems.length + (!isApp ? 1 : 0)}, minmax(0, 1fr))` }}
+      >
+        {currentItems.map(({ href, label, mobileLabel, icon: Icon, type }) => (
           <Link
             key={href}
             href={href}
             className={`${styles.navItem} ${active === href || (href !== '/' && href !== '/dashboard' && active.startsWith(href)) ? styles.active : ''}`}
+            aria-label={label}
           >
             <span className={styles.navIcon}>
               <Icon size={20} strokeWidth={2.5} />
               {type && renderBadge(type)}
             </span>
-            {label}
+            <span className={styles.navLabel}>{mobileLabel ?? label}</span>
           </Link>
         ))}
         {!isApp && (
-          <Link href="/join" className={styles.navItem}>
+          <Link href="/join" className={styles.navItem} aria-label="Join Network">
             <span className={styles.navIcon}>
               <Sparkles size={20} strokeWidth={2.5} />
             </span>
-            Join
+            <span className={styles.navLabel}>Join</span>
           </Link>
         )}
       </nav>
@@ -283,7 +293,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
             </div>
 
             <div className={styles.sideLinks}>
-              {currentItems.map(({ href, label, icon: Icon, type }: any) => (
+              {currentItems.map(({ href, label, icon: Icon, type }) => (
                 <Link
                   key={href}
                   href={href}
@@ -303,7 +313,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
           <div className={`${styles.sidebarBottom} reveal`} style={{ animationDelay: '0.4s' }}>
             <div className={styles.upgradeBox}>
               <div className={styles.upgradeTitle}>PREMIUM NETWORK</div>
-              <div className={styles.upgradeText}>Unlock the Titan's exchange and C-level mentoring.</div>
+              <div className={styles.upgradeText}>Unlock the Titan&apos;s exchange and C-level mentoring.</div>
               <Link href="/subscriptions">
                 <button className={`${styles.upgradeBtn} click-scale`}>View Plans</button>
               </Link>
@@ -331,7 +341,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
               SkillNet
             </Link>
             <div className={styles.desktopLinks}>
-              {currentItems.map(({ href, label, icon: Icon }: any) => (
+              {currentItems.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}

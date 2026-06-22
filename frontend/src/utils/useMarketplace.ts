@@ -14,6 +14,7 @@ export interface Listing {
     firstName: string | null;
     lastName: string | null;
     imageUrl: string | null;
+    subscriptionTier?: string | null;
     profile: {
       experienceLevel: string | null;
       availability: string | null;

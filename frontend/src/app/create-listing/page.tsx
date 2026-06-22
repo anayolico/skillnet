@@ -74,10 +74,10 @@ export default function CreateListing() {
   };
 
   return (
-    <div className={`${styles.createRoot} reveal`}>
+    <div className={styles.createRoot}>
       <AppNav />
 
-      <main className={styles.container}>
+      <main className={`${styles.container} reveal`}>
         <div className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>Post a Skill Offer</h1>
           <p className={styles.pageSubtitle}>List your expertise in the marketplace and specify what you want in return.</p>

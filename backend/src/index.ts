@@ -108,7 +108,13 @@ wss.on('connection', (ws: WebSocket) => {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL || 'http://localhost:3000',
+    'http://localhost:3000'
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -448,10 +454,10 @@ app.get('/api/marketplace/partners', requireAuth, async (req: Request, res: Resp
 
     const profiles = await prisma.profile.findMany({
       where: whereClause,
-      include: { user: { select: { firstName: true, lastName: true, imageUrl: true } } },
+      include: { user: { select: { firstName: true, lastName: true, imageUrl: true, subscriptionTier: true } } },
       skip,
       take: limitNum,
-      orderBy: { createdAt: 'desc' }
+      orderBy: [{ user: { subscriptionTier: 'desc' } }, { createdAt: 'desc' }]
     });
 
     const total = await prisma.profile.count({ where: whereClause });
@@ -508,7 +514,7 @@ app.get('/api/marketplace/listings', requireAuth, async (req: Request, res: Resp
     if (category) whereClause.category = String(category);
 
     const [listings, total] = await prisma.$transaction([
-      prisma.listing.findMany({ where: whereClause, include: { user: { include: { profile: true } } }, skip, take: limitNum, orderBy: { createdAt: 'desc' } }),
+      prisma.listing.findMany({ where: whereClause, include: { user: { include: { profile: true } } }, skip, take: limitNum, orderBy: [{ user: { subscriptionTier: 'desc' } }, { createdAt: 'desc' }] }),
       prisma.listing.count({ where: whereClause })
     ]);
 
@@ -796,8 +802,121 @@ app.post('/api/notifications/mark-messages-read/:swapId', requireAuth, async (re
     res.status(500).json({ error: 'Failed to mark messages as read' });
   }
 });
+/**
+ * @api {post} /api/subscriptions/initiate Initialize a subscription payment
+ */
+app.post('/api/subscriptions/initiate', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const caller = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
+    if (!caller) return res.status(404).json({ error: 'User not found' });
+
+    if (caller.subscriptionTier === 'professional') {
+      return res.status(400).json({ error: 'You are already on the Professional tier' });
+    }
+
+    const txRef = `sub_tx_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+    const amount = 49;
+    const currency = 'USD';
+
+    // Create a pending transaction
+    await prisma.transaction.create({
+      data: {
+        userId: caller.id,
+        txRef,
+        amount,
+        currency,
+        status: 'pending'
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      txRef,
+      amount,
+      currency,
+      user: {
+        email: caller.email,
+        name: `${caller.firstName} ${caller.lastName}`.trim(),
+      }
+    });
+  } catch (error) {
+    console.error('[subscriptions/initiate] Error:', error);
+    res.status(500).json({ error: 'Failed to initiate subscription' });
+  }
+});
+
+/**
+ * @api {post} /api/webhooks/flutterwave Flutterwave Webhook
+ */
+app.post('/api/webhooks/flutterwave', async (req: Request, res: Response) => {
+  try {
+    // Validate webhook signature
+    const secretHash = process.env.FLW_SECRET_HASH;
+    const signature = req.headers['verif-hash'];
+    
+    if (secretHash && signature !== secretHash) {
+      // In production, enforce this. For local testing, we might want to log it
+      console.warn('Webhook signature mismatch or missing');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const payload = req.body;
+    console.log('[Webhook] Flutterwave Event:', payload.event);
+
+    if (payload.event === 'charge.completed' && payload.data) {
+      const { tx_ref, status, id, amount } = payload.data;
+
+      // Find the transaction
+      const transaction = await prisma.transaction.findUnique({
+        where: { txRef: tx_ref }
+      });
+
+      if (!transaction) {
+        return res.status(404).json({ error: 'Transaction not found' });
+      }
+
+      // Check if already processed
+      if (transaction.status === 'successful') {
+        return res.status(200).json({ success: true, message: 'Already processed' });
+      }
+
+      if (status === 'successful') {
+        // Run as a transaction: update payment status AND upgrade user
+        await prisma.$transaction([
+          prisma.transaction.update({
+            where: { id: transaction.id },
+            data: { status: 'successful', flutterwaveId: id.toString() }
+          }),
+          prisma.user.update({
+            where: { id: transaction.userId },
+            data: { subscriptionTier: 'professional' }
+          })
+        ]);
+        console.log(`[Webhook] User ${transaction.userId} upgraded to Professional.`);
+      } else {
+        // Mark as failed
+        await prisma.transaction.update({
+          where: { id: transaction.id },
+          data: { status: 'failed', flutterwaveId: id.toString() }
+        });
+      }
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error('[Webhook] Error processing flutterwave webhook:', error);
+    res.status(500).json({ error: 'Webhook processing failed' });
+  }
+});
 
 // Start server
-server.listen(port, () => {
+server.listen(port, async () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
+  
+  try {
+    await prisma.$connect();
+    console.log(`[database]: Successfully connected to the database.`);
+  } catch (error) {
+    console.error(`[database]: Failed to connect to the database! Error:`, error);
+  }
 });

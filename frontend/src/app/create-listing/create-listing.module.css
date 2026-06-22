@@ -8,9 +8,17 @@
 }
 
 .container {
+  width: 100%;
   max-width: 800px;
   margin: 0 auto;
   padding: 3rem 1.5rem 8rem;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 860px;
+    padding: 3rem 2rem 8rem;
+  }
 }
 
 .pageHeader { margin-bottom: 2rem; }
