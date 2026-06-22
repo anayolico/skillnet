@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
+import Skeleton from '../../../components/Skeleton';
 import { User, FileText, Check, X, Clock, ArrowRight } from 'lucide-react';
 import styles from './escrow.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
@@ -139,8 +140,22 @@ export default function Escrow() {
         </div>
 
         {loading ? (
-          <div className={styles.loadingState}>
-            <p>Scanning the ledger for active protocols...</p>
+          <div className={styles.contractList}>
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div key={idx} className={styles.contractCard} style={{ display: 'flex', justifyContent: 'space-between', padding: '1.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <Skeleton width="48px" height="48px" borderRadius="50%" variant="circular" />
+                  <div>
+                    <Skeleton width="150px" height="20px" variant="text" />
+                    <Skeleton width="200px" height="14px" variant="text" style={{ marginTop: '0.5rem' }} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <Skeleton width="100px" height="36px" borderRadius="6px" variant="rectangular" />
+                  <Skeleton width="100px" height="36px" borderRadius="6px" variant="rectangular" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : currentRequests.length === 0 ? (
           <div className={styles.emptyState}>

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AppNav from '../../../components/AppNav';
+import Skeleton from '../../../components/Skeleton';
 import { 
   LayoutDashboard, 
   ArrowLeftRight, 
@@ -23,93 +24,56 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { User } from 'lucide-react';
 
 export default function Dashboard() {
-  const { user, logout, getToken } = useAuth();
+  const { user, isLoading } = useAuth();
   const router = useRouter();
-  const [userData, setUserData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchUserData() {
-      try {
-        if (!user) return;
-
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const token = getToken();
-        const res = await fetch(`${apiUrl}/api/me`, {
-          headers: {
-            'Authorization': `Bearer ${token || ''}`
-          }
-        });
-        const data = await res.json();
-        if (data.success) {
-          setUserData(data.user);
-        }
-      } catch (err) {
-        console.error('Failed to fetch dashboard data', err);
-      } finally {
-        setLoading(false);
-      }
+    if (!isLoading && !user) {
+      router.push('/login');
     }
-    if (user) {
-      fetchUserData();
-    } else {
-      // If no user after some time, could redirect to login
-    }
-  }, [user]);
+  }, [isLoading, user, router]);
 
+  if (isLoading || !user) {
+    return (
+      <div className={styles.dashboardRoot}>
+        <AppNav />
+        <div className={styles.dashboardContainer}>
+          <main className={styles.mainContent}>
+            <div className={styles.welcomeSection}>
+              <Skeleton width="150px" height="20px" variant="text" style={{ marginBottom: '1rem' }} />
+              <Skeleton width="400px" height="40px" variant="rectangular" style={{ marginBottom: '1rem' }} />
+              <Skeleton width="600px" height="24px" variant="text" />
+            </div>
+            
+            <div className={styles.statGrid} style={{ marginTop: '2rem' }}>
+              <Skeleton height="200px" variant="rectangular" />
+              <Skeleton height="200px" variant="rectangular" />
+              <Skeleton height="200px" variant="rectangular" />
+            </div>
 
-  if (loading) return <div className={styles.dashboardRoot}><AppNav /></div>;
+            <div style={{ marginTop: '4rem' }}>
+              <Skeleton width="300px" height="32px" variant="text" style={{ marginBottom: '2rem' }} />
+              <div className={styles.swapsGrid}>
+                <Skeleton height="250px" variant="rectangular" />
+                <Skeleton height="250px" variant="rectangular" />
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
-  const displayName = userData?.firstName ? `${userData.firstName} ${userData.lastName || ''}` : 'SkillNet Expert';
-  const displayHeadline = userData?.profile?.headline || 'Expertise Arbitrageur';
-  const displayLevel = userData?.profile?.experienceLevel || 'Expert';
+  const displayName = user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'SkillNet Expert';
+  const displayHeadline = user?.profile?.headline || 'Expertise Arbitrageur';
+  const displayLevel = user?.profile?.experienceLevel || 'Expert';
 
   return (
     <div className={styles.dashboardRoot}>
       <AppNav />
 
       <div className={`${styles.dashboardContainer} animate-fade-in`}>
-        {/* DESKTOP SIDEBAR: Fixed and Architected */}
-        <aside className={styles.sidebar}>
-          <div className="reveal stagger">
-            <div className={styles.hubLabel}>Professional Ledger</div>
-            <div className={styles.hubTier}>{displayLevel} Tier</div>
-            <div className={styles.sideLinks}>
-              <Link href="/dashboard" className={`${styles.sideLink} ${styles.active}`}>
-                <LayoutDashboard size={18} strokeWidth={2.5} /> Dashboard
-              </Link>
-              <Link href="/marketplace" className={styles.sideLink}>
-                <ArrowLeftRight size={18} strokeWidth={2.5} /> Marketplace
-              </Link>
-              <Link href="/escrow" className={styles.sideLink}>
-                <ShieldCheck size={18} strokeWidth={2.5} /> Swap Requests
-              </Link>
-              <Link href="/chats" className={styles.sideLink}>
-                <MessageSquare size={18} strokeWidth={2.5} /> Messages
-              </Link>
-              <Link href="/catalog" className={styles.sideLink}>
-                <BookOpen size={18} strokeWidth={2.5} /> Learning Hub
-              </Link>
-              <Link href="/create-listing" className={styles.sideLink}>
-                <PlusSquare size={18} strokeWidth={2.5} /> Post Expert Skill
-              </Link>
-            </div>
-          </div>
 
-          <div className={`${styles.sidebarBottom} reveal`} style={{ animationDelay: '0.4s' }}>
-            <div className={styles.upgradeBox}>
-              <div className={styles.upgradeTitle}>PREMIUM NETWORK</div>
-              <div className={styles.upgradeText}>Unlock the Titan's exchange and C-level mentoring.</div>
-              <Link href="/subscriptions"><button className={`${styles.upgradeBtn} click-scale`}>View Plans</button></Link>
-            </div>
-            <Link href="/settings" className={styles.sideLink}>
-              <Settings size={18} strokeWidth={2.5} /> Settings
-            </Link>
-            <button onClick={() => { logout(); router.push('/login'); }} className={styles.sideLink} style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}>
-              <LogOut size={18} strokeWidth={2.5} /> Logout
-            </button>
-          </div>
-        </aside>
 
         {/* MAIN COMMAND CENTER */}
         <main className={styles.mainContent}>

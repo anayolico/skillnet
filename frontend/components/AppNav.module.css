@@ -123,8 +123,15 @@
 }
 
 @keyframes dropdownIn {
-  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .dropdownHeader {
@@ -278,6 +285,48 @@
   z-index: 10;
 }
 
+.proBadge {
+  background-color: #4ade80;
+  color: #0c2b54;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  margin-left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+.proBadge:hover {
+  background-color: #22c55e;
+}
+
+.freeBadge {
+  background-color: #94a3b8;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  margin-left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+.freeBadge:hover {
+  background-color: #64748b;
+}
+
 /* ---- Desktop Override ---- */
 @media (min-width: 1024px) {
 
@@ -294,80 +343,114 @@
 
   /* --- App Sidebar Nav (Vertical) --- */
   .desktopNav.desktopAppNav {
+    display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 1.5rem;
-    width: 260px;
+    padding: 2.5rem 1.5rem;
+    width: 280px;
     height: 100vh;
     border-right: 1px solid #e2e8f0;
     position: fixed;
     left: 0;
     top: 0;
     z-index: 50;
-    gap: 1rem;
+    background-color: #ffffff;
   }
 
-  .desktopAppNav .desktopLeft {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.5rem;
-    width: 100%;
+  .desktopAppNav .hubLabel {
+    font-family: var(--font-mono), monospace;
+    font-size: 0.7rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+    padding: 0 1rem;
   }
 
-  .desktopAppNav .desktopLinks {
+  .desktopAppNav .hubTier {
+    font-family: var(--font-inter), sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0c2b54;
+    margin-bottom: 2.5rem;
+    padding: 0 1rem;
     display: flex;
-    flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 0.5rem;
-    width: 100%;
   }
 
-  .desktopAppNav .desktopLink {
+
+
+  .desktopAppNav .sideLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .desktopAppNav .sideLink {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
     color: #64748b;
     text-decoration: none;
-    transition: all 0.15s;
-    white-space: nowrap;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
   }
 
-  .desktopAppNav .desktopLink:hover {
-    color: #0f172a;
-    background: #f8fafc;
-  }
-
-  .desktopAppNav .desktopLink.active {
+  .desktopAppNav .sideLink:hover {
+    background-color: #f1f5f9;
     color: #0c2b54;
-    background: #eff6ff;
   }
 
-  .desktopAppNav .desktopRight {
+  .desktopAppNav .sideLink.active {
+    background-color: #0c2b54;
+    color: #ffffff;
+  }
+
+  .desktopAppNav .sidebarBottom {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
     width: 100%;
   }
 
-  .desktopAppNav .profileDropdownWrapper {
-    position: relative;
-    width: 100%;
+  .desktopAppNav .upgradeBox {
+    background: linear-gradient(135deg, #0c2b54, #1e293b);
+    padding: 1.5rem;
+    border-radius: 16px;
+    color: white;
+    margin-bottom: 2rem;
+    text-align: left;
   }
 
-  .desktopAppNav .profileDropdown.desktopDropdown {
-    position: absolute;
-    top: auto;
-    bottom: 100%;
-    left: 0;
-    right: auto;
+  .desktopAppNav .upgradeTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     margin-bottom: 0.5rem;
-    margin-top: 0;
+    opacity: 0.8;
+  }
+
+  .desktopAppNav .upgradeText {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+  }
+
+  .desktopAppNav .upgradeBtn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #4ade80;
+    color: #0c2b54;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: center;
   }
 
   /* --- Public Top Nav (Horizontal) --- */

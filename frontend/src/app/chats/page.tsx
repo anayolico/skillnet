@@ -1,7 +1,9 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
+import Skeleton from '../../../components/Skeleton';
 import { User, Send, Shield, Lock, ChevronLeft } from 'lucide-react';
 import styles from './chats.module.css';
 import { useAuth } from '../../contexts/AuthContext';
@@ -158,7 +160,41 @@ export default function Chats() {
     if (e.key === 'Enter') handleSendMessage();
   };
 
-  if (loading) return <div className={styles.messagesRoot}><AppNav /></div>;
+  if (loading) {
+    return (
+      <div className={styles.messagesRoot}>
+        <AppNav />
+        <div className={styles.chatContainer}>
+          <div className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>
+              <Skeleton width="150px" height="24px" variant="text" />
+            </div>
+            <ul className={styles.chatList}>
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <li key={idx} className={styles.chatItem} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <Skeleton width="48px" height="48px" borderRadius="50%" variant="circular" />
+                  <div style={{ flex: 1 }}>
+                    <Skeleton width="120px" height="18px" variant="text" />
+                    <Skeleton width="80px" height="14px" variant="text" style={{ marginTop: '0.25rem' }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className={`${styles.mainChat} ${styles.mobileHidden}`}>
+            <div className={styles.chatHeader}>
+               <Skeleton width="200px" height="24px" variant="text" />
+            </div>
+            <div className={styles.messageList} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '2rem' }}>
+               <Skeleton width="60%" height="60px" borderRadius="12px" variant="rectangular" style={{ alignSelf: 'flex-start' }} />
+               <Skeleton width="50%" height="80px" borderRadius="12px" variant="rectangular" style={{ alignSelf: 'flex-end' }} />
+               <Skeleton width="70%" height="40px" borderRadius="12px" variant="rectangular" style={{ alignSelf: 'flex-start' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`${styles.messagesRoot} animate-fade-in`}>

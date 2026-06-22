@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
+import Skeleton from '../../../components/Skeleton';
 import { 
   Settings, 
   Plus, 
@@ -50,7 +51,40 @@ export default function Profile() {
   }, [user]);
 
 
-  if (loading) return <div className={styles.profileRoot}><AppNav /></div>;
+  if (loading) {
+    return (
+      <div className={styles.profileRoot}>
+        <AppNav />
+        <div className={styles.container}>
+          <div className={styles.coverImage}>
+            <div className={styles.profileAvatar}>
+              <Skeleton width="100%" height="100%" borderRadius="50%" variant="circular" />
+            </div>
+            <div className={styles.headerActions}>
+              <Skeleton width="120px" height="40px" borderRadius="8px" variant="rectangular" />
+              <Skeleton width="120px" height="40px" borderRadius="8px" variant="rectangular" />
+            </div>
+          </div>
+          <div>
+            <Skeleton width="250px" height="40px" variant="text" style={{ marginBottom: '1rem' }} />
+            <Skeleton width="180px" height="20px" variant="text" style={{ marginBottom: '1.5rem' }} />
+            <Skeleton width="350px" height="24px" borderRadius="20px" variant="rectangular" />
+          </div>
+          <div className={styles.mainLayout} style={{ marginTop: '3rem' }}>
+            <div>
+              <Skeleton height="200px" variant="rectangular" style={{ marginBottom: '2rem' }} />
+              <Skeleton height="300px" variant="rectangular" />
+            </div>
+            <div>
+              <Skeleton height="150px" variant="rectangular" style={{ marginBottom: '2rem' }} />
+              <Skeleton height="150px" variant="rectangular" style={{ marginBottom: '2rem' }} />
+              <Skeleton height="200px" variant="rectangular" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const displayName = userData?.firstName ? `${userData.firstName} ${userData.lastName || ''}` : 'SkillNet Expert';
   const displayRole = userData?.profile?.headline || 'Expertise Arbitrageur';

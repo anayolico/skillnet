@@ -10,6 +10,10 @@ interface User {
   firstName?: string;
   lastName?: string;
   imageUrl?: string;
+  subscriptionTier?: string;
+  profile?: {
+    experienceLevel?: string;
+  };
 }
 
 interface AuthContextType {

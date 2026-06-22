@@ -3,6 +3,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AppNav from '@/components/AppNav';
+import Skeleton from '@/components/Skeleton';
 import {
   ShieldCheck,
   Search,
@@ -220,13 +221,17 @@ export default function Marketplace() {
 
           <div className={`${styles.partnerGrid} stagger`}>
             {loading && listings.length === 0 ? (
-               Array.from({ length: 3 }).map((_, idx) => (
-                 <div key={idx} className={styles.skeletonCard}>
-                    <div className={styles.skeletonHeader}>
-                      <div className={styles.skeletonAvatar}></div>
+               Array.from({ length: 6 }).map((_, idx) => (
+                 <div key={idx} className={styles.partnerCard} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <Skeleton width="64px" height="64px" borderRadius="12px" variant="rectangular" />
+                      <div>
+                        <Skeleton width="120px" height="20px" variant="text" />
+                        <Skeleton width="180px" height="14px" variant="text" style={{ marginTop: '0.5rem' }} />
+                      </div>
                     </div>
-                    <div className={styles.skeletonBlock}></div>
-                    <div className={`${styles.skeletonBlock} ${styles.short}`}></div>
+                    <Skeleton width="100%" height="40px" variant="rectangular" style={{ marginTop: '0.5rem' }} />
+                    <Skeleton width="100%" height="40px" variant="rectangular" />
                  </div>
                ))
             ) : listings.length === 0 ? (

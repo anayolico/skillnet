@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  ArrowLeftRight, 
-  ShieldCheck, 
-  MessageSquare, 
-  User, 
-  Search, 
-  Bell, 
-  Plus, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  ArrowLeftRight,
+  ShieldCheck,
+  MessageSquare,
+  User,
+  Search,
+  Bell,
+  Plus,
   Sparkles,
   LogOut,
   Settings,
@@ -24,16 +24,15 @@ import styles from './AppNav.module.css';
 
 const appNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/catalog', label: 'Learning', icon: BookOpen },
-  { href: '/marketplace', label: 'Market', icon: ArrowLeftRight },
+  { href: '/marketplace', label: 'Marketplace', icon: ArrowLeftRight },
   { href: '/escrow', label: 'Swap Requests', icon: ShieldCheck, type: 'swaps' },
-  { href: '/chats', label: 'Inbox', icon: MessageSquare, type: 'messages' },
+  { href: '/chats', label: 'Messages', icon: MessageSquare, type: 'messages' },
+  { href: '/create-listing', label: 'Post Expert Skill', icon: PlusSquare },
 ];
 
 const publicNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/catalog', label: 'Learning', icon: BookOpen },
-  { href: '/marketplace', label: 'Market', icon: ArrowLeftRight },
+  { href: '/marketplace', label: 'Marketplace', icon: ArrowLeftRight },
   { href: '/escrow', label: 'Swap Requests', icon: ShieldCheck },
 ];
 
@@ -99,7 +98,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setCounts(prev => ({ ...prev, swapRequests: 0 }));
-    } catch (err) {}
+    } catch (err) { }
   };
 
   useEffect(() => {
@@ -109,11 +108,11 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
 
       // Setup Real-time Notifications via WebSocket
       let socket: WebSocket | null = null;
-      
+
       async function setupWS() {
         const token = localStorage.getItem('token');
         if (!token) return;
-        
+
         // Need our DB userId
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         const meRes = await fetch(`${apiUrl}/api/me`, {
@@ -124,7 +123,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
 
         const baseWsUrl = process.env.NEXT_PUBLIC_WS_URL || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:3001` : 'ws://localhost:3001');
         const wsUrl = baseWsUrl.replace('http:', 'ws:').replace('https:', 'wss:');
-        
+
         console.log('[AppNav] Connecting to WebSocket:', wsUrl);
         socket = new WebSocket(wsUrl);
 
@@ -138,13 +137,13 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
             const msg = JSON.parse(event.data);
             if (msg.type === 'notification') {
               fetchCounts();
-              
+
               if (msg.subType === 'swap_request_received') {
                 showToast('New swap request received!', 'info');
               } else if (msg.subType === 'swap_request_sent') {
                 showToast('Swap request sent successfully!', 'success');
               }
-              
+
               window.dispatchEvent(new CustomEvent('new-notification', { detail: msg }));
             }
           } catch (err) {
@@ -206,16 +205,16 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                 </Link>
               )}
 
-              
+
               <div className={styles.profileDropdownWrapper}>
-                <button 
-                  className={styles.avatarBtn} 
+                <button
+                  className={styles.avatarBtn}
                   aria-label="Profile actions"
                   onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
                 >
                   {user?.firstName?.[0] || user?.email?.[0] || 'A'}
                 </button>
-                
+
                 {isMobileProfileOpen && (
                   <>
                     <div className={styles.dropdownOverlay} onClick={() => setIsMobileProfileOpen(false)} />
@@ -268,62 +267,102 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         )}
       </nav>
 
-      {/* -------- DESKTOP: sticky top bar -------- */}
-      <nav className={`${styles.desktopNav} ${isApp ? styles.desktopAppNav : styles.desktopPublicNav}`} aria-label="Desktop navigation">
-        <div className={styles.desktopLeft}>
-          <Link href="/" className={styles.logo}>
-            <div className={styles.logoShield} />
-            SkillNet
-          </Link>
-          <div className={styles.desktopLinks}>
-            {currentItems.map(({ href, label, icon: Icon, type }: any) => (
-              <Link
-                key={href}
-                href={href}
-                className={`${styles.desktopLink} ${active === href || (href !== '/' && href !== '/dashboard' && active.startsWith(href)) ? styles.active : ''}`}
-              >
-                <span className={styles.desktopLinkIcon}>
-                  <Icon size={18} strokeWidth={2.5} />
-                  {type && renderBadge(type)}
-                </span>
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
+      {/* -------- DESKTOP -------- */}
+      {isApp ? (
+        /* -------- DESKTOP: App Sidebar (Vertical) -------- */
+        <aside className={`${styles.desktopNav} ${styles.desktopAppNav}`} aria-label="App sidebar navigation">
+          <div className="reveal stagger">
+            <div className={styles.hubLabel}>Professional Ledger</div>
+            <div className={styles.hubTier}>
+              {user?.subscriptionTier ? user.subscriptionTier.charAt(0).toUpperCase() + user.subscriptionTier.slice(1) : 'Essential'} Tier
+              {user?.subscriptionTier !== 'professional' ? (
+                <Link href="/subscriptions" className={styles.freeBadge}>FREE</Link>
+              ) : (
+                <span className={styles.proBadge}>PRO</span>
+              )}
+            </div>
 
-        {isApp && pathname === '/marketplace' && (
-          <div className={styles.desktopCenter}>
-            <div className={styles.searchBar}>
-              <Search size={16} strokeWidth={2.5} color="#94a3b8" />
-              <input type="text" placeholder="Search skills, partners…" />
+            <div className={styles.sideLinks}>
+              {currentItems.map(({ href, label, icon: Icon, type }: any) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`${styles.sideLink} ${active === href || (href !== '/' && href !== '/dashboard' && active.startsWith(href))
+                      ? styles.active
+                      : ''
+                    }`}
+                >
+                  <Icon size={18} strokeWidth={2.5} />
+                  <span>{label}</span>
+                  {type && renderBadge(type)}
+                </Link>
+              ))}
             </div>
           </div>
-        )}
 
-        <div className={styles.desktopRight}>
-          {(isApp || user) ? (
-            <>
-              {isApp && (
-                <Link href="/chats" className={styles.notifBtn} aria-label="Messages">
-                  <MessageSquare size={18} strokeWidth={2.5} />
+          <div className={`${styles.sidebarBottom} reveal`} style={{ animationDelay: '0.4s' }}>
+            <div className={styles.upgradeBox}>
+              <div className={styles.upgradeTitle}>PREMIUM NETWORK</div>
+              <div className={styles.upgradeText}>Unlock the Titan's exchange and C-level mentoring.</div>
+              <Link href="/subscriptions">
+                <button className={`${styles.upgradeBtn} click-scale`}>View Plans</button>
+              </Link>
+            </div>
+
+            <Link href="/settings" className={styles.sideLink}>
+              <Settings size={18} strokeWidth={2.5} /> <span>Settings</span>
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className={styles.sideLink}
+              style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}
+            >
+              <LogOut size={18} strokeWidth={2.5} /> <span>Logout</span>
+            </button>
+          </div>
+        </aside>
+      ) : (
+        /* -------- DESKTOP: Public Top Nav (Horizontal) -------- */
+        <nav className={`${styles.desktopNav} ${styles.desktopPublicNav}`} aria-label="Public desktop navigation">
+          <div className={styles.desktopLeft}>
+            <Link href="/" className={styles.logo}>
+              <div className={styles.logoShield} />
+              SkillNet
+            </Link>
+            <div className={styles.desktopLinks}>
+              {currentItems.map(({ href, label, icon: Icon }: any) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`${styles.desktopLink} ${active === href || (href !== '/' && active.startsWith(href)) ? styles.active : ''}`}
+                >
+                  <span className={styles.desktopLinkIcon}>
+                    <Icon size={18} strokeWidth={2.5} />
+                  </span>
+                  {label}
                 </Link>
-              )}
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.desktopRight}>
+            {user ? (
               <div className={styles.profileDropdownWrapper}>
-                <button 
-                  className={styles.avatarDesktop} 
+                <button
+                  className={styles.avatarDesktop}
                   aria-label="View Profile"
                   onClick={() => setIsDesktopProfileOpen(!isDesktopProfileOpen)}
                 >
-                  {user?.firstName?.[0] || user?.email?.[0] || 'A'}
+                  {user.firstName?.[0] || user.email?.[0] || 'A'}
                 </button>
-                
+
                 {isDesktopProfileOpen && (
                   <>
                     <div className={styles.dropdownOverlay} onClick={() => setIsDesktopProfileOpen(false)} />
                     <div className={`${styles.profileDropdown} ${styles.desktopDropdown}`}>
                       <div className={styles.dropdownHeader}>
-                        <p className="font-bold">{user?.firstName || user?.email || 'Account'}</p>
+                        <p className="font-bold">{user.firstName || user.email || 'Account'}</p>
                       </div>
                       <Link href="/profile" className={styles.dropdownItem} onClick={() => setIsDesktopProfileOpen(false)}>
                         <User size={18} /> Profile
@@ -338,15 +377,15 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                   </>
                 )}
               </div>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className={styles.desktopLink}>Login</Link>
-              <Link href="/join" className={styles.postBtn}>Join Network</Link>
-            </>
-          )}
-        </div>
-      </nav>
+            ) : (
+              <>
+                <Link href="/login" className={styles.desktopLink}>Login</Link>
+                <Link href="/join" className={styles.postBtn}>Join Network</Link>
+              </>
+            )}
+          </div>
+        </nav>
+      )}
     </>
   );
 }

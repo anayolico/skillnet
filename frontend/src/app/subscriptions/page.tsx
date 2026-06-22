@@ -11,9 +11,9 @@ export default function Subscriptions() {
       price: '0',
       description: 'Ideal for those just starting their professional knowledge exchange journey.',
       features: [
-        '3 Skill Swaps per month',
+        '1 swap request',
+        'Messaging only who you swap with',
         'Access to Public Marketplace',
-        'Basic Skill Certification',
         'Standard Search Visibility',
         'Email Support'
       ],
@@ -25,30 +25,14 @@ export default function Subscriptions() {
       price: '49',
       description: 'Designed for architects and executives scaling their technical mastery.',
       features: [
-        'Unlimited Skill Swaps',
+        'Unlimited swap requests',
+        'Unlimited messaging',
         'Priority Partner Matching',
         'Verified "Expert" Badge',
-        'Access to Industry Labs',
-        '24/7 Priority Support',
-        'Personal Learning Ledger'
+        '24/7 Priority Support'
       ],
       cta: 'Go Professional',
       featured: true
-    },
-    {
-      name: 'Architect / Titans',
-      price: '149',
-      description: 'The elite tier for industry leaders swapping high-stakes expertise.',
-      features: [
-        ' Titans Private Network Access',
-        'C-Level Mentor Matching',
-        'Architectural Board Mediation',
-        'Custom Learning Tracks',
-        'Internal Team Swaps',
-        'White-glove Concierge'
-      ],
-      cta: 'Join The Elite',
-      featured: false
     }
   ];
 

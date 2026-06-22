@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+// Trigger restart 4
 import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -544,6 +545,15 @@ app.post('/api/marketplace/swap-requests', requireAuth, async (req: Request, res
   try {
     const caller = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
     if (!caller) return res.status(404).json({ error: 'Caller not found' });
+
+    if (caller.subscriptionTier === 'essential') {
+      const requestsSentCount = await prisma.swapRequest.count({
+        where: { requesterId: caller.id }
+      });
+      if (requestsSentCount >= 1) {
+        return res.status(403).json({ error: 'Essential plan limits you to 1 swap request. Upgrade to Professional for unlimited requests.' });
+      }
+    }
 
     const { listingId, message } = req.body;
     if (!listingId) return res.status(400).json({ error: 'Listing ID is required' });
