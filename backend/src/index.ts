@@ -129,6 +129,46 @@ app.use((req, res, next) => {
 });
 
 /**
+ * @api {get} /health Liveness probe
+ */
+app.get('/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+app.get('/api/health', (req: Request, res: Response) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+/**
+ * @api {get} /ready Readiness probe (checks DB)
+ */
+app.get('/ready', async (req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({
+      ready: true,
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({
+      ready: false,
+      database: 'disconnected',
+      error: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
  * @api {get} /api/db-check Check database connection status
  */
 app.get('/api/db-check', async (req: Request, res: Response) => {
