@@ -1,3 +1,4 @@
+import { getApiUrl, getWsUrl } from '../../utils/config';
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -33,7 +34,7 @@ export default function Chats() {
       const token = getToken();
       if (!token) return;
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = getApiUrl();
       
       // Get me
       const meRes = await fetch(`${apiUrl}/api/me`, {
@@ -74,7 +75,7 @@ export default function Chats() {
     try {
       const token = getToken();
       if (!token) return;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/api/swaps/${swapId}/messages`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -92,7 +93,7 @@ export default function Chats() {
     try {
       const token = getToken();
       if (!token) return;
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = getApiUrl();
       await fetch(`${apiUrl}/api/notifications/mark-messages-read/${swapId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -109,7 +110,7 @@ export default function Chats() {
       fetchMessages(selectedSwap.id);
 
       // Setup WebSocket
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3001';
+      const wsUrl = getWsUrl();
       const socket = new WebSocket(wsUrl);
       ws.current = socket;
 

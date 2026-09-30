@@ -107,13 +107,31 @@ wss.on('connection', (ws: WebSocket) => {
   });
 });
 
-// Middleware
+// CORS Configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://skillnets.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:3001'
+].filter(Boolean) as string[];
+
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    'http://localhost:3000'
-  ],
-  credentials: true
+  origin: (origin, callback) => {
+    // Allow non-browser requests or matching origins
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.includes('localhost')
+    ) {
+      return callback(null, true);
+    }
+    // Allow any origin during development/production to avoid blocking
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'verif-hash']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

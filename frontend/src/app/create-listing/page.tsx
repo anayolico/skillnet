@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import AppNav from '../../../components/AppNav';
 import styles from './create-listing.module.css';
 import { DEFAULT_SKILLS } from '../../utils/skills';
+import { getApiUrl } from '../../utils/config';
 
 export default function CreateListing() {
   const router = useRouter();
@@ -45,7 +46,8 @@ export default function CreateListing() {
         .map(s => s.trim())
         .filter(s => s);
 
-      const res = await fetch('http://localhost:3001/api/marketplace/listings', {
+      const apiUrl = getApiUrl();
+      const res = await fetch(`${apiUrl}/api/marketplace/listings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

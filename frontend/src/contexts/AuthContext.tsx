@@ -1,8 +1,9 @@
+import { getApiUrl } from '../utils/config';
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = getApiUrl();
 
 interface User {
   id: string;
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = async (authToken: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/me`, {
+      const res = await fetch(`${getApiUrl()}/api/me`, {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       if (res.ok) {
@@ -73,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/login`, {
+      const res = await fetch(`${getApiUrl()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -98,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, firstName: string, lastName: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/register`, {
+      const res = await fetch(`${getApiUrl()}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, firstName, lastName })
@@ -118,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const googleLogin = async (code: string) => {
     try {
-      const res = await fetch(`${API_URL}/api/auth/google`, {
+      const res = await fetch(`${getApiUrl()}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })

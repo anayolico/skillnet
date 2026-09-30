@@ -1,3 +1,4 @@
+import { getApiUrl } from '../../utils/config';
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -54,7 +55,7 @@ export default function Onboarding() {
     try {
       if (!user) throw new Error("No active session found.");
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = getApiUrl();
       const token = getToken();
       const response = await fetch(`${apiUrl}/api/onboarding`, {
         method: 'POST',

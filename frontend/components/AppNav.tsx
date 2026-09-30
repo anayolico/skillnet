@@ -1,3 +1,4 @@
+import { getApiUrl, getWsUrl } from '@/src/utils/config';
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -63,13 +64,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      const getApiUrl = () => {
-        if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-        if (typeof window !== 'undefined') {
-          return `${window.location.protocol}//${window.location.hostname}:3001`;
-        }
-        return 'http://localhost:3001';
-      };
+      
 
       const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/api/notifications/counts`, {
@@ -89,13 +84,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const getApiUrl = () => {
-        if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL;
-        if (typeof window !== 'undefined') {
-          return `${window.location.protocol}//${window.location.hostname}:3001`;
-        }
-        return 'http://localhost:3001';
-      };
+      
 
       const apiUrl = getApiUrl();
       await fetch(`${apiUrl}/api/notifications/mark-swaps-viewed`, {
@@ -119,15 +108,15 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
         if (!token) return;
 
         // Need our DB userId
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const apiUrl = getApiUrl();
         const meRes = await fetch(`${apiUrl}/api/me`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const meData = await meRes.json();
         if (!meData.success) return;
 
-        const baseWsUrl = process.env.NEXT_PUBLIC_WS_URL || (typeof window !== 'undefined' ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:3001` : 'ws://localhost:3001');
-        const wsUrl = baseWsUrl.replace('http:', 'ws:').replace('https:', 'wss:');
+        const baseWsUrl = getWsUrl();
+        const wsUrl = getWsUrl();
 
         console.log('[AppNav] Connecting to WebSocket:', wsUrl);
         socket = new WebSocket(wsUrl);

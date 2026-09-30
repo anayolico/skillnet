@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
-import Script from 'next/script';
 import { Shield, Linkedin, Eye, EyeOff } from 'lucide-react';
 import styles from '../auth.module.css';
 
@@ -43,7 +42,6 @@ export default function Login() {
       router.push('/dashboard');
     }
   };
-
 
   return (
     <div className={styles.pageWrapper}>

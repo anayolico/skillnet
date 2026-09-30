@@ -1,3 +1,4 @@
+import { getApiUrl } from '@/src/utils/config';
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -22,7 +23,7 @@ export default function Escrow() {
       const token = getToken();
       if (!token) return;
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/api/marketplace/swap-requests`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -62,7 +63,7 @@ export default function Escrow() {
       const token = getToken();
       if (!token) return;
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/api/marketplace/swap-requests/${requestId}`, {
         method: 'PUT',
         headers: {

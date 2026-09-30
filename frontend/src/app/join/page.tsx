@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { getApiUrl } from '@/src/utils/config';
 import { Shield, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
 import styles from '../auth.module.css';
 
@@ -25,7 +26,7 @@ export default function Join() {
     const lastName = lastNames.join(' ');
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const apiUrl = getApiUrl();
       const regRes = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -53,7 +54,6 @@ export default function Join() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className={styles.pageWrapper}>

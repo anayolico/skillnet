@@ -1,3 +1,4 @@
+import { getApiUrl } from './config';
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -41,7 +42,7 @@ export function useMarketplace() {
   const [category, setCategory] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const apiUrl = getApiUrl();
 
   const getAccessToken = () => {
     const token = getToken();
@@ -53,7 +54,7 @@ export function useMarketplace() {
   const fetchStats = useCallback(async () => {
     try {
       const token = await getAccessToken();
-      const res = await fetch(`${apiUrl}/api/marketplace/stats`, {
+      const res = await fetch(`${getApiUrl()}/api/marketplace/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch stats');
@@ -79,7 +80,7 @@ export function useMarketplace() {
       if (searchQuery) queryParams.append('search', searchQuery);
       if (category) queryParams.append('category', category);
 
-      const res = await fetch(`${apiUrl}/api/marketplace/listings?${queryParams}`, {
+      const res = await fetch(`${getApiUrl()}/api/marketplace/listings?${queryParams}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -120,7 +121,7 @@ export function useMarketplace() {
   const requestSwap = async (listingId: string, message: string) => {
     try {
       const token = await getAccessToken();
-      const res = await fetch(`${apiUrl}/api/marketplace/swap-requests`, {
+      const res = await fetch(`${getApiUrl()}/api/marketplace/swap-requests`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

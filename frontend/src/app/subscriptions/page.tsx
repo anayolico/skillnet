@@ -1,3 +1,4 @@
+import { getApiUrl } from '@/src/utils/config';
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
@@ -42,7 +43,7 @@ export default function Subscriptions() {
   const { user, getToken } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const API_URL = getApiUrl();
 
   const config = {
     public_key: process.env.NEXT_PUBLIC_FLW_PUBLIC_KEY || 'FLWPUBK_TEST-placeholder',

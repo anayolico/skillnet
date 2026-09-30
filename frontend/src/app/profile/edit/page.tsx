@@ -1,3 +1,4 @@
+import { getApiUrl } from '@/src/utils/config';
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -51,7 +52,7 @@ export default function EditProfile() {
           return;
         }
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const apiUrl = getApiUrl();
         const res = await fetch(`${apiUrl}/api/profile`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -100,7 +101,7 @@ export default function EditProfile() {
       const token = getToken();
       if (!token) throw new Error("Authentication required.");
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const apiUrl = getApiUrl();
       const payload = {
         firstName,
         lastName,
