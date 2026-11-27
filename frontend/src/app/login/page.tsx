@@ -3,44 +3,42 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
+import { startGoogleOAuth } from '@/src/utils/googleOAuth';
 import { Shield, Linkedin, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import BrandLogo from '../../../components/BrandLogo';
 import styles from '../auth.module.css';
 
 export default function Login() {
   const router = useRouter();
-  const { login, googleLogin } = useAuth();
+  const { login } = useAuth();
+  const { showToast } = useToast();
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
-    const result = await login(email, password);
+    const result = await login(email.trim().toLowerCase(), password);
 
     if (!result.success) {
-      setError(result.error || 'Invalid email or password');
+      showToast(result.error || 'Invalid email or password', 'error');
       setLoading(false);
     } else {
-      router.push('/dashboard');
+      router.push(result.user?.isOnboarded ? '/dashboard' : '/onboarding');
     }
   };
 
-  const handleGoogleLogin = async (code: string) => {
+  const handleGoogleStart = async () => {
     setGoogleLoading(true);
-    setError(null);
-    const result = await googleLogin(code);
-    if (!result.success) {
-      setError(result.error || 'Google login failed');
+    const result = await startGoogleOAuth();
+    if (!result.ok) {
+      showToast(result.error, 'error');
       setGoogleLoading(false);
-    } else {
-      router.push('/dashboard');
     }
   };
 
@@ -83,8 +81,6 @@ export default function Login() {
           <h1 className={styles.title}>Welcome back.</h1>
 
           <form onSubmit={handleSubmit} className={styles.form}>
-            {error && <div className={styles.errorAlert} role="alert">{error}</div>}
-
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
                 <label htmlFor="login-email" className={styles.label}>Email address</label>
@@ -146,17 +142,7 @@ export default function Login() {
             <button
               type="button"
               className={styles.ssoBtn}
-              onClick={() => {
-                const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-                if (!clientId) {
-                  setError('Google login not configured');
-                  return;
-                }
-                const oauth2Url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-                  window.location.origin + '/api/auth/google/callback'
-                )}&response_type=code&scope=openid%20email%20profile`;
-                window.location.href = oauth2Url;
-              }}
+              onClick={handleGoogleStart}
               disabled={googleLoading}
             >
               <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
@@ -182,7 +168,7 @@ export default function Login() {
             <button
               type="button"
               className={styles.ssoBtn}
-              onClick={() => alert('Social login coming soon')}
+              onClick={() => showToast('LinkedIn login is coming soon.', 'info')}
             >
               <Linkedin size={18} color="#0A66C2" />
               LinkedIn

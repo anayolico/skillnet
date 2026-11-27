@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import AppNav from '../../../components/AppNav';
 import styles from './create-listing.module.css';
 import { DEFAULT_SKILLS } from '../../utils/skills';
@@ -11,6 +12,7 @@ import { getApiUrl } from '../../utils/config';
 export default function CreateListing() {
   const router = useRouter();
   const { getToken } = useAuth();
+  const { showToast } = useToast();
   
   const [formData, setFormData] = useState({
     title: '',
@@ -22,7 +24,6 @@ export default function CreateListing() {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -35,7 +36,6 @@ export default function CreateListing() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError('');
 
     try {
       const token = getToken();
@@ -69,9 +69,10 @@ export default function CreateListing() {
         throw new Error(data.error || 'Failed to create listing');
       }
 
+      showToast('Skill offer published to the marketplace.', 'success');
       router.push('/marketplace');
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'An error occurred', 'error');
       setIsSubmitting(false);
     }
   };
@@ -87,7 +88,6 @@ export default function CreateListing() {
         </div>
 
         <div className={styles.formCard}>
-          {error && <div style={{ color: 'red', marginBottom: '1rem', fontWeight: 600 }}>{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
               <label className={styles.label}>Listing Title</label>

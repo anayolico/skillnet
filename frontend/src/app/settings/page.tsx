@@ -169,16 +169,16 @@ export default function Settings() {
       });
 
       if (res.ok) {
-        alert('Your SkillNet account has been permanently deleted.');
+        showToast('Your SkillNet account has been permanently deleted.', 'success');
         logout();
         router.push('/join');
       } else {
-        alert('Failed to delete account. Please try again.');
+        showToast('Failed to delete account. Please try again.', 'error');
         setDeleting(false);
       }
     } catch (err) {
       console.error(err);
-      alert('Error deleting account.');
+      showToast('Error deleting account.', 'error');
       setDeleting(false);
     }
   };
@@ -346,27 +346,30 @@ export default function Settings() {
         </div>
       </main>
 
-      {/* Professional Multi-step Delete Modal */}
+      {/* Multi-step Delete Modal */}
       {isDeleteModalOpen && (
         <div className={styles.modalOverlay} onClick={closeDeleteModal}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+          <div
+            className={`${styles.modalCard} ${deleteStep === 2 ? styles.modalCardCompact : ''}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className={styles.modalTitleRow}>
                 <h3 className={styles.modalTitle}>
-                  <AlertTriangle size={24} /> Delete Account
+                  <AlertTriangle size={20} /> Delete Account
                 </h3>
                 <button
+                  type="button"
                   onClick={closeDeleteModal}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                  className={styles.modalCloseBtn}
+                  aria-label="Close modal"
                 >
-                  <X size={20} />
+                  <X size={19} />
                 </button>
               </div>
-              <p className={styles.modalSubtitle}>
-                {deleteStep === 1
-                  ? 'We are sorry to see you go. Please tell us why you are leaving so we can improve SkillNet.'
-                  : 'Final verification: Confirm your identity to permanently erase your profile and records.'}
-              </p>
+              {deleteStep === 2 && (
+                <p className={styles.modalSubtitle}>Confirm your identity.</p>
+              )}
             </div>
 
             {deleteStep === 1 ? (
@@ -383,20 +386,17 @@ export default function Settings() {
                         value={reason}
                         checked={selectedReason === reason}
                         onChange={() => setSelectedReason(reason)}
-                        style={{ marginRight: '0.75rem' }}
+                        className={styles.reasonRadio}
                       />
-                      {reason}
+                      <span>{reason}</span>
                     </label>
                   ))}
                 </div>
 
-                <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
-                  <label className={styles.label} style={{ fontSize: '0.8rem', color: '#64748b' }}>
-                    Additional feedback (optional)
-                  </label>
+                <div className={styles.feedbackGroup}>
+                  <label className={styles.feedbackLabel}>Additional feedback (optional)</label>
                   <textarea
-                    className={styles.input}
-                    style={{ minHeight: '70px', padding: '0.75rem' }}
+                    className={`${styles.input} ${styles.feedbackTextarea}`}
                     placeholder="Anything we could have done better?"
                     value={feedbackNote}
                     onChange={(e) => setFeedbackNote(e.target.value)}
@@ -404,10 +404,11 @@ export default function Settings() {
                 </div>
 
                 <div className={styles.modalActions}>
-                  <button className={styles.cancelModalBtn} onClick={closeDeleteModal}>
+                  <button type="button" className={styles.cancelModalBtn} onClick={closeDeleteModal}>
                     Keep My Account
                   </button>
                   <button
+                    type="button"
                     className={styles.deleteDangerBtn}
                     disabled={!selectedReason}
                     onClick={() => setDeleteStep(2)}
@@ -420,12 +421,21 @@ export default function Settings() {
               <div>
                 <div className={styles.confirmBox}>
                   <p className={styles.confirmNotice}>
-                    To prevent accidental deletions, please type your full name <strong>{firstName} {lastName}</strong> or your email <strong>{email}</strong> below:
+                    {`${firstName} ${lastName}`.trim() ? (
+                      <>
+                        Type <strong>{`${firstName} ${lastName}`.trim()}</strong> or{' '}
+                        <strong>{email}</strong> to confirm deletion:
+                      </>
+                    ) : (
+                      <>
+                        Type <strong>{email}</strong> to confirm deletion:
+                      </>
+                    )}
                   </p>
                   <input
                     type="text"
                     className={styles.input}
-                    placeholder={`Type "${email || `${firstName} ${lastName}`}"`}
+                    placeholder={`Type "${email || `${firstName} ${lastName}`.trim()}"`}
                     value={confirmInput}
                     onChange={(e) => setConfirmInput(e.target.value)}
                     autoFocus
@@ -434,6 +444,7 @@ export default function Settings() {
 
                 <div className={styles.modalActions}>
                   <button
+                    type="button"
                     className={styles.cancelModalBtn}
                     onClick={() => setDeleteStep(1)}
                     disabled={deleting}
@@ -441,11 +452,12 @@ export default function Settings() {
                     ← Back
                   </button>
                   <button
+                    type="button"
                     className={styles.deleteDangerBtn}
                     disabled={!isIdentityVerified || deleting}
                     onClick={handleExecuteDelete}
                   >
-                    {deleting ? 'Deleting Account...' : 'Permanently Delete Account'}
+                    {deleting ? 'Deleting...' : 'Permanently Delete'}
                   </button>
                 </div>
               </div>

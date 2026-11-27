@@ -13,6 +13,7 @@ import {
   LogOut,
   Settings,
   PlusSquare,
+  CreditCard,
   type LucideIcon,
 } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
@@ -37,6 +38,11 @@ const appNavItems: NavItem[] = [
   { href: '/create-listing', label: 'Post Skill Offer', mobileLabel: 'Post', icon: PlusSquare },
 ];
 
+const desktopAppNavItems: NavItem[] = [
+  ...appNavItems,
+  { href: '/subscriptions', label: 'Subscription', mobileLabel: 'Plan', icon: CreditCard },
+];
+
 const publicNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', mobileLabel: 'Home', icon: LayoutDashboard },
   { href: '/marketplace', label: 'Marketplace', mobileLabel: 'Market', icon: ArrowLeftRight },
@@ -59,6 +65,7 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
   const active = activePage ?? pathname;
   const isApp = mode === 'app';
   const currentItems = isApp ? appNavItems : publicNavItems;
+  const isPro = user?.subscriptionTier === 'professional';
 
   const fetchCounts = async () => {
     try {
@@ -219,6 +226,9 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                     <div className={styles.profileDropdown}>
                       <div className={styles.dropdownHeader}>
                         <p>{user?.firstName || user?.email || 'Account'}</p>
+                        <span className={styles.dropdownTier}>
+                          {isPro ? 'Professional' : 'Essential · Free'}
+                        </span>
                       </div>
                       <Link
                         href="/profile"
@@ -226,6 +236,13 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                         onClick={() => setIsMobileProfileOpen(false)}
                       >
                         <User size={16} /> Profile
+                      </Link>
+                      <Link
+                        href="/subscriptions"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsMobileProfileOpen(false)}
+                      >
+                        <CreditCard size={16} /> Subscription
                       </Link>
                       <Link
                         href="/settings"
@@ -298,31 +315,21 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
           className={`${styles.desktopNav} ${styles.desktopAppNav}`}
           aria-label="App sidebar navigation"
         >
-          <div>
-            <Link href="/" className={styles.sidebarBrand} aria-label="SkillNet Home">
-              <BrandLogo variant="dark" size="sm" />
-            </Link>
+          <div className={styles.sidebarTop}>
+            <div className={styles.sidebarHeader}>
+              <Link href="/" className={styles.sidebarBrand} aria-label="SkillNet Home">
+                <BrandLogo variant="dark" size="sm" />
+              </Link>
 
-            <div className={styles.tierPanel}>
-              <div className={styles.hubLabel}>Workspace Tier</div>
-              <div className={styles.hubTier}>
-                <span>
-                  {user?.subscriptionTier
-                    ? user.subscriptionTier.charAt(0).toUpperCase() + user.subscriptionTier.slice(1)
-                    : 'Essential'}
-                </span>
-                {user?.subscriptionTier !== 'professional' ? (
-                  <Link href="/subscriptions" className={styles.freeBadge}>
-                    FREE
-                  </Link>
-                ) : (
-                  <span className={styles.proBadge}>PRO</span>
-                )}
-              </div>
+              <Link href="/subscriptions" className={styles.tierLine}>
+                <span className={`${styles.tierDot} ${isPro ? styles.tierDotPro : ''}`} />
+                <span className={styles.tierName}>{isPro ? 'Professional' : 'Essential'}</span>
+                {!isPro && <span className={styles.tierFreeTag}>Free</span>}
+              </Link>
             </div>
 
             <div className={styles.sideLinks}>
-              {currentItems.map(({ href, label, icon: Icon, type }) => (
+              {desktopAppNavItems.map(({ href, label, icon: Icon, type }) => (
                 <Link
                   key={href}
                   href={href}
@@ -342,18 +349,6 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
           </div>
 
           <div className={styles.sidebarBottom}>
-            {user?.subscriptionTier !== 'professional' && (
-              <div className={styles.upgradeBox}>
-                <div className={styles.upgradeTitle}>PROFESSIONAL TIER</div>
-                <div className={styles.upgradeText}>
-                  Unlock unlimited skill listings, swap requests, and priority discovery.
-                </div>
-                <Link href="/subscriptions" className={styles.upgradeBtn}>
-                  View Plans
-                </Link>
-              </div>
-            )}
-
             <div className={styles.bottomActions}>
               <Link
                 href="/profile"
@@ -427,6 +422,13 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                         onClick={() => setIsDesktopProfileOpen(false)}
                       >
                         <User size={16} /> Profile
+                      </Link>
+                      <Link
+                        href="/subscriptions"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsDesktopProfileOpen(false)}
+                      >
+                        <CreditCard size={16} /> Subscription
                       </Link>
                       <Link
                         href="/settings"

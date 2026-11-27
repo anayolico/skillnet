@@ -7,10 +7,12 @@ import { Check, LockKeyhole, Scale, ShieldCheck } from 'lucide-react';
 import AppNav from '../../../components/AppNav';
 import styles from './subscriptions.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { getApiUrl } from '@/src/utils/config';
 
 export default function Subscriptions() {
   const { user, getToken } = useAuth();
+  const { showToast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const API_URL = getApiUrl();
@@ -69,20 +71,23 @@ export default function Subscriptions() {
 
   const handleUpgradeClick = async () => {
     if (!user) {
-      alert("Please log in first to upgrade.");
+      showToast('Please log in first to upgrade.', 'info');
       router.push('/login');
       return;
     }
     if (isPro) {
-      alert("You are already on the Professional tier!");
+      showToast('You are already on the Professional tier.', 'info');
       return;
     }
 
     setIsProcessing(true);
     try {
       // Dynamically load Flutterwave script
-      const loadFlutterwave = () => new Promise((resolve) => {
-        if ((window as any).FlutterwaveCheckout) {
+      const win = window as Window & {
+        FlutterwaveCheckout?: (options: Record<string, unknown>) => void;
+      };
+      const loadFlutterwave = () => new Promise<boolean>((resolve) => {
+        if (win.FlutterwaveCheckout) {
           resolve(true);
         } else {
           const script = document.createElement('script');
@@ -96,7 +101,7 @@ export default function Subscriptions() {
 
       const loaded = await loadFlutterwave();
       if (!loaded) {
-        alert("Failed to load payment gateway. Please check your network connection.");
+        showToast('Failed to load payment gateway. Please check your network connection.', 'error');
         setIsProcessing(false);
         return;
       }
@@ -110,18 +115,18 @@ export default function Subscriptions() {
       const data = await res.json();
       
       if (!data.success) {
-        alert(data.error || "Failed to initiate payment");
+        showToast(data.error || 'Failed to initiate payment', 'error');
         setIsProcessing(false);
         return;
       }
 
       // Launch Flutterwave checkout with the real tx_ref
-      const FlutterwaveCheckout = (window as any).FlutterwaveCheckout;
+      const FlutterwaveCheckout = win.FlutterwaveCheckout;
       if (FlutterwaveCheckout) {
         FlutterwaveCheckout({
           ...config,
           tx_ref: data.txRef,
-          callback: async (response: any) => {
+          callback: async (response: { transaction_id?: string | number; id?: string | number }) => {
              console.log("Payment response:", response);
              
              // Verify transaction with backend immediately
@@ -141,21 +146,21 @@ export default function Subscriptions() {
                console.error("Verification error:", e);
              }
 
-             alert("Payment successful! You are now upgraded to the Professional tier.");
+             showToast('Payment successful! You are now upgraded to Professional.', 'success');
              setIsProcessing(false);
-             window.location.href = '/dashboard';
+             router.push('/dashboard');
           },
           onclose: () => {
              setIsProcessing(false);
           }
         });
       } else {
-        alert("Payment gateway is still loading. Please try again.");
+        showToast('Payment gateway is still loading. Please try again.', 'info');
         setIsProcessing(false);
       }
     } catch (e) {
       console.error(e);
-      alert("Network error. Please try again.");
+      showToast('Network error. Please try again.', 'error');
       setIsProcessing(false);
     }
   };

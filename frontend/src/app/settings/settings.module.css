@@ -182,63 +182,102 @@ input:checked + .slider:before {
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(10, 31, 60, 0.6);
+  background-color: rgba(10, 31, 60, 0.58);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  padding: 1.25rem;
+  padding: 1.5rem;
 }
 
 .modalCard {
   background: #ffffff;
   border-radius: 16px;
-  max-width: 520px;
+  max-width: 640px;
   width: 100%;
-  padding: 2rem;
+  max-height: calc(100dvh - 3rem);
+  overflow-y: auto;
+  padding: 1.45rem 1.65rem;
   box-shadow: 0 24px 48px -12px rgba(10, 31, 60, 0.28);
 }
 
+.modalCardCompact {
+  max-width: 500px;
+}
+
 .modalHeader {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.modalTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .modalTitle {
   font-family: var(--font-display), sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: #b91c1c;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
+}
+
+.modalCloseBtn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.modalCloseBtn:hover {
+  background: #f1f5f9;
+  color: #0a1f3c;
 }
 
 .modalSubtitle {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: #475569;
-  margin-top: 0.45rem;
-  line-height: 1.55;
+  margin-top: 0.3rem;
+  line-height: 1.45;
 }
 
 .surveyList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  margin: 1.25rem 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0.9rem 0;
 }
 
 .reasonOption {
   display: flex;
   align-items: center;
-  padding: 0.78rem 1rem;
+  gap: 0.55rem;
+  padding: 0.62rem 0.8rem;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 0.92rem;
+  font-size: 0.85rem;
+  line-height: 1.3;
   font-weight: 500;
   background: #f7f9fc;
   color: #0f172a;
+  transition: border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.reasonRadio {
+  flex-shrink: 0;
+  accent-color: #dc2626;
 }
 
 .reasonOption:hover {
@@ -252,19 +291,39 @@ input:checked + .slider:before {
   font-weight: 600;
 }
 
+.feedbackGroup {
+  margin-top: 0.85rem;
+}
+
+.feedbackLabel {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.feedbackTextarea {
+  min-height: 58px;
+  padding: 0.62rem 0.85rem;
+  font-size: 0.88rem;
+  resize: vertical;
+}
+
 .confirmBox {
   background: #f7f9fc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 1.25rem;
-  margin: 1.25rem 0;
+  padding: 1rem 1.1rem;
+  margin: 0.85rem 0;
 }
 
 .confirmNotice {
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   color: #475569;
-  line-height: 1.55;
-  margin-bottom: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+  word-break: break-word;
 }
 
 .confirmNotice strong {
@@ -274,30 +333,37 @@ input:checked + .slider:before {
 .modalActions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: 0.65rem;
+  margin-top: 1.1rem;
 }
 
 .cancelModalBtn {
   background: #eef2f7;
   color: #334155;
   border: none;
-  padding: 0.72rem 1.25rem;
+  padding: 0.65rem 1.1rem;
   border-radius: 10px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   cursor: pointer;
+  white-space: nowrap;
+}
+
+.cancelModalBtn:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #0a1f3c;
 }
 
 .deleteDangerBtn {
   background: #dc2626;
   color: #ffffff;
   border: none;
-  padding: 0.72rem 1.4rem;
+  padding: 0.65rem 1.25rem;
   border-radius: 10px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.86rem;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .deleteDangerBtn:hover:not(:disabled) {
@@ -315,8 +381,7 @@ input:checked + .slider:before {
     padding-top: 1.75rem;
   }
 
-  .settingsCard,
-  .modalCard {
+  .settingsCard {
     padding: 1.5rem;
   }
 }
@@ -331,8 +396,7 @@ input:checked + .slider:before {
     font-size: 1.6rem;
   }
 
-  .settingsCard,
-  .modalCard {
+  .settingsCard {
     padding: 1.2rem 1rem;
   }
 
@@ -344,13 +408,68 @@ input:checked + .slider:before {
     width: 100%;
   }
 
+  .modalOverlay {
+    padding: 0.85rem;
+  }
+
+  .modalCard {
+    max-width: 100%;
+    max-height: calc(100dvh - 1.7rem);
+    padding: 1.1rem 1rem;
+    border-radius: 14px;
+  }
+
+  .modalHeader {
+    margin-bottom: 0.75rem;
+  }
+
+  .modalTitle {
+    font-size: 1.08rem;
+  }
+
+  .surveyList {
+    grid-template-columns: 1fr;
+    gap: 0.42rem;
+    margin: 0.65rem 0;
+  }
+
+  .reasonOption {
+    padding: 0.52rem 0.72rem;
+    font-size: 0.82rem;
+  }
+
+  .feedbackGroup {
+    margin-top: 0.65rem;
+  }
+
+  .feedbackTextarea {
+    min-height: 48px;
+    padding: 0.52rem 0.75rem;
+    font-size: 0.84rem;
+  }
+
+  .confirmBox {
+    padding: 0.85rem 0.9rem;
+    margin: 0.65rem 0;
+  }
+
+  .confirmNotice {
+    font-size: 0.82rem;
+    margin-bottom: 0.6rem;
+  }
+
   .modalActions {
-    flex-direction: column-reverse;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-top: 0.9rem;
   }
 
   .cancelModalBtn,
   .deleteDangerBtn {
     width: 100%;
+    padding: 0.64rem 0.6rem;
+    font-size: 0.8rem;
     text-align: center;
   }
 }

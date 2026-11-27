@@ -6,15 +6,16 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PublicHeader from '../../../components/landing/PublicHeader';
 import styles from './onboarding.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { DEFAULT_SKILLS } from '../../utils/skills';
 import { getApiUrl } from '../../utils/config';
 
 export default function Onboarding() {
   const router = useRouter();
-  const { user, getToken } = useAuth();
+  const { user, getToken, refreshSession } = useAuth();
+  const { showToast } = useToast();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Form State
   const [headline, setHeadline] = useState('');
@@ -51,7 +52,6 @@ export default function Onboarding() {
 
   const handleComplete = async () => {
     setLoading(true);
-    setError(null);
 
     try {
       if (!user) throw new Error("No active session found.");
@@ -79,11 +79,11 @@ export default function Onboarding() {
         throw new Error("Failed to save profile.");
       }
 
-      // Update cookie so middleware knows user is onboarded
-      document.cookie = 'onboarded=true; path=/; max-age=86400; SameSite=Lax';
+      const data = await response.json();
+      await refreshSession(data.token, data.user);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'An unexpected error occurred.', 'error');
       setLoading(false);
     }
   };
@@ -331,8 +331,6 @@ export default function Onboarding() {
                   {loading ? 'Finalizing...' : 'Complete Profile'}
                 </button>
               </div>
-              
-              {error && <div className={styles.errorText}>{error}</div>}
             </div>
           )}
         </div>

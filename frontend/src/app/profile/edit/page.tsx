@@ -3,21 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { User, Sparkles, SlidersHorizontal, CheckCircle2 } from 'lucide-react';
+import { User, Sparkles, SlidersHorizontal } from 'lucide-react';
 import AppNav from '../../../../components/AppNav';
 import styles from './edit.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { DEFAULT_SKILLS } from '../../../utils/skills';
 import { getApiUrl } from '@/src/utils/config';
 
 export default function EditProfile() {
   const router = useRouter();
   const { user, getToken } = useAuth();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'profile' | 'skills' | 'preferences'>('profile');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Form State
   const [firstName, setFirstName] = useState('');
@@ -77,13 +77,13 @@ export default function EditProfile() {
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
-        setError('Failed to load profile data.');
+        showToast('Failed to load profile data.', 'error');
       } finally {
         setLoading(false);
       }
     }
     fetchProfile();
-  }, []);
+  }, [getToken, showToast]);
 
   const toggleSkill = (skill: string, type: 'offered' | 'sought') => {
     if (type === 'offered') {
@@ -96,8 +96,6 @@ export default function EditProfile() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setSuccess(false);
-    setError(null);
 
     try {
       const token = getToken();
@@ -126,10 +124,9 @@ export default function EditProfile() {
 
       if (!res.ok) throw new Error("Failed to update profile.");
 
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message);
+      showToast('Profile updated successfully.', 'success');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Failed to update profile.', 'error');
     } finally {
       setSaving(false);
     }
@@ -157,13 +154,6 @@ export default function EditProfile() {
           </div>
           <Link href="/profile" className={styles.cancelBtn}>View Public Profile</Link>
         </div>
-
-        {success && (
-          <div className={styles.successMsg}>
-            <CheckCircle2 size={16} /> Profile updated successfully.
-          </div>
-        )}
-        {error && <div className={styles.errorText} style={{ color: '#b91c1c', marginBottom: '1rem' }}>{error}</div>}
 
         <div className={styles.mainLayout}>
           <aside className={styles.sidebar}>

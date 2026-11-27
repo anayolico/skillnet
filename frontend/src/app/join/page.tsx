@@ -3,7 +3,9 @@ import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { useToast } from '@/components/Toast';
 import { getApiUrl } from '@/src/utils/config';
+import { startGoogleOAuth } from '@/src/utils/googleOAuth';
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Linkedin } from 'lucide-react';
 import BrandLogo from '../../../components/BrandLogo';
 import styles from '../auth.module.css';
@@ -11,62 +13,64 @@ import styles from '../auth.module.css';
 export default function Join() {
   const router = useRouter();
   const { login } = useAuth();
+  const { showToast } = useToast();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
 
-    const [firstName, ...lastNames] = fullName.split(' ');
+    if (password.length < 8) {
+      showToast('Password must be at least 8 characters long.', 'error');
+      return;
+    }
+
+    setLoading(true);
+
+    const [firstName, ...lastNames] = fullName.trim().split(/\s+/);
     const lastName = lastNames.join(' ');
+    const normalizedEmail = email.trim().toLowerCase();
 
     try {
       const apiUrl = getApiUrl();
       const regRes = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, lastName }),
+        body: JSON.stringify({ email: normalizedEmail, password, firstName, lastName }),
       });
 
       if (!regRes.ok) {
         const data = await regRes.json();
-        setError(data.error || 'Registration failed');
+        showToast(data.error || 'Registration failed', 'error');
         setLoading(false);
         return;
       }
 
-      const result = await login(email, password);
+      const result = await login(normalizedEmail, password);
 
       if (!result.success) {
-        setError(result.error || 'Login failed after registration');
+        showToast(result.error || 'Login failed after registration', 'error');
         setLoading(false);
       } else {
         router.push('/onboarding');
       }
     } catch {
-      setError('System error during registration');
+      showToast('System error during registration', 'error');
       setLoading(false);
     }
   };
 
-  const handleGoogleStart = () => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-    if (!clientId) {
-      setError('Google login not configured');
-      return;
-    }
+  const handleGoogleStart = async () => {
     setGoogleLoading(true);
-    const oauth2Url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-      window.location.origin + '/api/auth/google/callback'
-    )}&response_type=code&scope=openid%20email%20profile`;
-    window.location.href = oauth2Url;
+    const result = await startGoogleOAuth();
+    if (!result.ok) {
+      showToast(result.error, 'error');
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -108,8 +112,6 @@ export default function Join() {
           <h1 className={styles.title}>Create your profile.</h1>
 
           <form onSubmit={handleSubmit} className={styles.form}>
-            {error && <div className={styles.errorAlert} role="alert">{error}</div>}
-
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
                 <label htmlFor="join-name" className={styles.label}>Full name</label>
@@ -149,9 +151,11 @@ export default function Join() {
                   id="join-password"
                   type={showPassword ? 'text' : 'password'}
                   className={`${styles.input} ${styles.passwordInput}`}
-                  placeholder="Create a strong password"
+                  placeholder="At least 8 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  minLength={8}
+                  maxLength={72}
                   required
                 />
                 <button
@@ -226,7 +230,7 @@ export default function Join() {
             <button
               type="button"
               className={styles.ssoBtn}
-              onClick={() => alert('Social login coming soon')}
+              onClick={() => showToast('LinkedIn login is coming soon.', 'info')}
             >
               <Linkedin size={18} color="#0A66C2" />
               LinkedIn

@@ -1,8 +1,8 @@
 import express, { Request, Response } from 'express';
-// Trigger restart 4
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import http from 'http';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -13,10 +13,28 @@ dotenv.config();
 
 import { requireAuth, verifySession } from './middleware/auth';
 import prisma from './lib/prisma';
+import {
+  BCRYPT_ROUNDS,
+  DUMMY_PASSWORD_HASH,
+  PUBLIC_USER_SELECT,
+  SAFE_USER_SELECT,
+  createSessionToken,
+  getAuthSecret,
+  normalizeEmail,
+  refreshSessionToken,
+  revokeAllUserSessions,
+  revokeSession,
+  sanitizeName,
+  validateNewPassword,
+} from './lib/auth';
 import swaggerUi from 'swagger-ui-express';
 import * as swaggerDocument from './swagger.json';
 
+// Fail fast on startup if AUTH_SECRET is missing or too weak
+getAuthSecret();
+
 const app = express();
+app.set('trust proxy', 1);
 const port = process.env.PORT || 3001;
 
 // Create HTTP server
@@ -107,34 +125,67 @@ wss.on('connection', (ws: WebSocket) => {
   });
 });
 
-// CORS Configuration
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'https://skillnets.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:3001'
-].filter(Boolean) as string[];
+// Security Headers
+app.use(helmet());
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow non-browser requests or matching origins
-    if (!origin) return callback(null, true);
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith('.vercel.app') ||
-      origin.includes('localhost')
-    ) {
-      return callback(null, true);
-    }
-    // Allow any origin during development/production to avoid blocking
-    return callback(null, true);
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'verif-hash']
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Strict CORS Allowlist
+const normalizedFrontendUrl = process.env.FRONTEND_URL?.replace(/\/+$/, '');
+const allowedOrigins = new Set(
+  [
+    normalizedFrontendUrl,
+    'https://skillnets.vercel.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3001',
+  ].filter(Boolean) as string[]
+);
+
+const allowedGoogleRedirectUris = new Set(
+  [
+    process.env.GOOGLE_REDIRECT_URI,
+    normalizedFrontendUrl ? `${normalizedFrontendUrl}/api/auth/google/callback` : undefined,
+    'https://skillnets.vercel.app/api/auth/google/callback',
+    'http://localhost:3000/api/auth/google/callback',
+    'http://127.0.0.1:3000/api/auth/google/callback',
+  ].filter(Boolean) as string[]
+);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow non-browser / server-to-server requests (webhooks, health checks)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'verif-hash'],
+  })
+);
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+
+// Rate Limiting
+const apiRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please slow down and try again shortly.' },
+});
+
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 25,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts. Please wait 15 minutes and try again.' },
+});
+
+app.use('/api', apiRateLimiter);
 
 // Request logging
 app.use((req, res, next) => {
@@ -209,33 +260,54 @@ app.get('/api/db-check', async (req: Request, res: Response) => {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 /**
- * @api {post} /api/auth/sync Sync frontend user to database
+ * @api {post} /api/auth/register Create a new email/password account
  */
-app.post('/api/auth/register', async (req: Request, res: Response) => {
-  const { email, password, firstName, lastName } = req.body;
+app.post('/api/auth/register', authRateLimiter, async (req: Request, res: Response) => {
+  const email = normalizeEmail(req.body?.email);
+  const passwordCheck = validateNewPassword(req.body?.password);
+  const firstName = sanitizeName(req.body?.firstName);
+  const lastName = sanitizeName(req.body?.lastName);
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+  if (!email) {
+    return res.status(400).json({ error: 'Please enter a valid email address' });
+  }
+
+  if (!passwordCheck.valid) {
+    return res.status(400).json({ error: passwordCheck.error });
   }
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res.status(409).json({
+        error: 'An account with this email already exists. Please log in or continue with Google.',
+      });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(passwordCheck.value, BCRYPT_ROUNDS);
 
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        firstName: firstName || '',
-        lastName: lastName || '',
-      }
+        firstName,
+        lastName,
+      },
+      select: SAFE_USER_SELECT,
     });
 
-    res.status(201).json({ success: true, user: { id: user.id, email: user.email, isOnboarded: user.isOnboarded } });
+    res.status(201).json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        isOnboarded: user.isOnboarded,
+      },
+    });
   } catch (error) {
     console.error('[register] Error:', error);
     res.status(500).json({ error: 'Registration failed' });
@@ -243,31 +315,40 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
 });
 
 /**
- * @api {post} /api/auth/login Login with credentials
+ * @api {post} /api/auth/login Login with email and password
  */
-app.post('/api/auth/login', async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+app.post('/api/auth/login', authRateLimiter, async (req: Request, res: Response) => {
+  const email = normalizeEmail(req.body?.email);
+  const password = req.body?.password;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+  if (!email || typeof password !== 'string' || !password) {
+    return res.status(400).json({ error: 'Valid email and password are required' });
+  }
+
+  if (Buffer.byteLength(password, 'utf8') > 72) {
+    return res.status(401).json({
+      error: 'Invalid email or password. If you signed up with Google, click Continue with Google.',
+    });
   }
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !user.password) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+
+    // Constant-time password comparison prevents timing-based email enumeration
+    const hashToCompare = user?.password || DUMMY_PASSWORD_HASH;
+    const isValid = await bcrypt.compare(password, hashToCompare);
+
+    if (!user || !user.password || !isValid) {
+      return res.status(401).json({
+        error: 'Invalid email or password. If you signed up with Google, click Continue with Google.',
+      });
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.AUTH_SECRET || process.env.SUPABASE_JWT_SECRET || 'fallback-secret',
-      { expiresIn: '7d' }
-    );
+    const { token } = await createSessionToken({
+      id: user.id,
+      email: user.email,
+      isOnboarded: user.isOnboarded,
+    });
 
     res.json({
       success: true,
@@ -279,7 +360,8 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
         lastName: user.lastName,
         imageUrl: user.imageUrl,
         isOnboarded: user.isOnboarded,
-      }
+        subscriptionTier: user.subscriptionTier,
+      },
     });
   } catch (error) {
     console.error('[login] Error:', error);
@@ -288,65 +370,181 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
 });
 
 /**
- * @api {post} /api/auth/google Google OAuth login
+ * @api {post} /api/auth/google Google OAuth 2.0 (with PKCE + verified_email + Account linking)
  */
-app.post('/api/auth/google', async (req: Request, res: Response) => {
-  const { code } = req.body;
+app.post('/api/auth/google', authRateLimiter, async (req: Request, res: Response) => {
+  const { code, codeVerifier, redirectUri } = req.body || {};
 
-  if (!code) {
+  if (typeof code !== 'string' || !code.trim()) {
     return res.status(400).json({ error: 'Authorization code required' });
   }
 
+  const resolvedRedirectUri =
+    typeof redirectUri === 'string' && redirectUri.trim()
+      ? redirectUri.trim()
+      : process.env.GOOGLE_REDIRECT_URI || '';
+
+  if (!resolvedRedirectUri || !allowedGoogleRedirectUris.has(resolvedRedirectUri)) {
+    return res.status(400).json({ error: 'Invalid OAuth redirect URI' });
+  }
+
   try {
-    // Exchange code for tokens
+    // Exchange authorization code for Google OAuth tokens
     const params = new URLSearchParams();
-    params.append('code', code);
+    params.append('code', code.trim());
     params.append('client_id', process.env.GOOGLE_CLIENT_ID || '');
     params.append('client_secret', process.env.GOOGLE_CLIENT_SECRET || '');
-    params.append('redirect_uri', process.env.GOOGLE_REDIRECT_URI || 'postmessage');
+    params.append('redirect_uri', resolvedRedirectUri);
     params.append('grant_type', 'authorization_code');
+    if (typeof codeVerifier === 'string' && codeVerifier.trim()) {
+      params.append('code_verifier', codeVerifier.trim());
+    }
 
     const tokenRes = await axios.post('https://oauth2.googleapis.com/token', params.toString(), {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      timeout: 10000,
     });
 
-    const { access_token } = tokenRes.data;
+    const { access_token, id_token, token_type, scope } = tokenRes.data;
 
-    // Get user info from Google
+    // Fetch authenticated Google profile
     const userRes = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
-      headers: { Authorization: `Bearer ${access_token}` }
+      headers: { Authorization: `Bearer ${access_token}` },
+      timeout: 10000,
     });
 
     const googleUser = userRes.data;
+    const providerAccountId = googleUser?.id ? String(googleUser.id) : null;
+    const normalizedEmail = normalizeEmail(googleUser?.email);
 
-    // Find or create user
-    let user = await prisma.user.findUnique({
-      where: { email: googleUser.email }
-    });
-
-    if (!user) {
-      // Create new user from Google data
-      user = await prisma.user.create({
-        data: {
-          email: googleUser.email,
-          firstName: googleUser.given_name || '',
-          lastName: googleUser.family_name || '',
-          imageUrl: googleUser.picture || null,
-          emailVerified: new Date(),
-          // Generate a random password since it's required
-          password: await bcrypt.hash(Math.random().toString(36), 10)
-        }
+    if (!providerAccountId || !normalizedEmail || googleUser?.verified_email !== true) {
+      return res.status(400).json({
+        error: 'A verified Google email address is required to sign in.',
       });
     }
 
-    // Generate JWT
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.AUTH_SECRET || process.env.SUPABASE_JWT_SECRET || 'fallback-secret',
-      { expiresIn: '7d' }
-    );
+    const googleFirstName = sanitizeName(googleUser.given_name);
+    const googleLastName = sanitizeName(googleUser.family_name);
+    const googlePicture =
+      typeof googleUser.picture === 'string' && googleUser.picture.startsWith('https://')
+        ? googleUser.picture
+        : null;
+
+    // 1. Prefer an existing verified Google Account link
+    const existingAccount = await prisma.account.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider: 'google',
+          providerAccountId,
+        },
+      },
+      include: { user: true },
+    });
+
+    let user = existingAccount?.user || null;
+
+    if (user) {
+      // Backfill missing name/avatar fields without overwriting custom user edits
+      const updates: Record<string, any> = {};
+      if (!user.firstName && googleFirstName) updates.firstName = googleFirstName;
+      if (!user.lastName && googleLastName) updates.lastName = googleLastName;
+      if (!user.imageUrl && googlePicture) updates.imageUrl = googlePicture;
+      if (!user.emailVerified) updates.emailVerified = new Date();
+
+      if (Object.keys(updates).length > 0) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: updates,
+        });
+      }
+    } else {
+      // 2. Check for existing account by normalized email
+      const existingByEmail = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      });
+
+      if (!existingByEmail) {
+        // Brand-new Google user: no fake random password; link Account atomically
+        user = await prisma.user.create({
+          data: {
+            email: normalizedEmail,
+            firstName: googleFirstName,
+            lastName: googleLastName,
+            imageUrl: googlePicture,
+            emailVerified: new Date(),
+            password: null,
+            accounts: {
+              create: {
+                type: 'oauth',
+                provider: 'google',
+                providerAccountId,
+                token_type: token_type || null,
+                scope: scope || null,
+                id_token: id_token || null,
+              },
+            },
+          },
+        });
+      } else {
+        // Pre-Account Takeover Defense: if a prior form signup never verified this email,
+        // revoke its unverified password and sessions when the real verified Google owner claims it.
+        const wasUnverifiedPasswordAccount =
+          !existingByEmail.emailVerified && Boolean(existingByEmail.password);
+
+        if (wasUnverifiedPasswordAccount) {
+          await revokeAllUserSessions(existingByEmail.id);
+        }
+
+        const [updatedUser] = await prisma.$transaction([
+          prisma.user.update({
+            where: { id: existingByEmail.id },
+            data: {
+              emailVerified: existingByEmail.emailVerified || new Date(),
+              ...(wasUnverifiedPasswordAccount ? { password: null } : {}),
+              ...(!existingByEmail.firstName && googleFirstName
+                ? { firstName: googleFirstName }
+                : {}),
+              ...(!existingByEmail.lastName && googleLastName
+                ? { lastName: googleLastName }
+                : {}),
+              ...(!existingByEmail.imageUrl && googlePicture ? { imageUrl: googlePicture } : {}),
+            },
+          }),
+          prisma.account.upsert({
+            where: {
+              provider_providerAccountId: {
+                provider: 'google',
+                providerAccountId,
+              },
+            },
+            update: {
+              token_type: token_type || null,
+              scope: scope || null,
+              id_token: id_token || null,
+            },
+            create: {
+              userId: existingByEmail.id,
+              type: 'oauth',
+              provider: 'google',
+              providerAccountId,
+              token_type: token_type || null,
+              scope: scope || null,
+              id_token: id_token || null,
+            },
+          }),
+        ]);
+
+        user = updatedUser;
+      }
+    }
+
+    const { token } = await createSessionToken({
+      id: user.id,
+      email: user.email,
+      isOnboarded: user.isOnboarded,
+    });
 
     res.json({
       success: true,
@@ -358,7 +556,8 @@ app.post('/api/auth/google', async (req: Request, res: Response) => {
         lastName: user.lastName,
         imageUrl: user.imageUrl,
         isOnboarded: user.isOnboarded,
-      }
+        subscriptionTier: user.subscriptionTier,
+      },
     });
   } catch (error: any) {
     console.error('[google-auth] Error:', error.response?.data || error.message);
@@ -366,70 +565,16 @@ app.post('/api/auth/google', async (req: Request, res: Response) => {
   }
 });
 
-app.post('/api/auth/sync', verifySession, async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  const email = req.auth?.email;
-  const metadata = req.body.metadata || {};
-
-  if (!userId || !email) {
-    return res.status(400).json({ error: 'Missing user credentials in token' });
-  }
-
-  try {
-    const user = await prisma.user.upsert({
-      where: { id: userId },
-      update: { email },
-      create: {
-        id: userId,
-        email,
-        firstName: metadata.full_name?.split(' ')[0] || metadata.first_name || '',
-        lastName: metadata.full_name?.split(' ').slice(1).join(' ') || metadata.last_name || '',
-        imageUrl: metadata.avatar_url || metadata.image_url || null,
-      }
-    });
-    res.status(200).json({ success: true, user });
-  } catch (error) {
-    res.status(500).json({ error: 'Database sync failed' });
-  }
-});
-
 /**
- * @api {get} /api/auth/verify Verify user existence
+ * @api {post} /api/auth/logout Revoke current server-side session
  */
-app.get('/api/auth/verify', verifySession, async (req: Request, res: Response) => {
-  const userId = req.auth?.userId;
-  const email = req.auth?.email;
-  const metadata = req.auth?.metadata || {};
-
-  if (!userId || !email) {
-    return res.status(400).json({ error: 'Missing user credentials in token' });
-  }
-
+app.post('/api/auth/logout', verifySession, async (req: Request, res: Response) => {
   try {
-    let user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { isOnboarded: true }
-    });
-
-    if (!user) {
-      console.log(`[auth]: User ${userId} not found in DB during verify, attempting auto-sync`);
-      // Auto-sync user
-      const newUser = await prisma.user.create({
-        data: {
-          id: userId,
-          email,
-          firstName: metadata.full_name?.split(' ')[0] || metadata.first_name || '',
-          lastName: metadata.full_name?.split(' ').slice(1).join(' ') || metadata.last_name || '',
-          imageUrl: metadata.avatar_url || metadata.image_url || null,
-        }
-      });
-      user = { isOnboarded: newUser.isOnboarded };
-    }
-
-    res.status(200).json({ success: true, userId: userId, isOnboarded: user.isOnboarded });
+    await revokeSession(req.auth?.jti);
+    res.status(200).json({ success: true });
   } catch (error) {
-    console.error('[auth]: Verify/Auto-sync failed', error);
-    res.status(500).json({ error: 'Database verification failed' });
+    console.error('[logout] Error:', error);
+    res.status(500).json({ error: 'Logout failed' });
   }
 });
 
@@ -441,14 +586,16 @@ app.post('/api/onboarding', requireAuth, async (req: Request, res: Response) => 
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.auth!.userId }
+      where: { id: req.auth!.userId },
+      select: SAFE_USER_SELECT,
     });
 
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const { firstName, lastName } = req.body;
+    const firstName = sanitizeName(req.body?.firstName);
+    const lastName = sanitizeName(req.body?.lastName);
 
-    await prisma.$transaction([
+    const [, updatedUser] = await prisma.$transaction([
       prisma.profile.upsert({
         where: { userId: user.id },
         update: { headline, bio, skillsOffered: skillsOffered || [], skillsSought: skillsSought || [], experienceLevel, availability, timezone },
@@ -456,11 +603,22 @@ app.post('/api/onboarding', requireAuth, async (req: Request, res: Response) => 
       }),
       prisma.user.update({
         where: { id: user.id },
-        data: { isOnboarded: true, ...(firstName && { firstName }), ...(lastName && { lastName }) }
+        data: { isOnboarded: true, ...(firstName && { firstName }), ...(lastName && { lastName }) },
+        select: { ...SAFE_USER_SELECT, profile: true },
       })
     ]);
 
-    res.status(200).json({ success: true });
+    // Issue updated signed JWT containing isOnboarded: true
+    const token = await refreshSessionToken(
+      {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        isOnboarded: updatedUser.isOnboarded,
+      },
+      req.auth?.jti
+    );
+
+    res.status(200).json({ success: true, token, user: updatedUser });
   } catch (error) {
     res.status(500).json({ error: 'Onboarding failed' });
   }
@@ -473,7 +631,7 @@ app.get('/api/me', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.auth!.userId },
-      include: { profile: true }
+      select: { ...SAFE_USER_SELECT, profile: true }
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ success: true, user });
@@ -489,7 +647,7 @@ app.get('/api/profile', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.auth!.userId },
-      include: { profile: true }
+      select: { ...SAFE_USER_SELECT, profile: true }
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ success: true, user });
@@ -537,15 +695,15 @@ app.post('/api/profile', requireAuth, async (req: Request, res: Response) => {
       prisma.user.update({
         where: { id: req.auth!.userId },
         data: {
-          ...(firstName !== undefined && { firstName }),
-          ...(lastName !== undefined && { lastName })
+          ...(firstName !== undefined && { firstName: sanitizeName(firstName) }),
+          ...(lastName !== undefined && { lastName: sanitizeName(lastName) })
         }
       })
     ]);
 
     const updatedUser = await prisma.user.findUnique({
       where: { id: req.auth!.userId },
-      include: { profile: true }
+      select: { ...SAFE_USER_SELECT, profile: true }
     });
 
     res.json({ success: true, user: updatedUser });
@@ -659,7 +817,20 @@ app.get('/api/marketplace/listings', requireAuth, async (req: Request, res: Resp
     if (category) whereClause.category = String(category);
 
     const [listings, total] = await prisma.$transaction([
-      prisma.listing.findMany({ where: whereClause, include: { user: { include: { profile: true } } }, skip, take: limitNum, orderBy: [{ user: { subscriptionTier: 'desc' } }, { createdAt: 'desc' }] }),
+      prisma.listing.findMany({
+        where: whereClause,
+        include: {
+          user: {
+            select: {
+              ...PUBLIC_USER_SELECT,
+              profile: true,
+            },
+          },
+        },
+        skip,
+        take: limitNum,
+        orderBy: [{ user: { subscriptionTier: 'desc' } }, { createdAt: 'desc' }],
+      }),
       prisma.listing.count({ where: whereClause })
     ]);
 

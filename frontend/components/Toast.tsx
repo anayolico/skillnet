@@ -1,12 +1,16 @@
 'use client';
-import React, { createContext, useContext, useState, useCallback } from 'react';
+
+import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
+import styles from './Toast.module.css';
 
 type ToastType = 'success' | 'error' | 'info';
 
-interface Toast {
+interface ToastItem {
   id: number;
   message: string;
   type: ToastType;
+  exiting: boolean;
 }
 
 interface ToastContextType {
@@ -15,55 +19,89 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+const AUTO_DISMISS_MS = 4000;
+const EXIT_ANIMATION_MS = 220;
+const MAX_TOASTS = 4;
 
-  const showToast = useCallback((message: string, type: ToastType = 'info') => {
-    const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const nextIdRef = useRef(1);
+  const timersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+
+  const dismissToast = useCallback((id: number) => {
+    const existingTimer = timersRef.current.get(id);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+      timersRef.current.delete(id);
+    }
+
+    setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, exiting: true } : t)));
+
+    const removeTimer = setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
+      timersRef.current.delete(id);
+    }, EXIT_ANIMATION_MS);
+
+    timersRef.current.set(id, removeTimer);
+  }, []);
+
+  const showToast = useCallback(
+    (message: string, type: ToastType = 'info') => {
+      const id = nextIdRef.current++;
+
+      setToasts((prev) => {
+        const next = [...prev, { id, message, type, exiting: false }];
+        return next.length > MAX_TOASTS ? next.slice(next.length - MAX_TOASTS) : next;
+      });
+
+      const timer = setTimeout(() => {
+        dismissToast(id);
+      }, AUTO_DISMISS_MS);
+
+      timersRef.current.set(id, timer);
+    },
+    [dismissToast]
+  );
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+      timers.clear();
+    };
   }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="toast-container">
+      <div className={styles.container} aria-live="polite" aria-atomic="false">
         {toasts.map((toast) => (
-          <div key={toast.id} className={`toast toast-${toast.type}`}>
-            {toast.message}
+          <div
+            key={toast.id}
+            role={toast.type === 'error' ? 'alert' : 'status'}
+            className={`${styles.toast} ${styles[toast.type]} ${toast.exiting ? styles.exiting : ''}`}
+          >
+            <span className={styles.icon} aria-hidden="true">
+              {toast.type === 'error' ? (
+                <AlertCircle size={18} strokeWidth={2} />
+              ) : toast.type === 'success' ? (
+                <CheckCircle2 size={18} strokeWidth={2} />
+              ) : (
+                <Info size={18} strokeWidth={2} />
+              )}
+            </span>
+            <span className={styles.message}>{toast.message}</span>
+            <button
+              type="button"
+              className={styles.closeBtn}
+              onClick={() => dismissToast(toast.id)}
+              aria-label="Dismiss notification"
+            >
+              <X size={15} />
+            </button>
           </div>
         ))}
       </div>
-      <style jsx>{`
-        .toast-container {
-          position: fixed;
-          bottom: 2rem;
-          right: 2rem;
-          z-index: 9999;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-        .toast {
-          padding: 1rem 1.5rem;
-          border-radius: 8px;
-          background: white;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-          font-weight: 600;
-          font-size: 0.9rem;
-          animation: slideIn 0.3s ease-out forwards;
-          border-left: 4px solid #64748b;
-        }
-        .toast-success { border-left-color: #10b981; color: #065f46; }
-        .toast-error { border-left-color: #ef4444; color: #991b1b; }
-        .toast-info { border-left-color: #3b82f6; color: #1e40af; }
-        @keyframes slideIn {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-      `}</style>
     </ToastContext.Provider>
   );
 }

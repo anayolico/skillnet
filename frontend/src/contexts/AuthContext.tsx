@@ -3,12 +3,13 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { getApiUrl } from '../utils/config';
 
-interface User {
+export interface User {
   id: string;
   email: string;
   firstName?: string;
   lastName?: string;
   imageUrl?: string;
+  isOnboarded?: boolean;
   subscriptionTier?: string;
   profile?: {
     experienceLevel?: string;
@@ -16,15 +17,47 @@ interface User {
   };
 }
 
+interface AuthResult {
+  success: boolean;
+  error?: string;
+  user?: User;
+}
+
+interface GoogleLoginPayload {
+  code: string;
+  codeVerifier?: string;
+  redirectUri?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (email: string, password: string, firstName: string, lastName: string) => Promise<{ success: boolean; error?: string }>;
-  googleLogin: (code: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<AuthResult>;
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) => Promise<{ success: boolean; error?: string }>;
+  googleLogin: (payload: string | GoogleLoginPayload) => Promise<AuthResult>;
+  refreshSession: (newToken?: string, updatedUser?: User) => Promise<void>;
+  logout: () => Promise<void>;
   getToken: () => string | null;
+}
+
+const COOKIE_MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // Matches 7-day JWT lifetime
+
+function setCookie(name: string, value: string) {
+  const secure =
+    typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
+}
+
+function clearCookie(name: string) {
+  const secure =
+    typeof window !== 'undefined' && window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax${secure}`;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,11 +67,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load token from localStorage on mount
+  const persistSession = (authToken: string, userData: User) => {
+    localStorage.setItem('token', authToken);
+    setCookie('token', authToken);
+    setCookie('onboarded', String(Boolean(userData.isOnboarded)));
+    setToken(authToken);
+    setUser(userData);
+  };
+
+  const clearSession = () => {
+    localStorage.removeItem('token');
+    clearCookie('token');
+    clearCookie('onboarded');
+    setToken(null);
+    setUser(null);
+  };
+
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
-      document.cookie = `token=${storedToken}; path=/; max-age=86400; SameSite=Lax`;
+      setCookie('token', storedToken);
       setToken(storedToken);
       fetchUser(storedToken);
     } else {
@@ -49,19 +97,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUser = async (authToken: string) => {
     try {
       const res = await fetch(`${getApiUrl()}/api/me`, {
-        headers: { Authorization: `Bearer ${authToken}` }
+        headers: { Authorization: `Bearer ${authToken}` },
       });
       if (res.ok) {
         const data = await res.json();
-        document.cookie = `onboarded=${data.user.isOnboarded}; path=/; max-age=86400; SameSite=Lax`;
+        setCookie('onboarded', String(Boolean(data.user.isOnboarded)));
         setUser(data.user);
       } else {
-        // Token invalid, clear it
-        localStorage.removeItem('token');
-        document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        document.cookie = 'onboarded=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        setToken(null);
-        setUser(null);
+        clearSession();
       }
     } catch (error) {
       console.error('Failed to fetch user:', error);
@@ -70,12 +113,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthResult> => {
     try {
       const res = await fetch(`${getApiUrl()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -84,23 +127,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: data.error || 'Login failed' };
       }
 
-      localStorage.setItem('token', data.token);
-      document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `onboarded=${data.user.isOnboarded}; path=/; max-age=86400; SameSite=Lax`;
-      setToken(data.token);
-      setUser(data.user);
-      return { success: true };
-    } catch (error) {
+      persistSession(data.token, data.user);
+      return { success: true, user: data.user };
+    } catch {
       return { success: false, error: 'Network error' };
     }
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) => {
     try {
       const res = await fetch(`${getApiUrl()}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, lastName })
+        body: JSON.stringify({ email, password, firstName, lastName }),
       });
 
       const data = await res.json();
@@ -110,17 +154,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: false, error: 'Network error' };
     }
   };
 
-  const googleLogin = async (code: string) => {
+  const googleLogin = async (payload: string | GoogleLoginPayload): Promise<AuthResult> => {
     try {
+      const body = typeof payload === 'string' ? { code: payload } : payload;
+
       const res = await fetch(`${getApiUrl()}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -129,29 +175,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: data.error || 'Google login failed' };
       }
 
-      localStorage.setItem('token', data.token);
-      document.cookie = `token=${data.token}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `onboarded=${data.user.isOnboarded}; path=/; max-age=86400; SameSite=Lax`;
-      setToken(data.token);
-      setUser(data.user);
-      return { success: true };
-    } catch (error) {
+      persistSession(data.token, data.user);
+      return { success: true, user: data.user };
+    } catch {
       return { success: false, error: 'Network error' };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    document.cookie = 'onboarded=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    setToken(null);
-    setUser(null);
+  const refreshSession = async (newToken?: string, updatedUser?: User) => {
+    const activeToken = newToken || token || localStorage.getItem('token');
+    if (!activeToken) return;
+
+    if (newToken && updatedUser) {
+      persistSession(newToken, updatedUser);
+      return;
+    }
+
+    if (newToken) {
+      localStorage.setItem('token', newToken);
+      setCookie('token', newToken);
+      setToken(newToken);
+    }
+
+    await fetchUser(activeToken);
+  };
+
+  const logout = async () => {
+    const activeToken = token || localStorage.getItem('token');
+    clearSession();
+
+    if (activeToken) {
+      try {
+        await fetch(`${getApiUrl()}/api/auth/logout`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${activeToken}` },
+        });
+      } catch {
+        // Local session is already cleared; ignore transient network error on logout
+      }
+    }
   };
 
   const getToken = () => token;
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, googleLogin, logout, getToken }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        isLoading,
+        login,
+        register,
+        googleLogin,
+        refreshSession,
+        logout,
+        getToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
