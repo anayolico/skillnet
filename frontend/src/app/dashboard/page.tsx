@@ -1,27 +1,20 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import AppNav from '../../../components/AppNav';
 import Skeleton from '../../../components/Skeleton';
-import { 
-  LayoutDashboard, 
-  ArrowLeftRight, 
-  ShieldCheck, 
-  MessageSquare, 
-  BookOpen, 
-  PlusSquare, 
-  Settings, 
-  LogOut,
+import {
+  ArrowLeftRight,
   Star,
   TrendingUp,
   Briefcase,
   Building2,
-  BarChart3
+  BarChart3,
+  User,
 } from 'lucide-react';
 import styles from './dashboard.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { User } from 'lucide-react';
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -65,8 +58,6 @@ export default function Dashboard() {
   }
 
   const displayName = user?.firstName ? `${user.firstName} ${user.lastName || ''}` : 'SkillNet Expert';
-  const displayHeadline = user?.profile?.headline || 'Expertise Arbitrageur';
-  const displayLevel = user?.profile?.experienceLevel || 'Expert';
 
   return (
     <div className={styles.dashboardRoot}>
@@ -80,12 +71,11 @@ export default function Dashboard() {
           
           <div className={`${styles.welcomeSection} reveal`}>
             <div>
-              <span className={styles.welcomeSubtitle}>SYSTEM OVERVIEW</span>
               <h1 className={styles.welcomeTitle}>Welcome, {displayName}.</h1>
               <p className={styles.welcomeText}>Your trust rating is in the Top 5%. 2 active swaps require your attention.</p>
             </div>
             <Link href="/marketplace" className={`${styles.ctaBtn} click-scale`}>
-              Open Discovery Hub →
+              Open Discovery Hub
             </Link>
           </div>
 
@@ -156,7 +146,6 @@ export default function Dashboard() {
                       <div className={styles.swapRole}>Senior Financial Architect</div>
                     </div>
                   </div>
-                  <span className={`${styles.swapBadge} ${styles.swapBadgeBlue}`}>PROTOCOL ACTIVE</span>
                 </div>
                 <div className={styles.swapData}>
                   <div className={styles.swapCol}>
@@ -186,7 +175,6 @@ export default function Dashboard() {
                       <div className={styles.swapRole}>DevOps Lead</div>
                     </div>
                   </div>
-                  <span className={`${styles.swapBadge} ${styles.swapBadgeGreen}`}>PENDING SIG</span>
                 </div>
                 <div className={styles.swapData}>
                   <div className={styles.swapCol}>

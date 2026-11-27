@@ -4,8 +4,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
+import { getApiUrl } from '@/src/utils/config';
 import { startGoogleOAuth } from '@/src/utils/googleOAuth';
-import { Shield, Linkedin, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
+import { validateEmail } from '@/src/utils/validation';
+import { Shield, Linkedin, Eye, EyeOff, ArrowRight, ArrowLeft, X, CheckCircle2 } from 'lucide-react';
 import BrandLogo from '../../../components/BrandLogo';
 import styles from '../auth.module.css';
 
@@ -19,17 +21,72 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Forgot Password Modal State
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSending, setForgotSending] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      showToast(emailCheck.error, 'error');
+      return;
+    }
+
     setLoading(true);
 
-    const result = await login(email.trim().toLowerCase(), password);
+    const result = await login(emailCheck.value, password);
 
     if (!result.success) {
       showToast(result.error || 'Invalid email or password', 'error');
       setLoading(false);
     } else {
       router.push(result.user?.isOnboarded ? '/dashboard' : '/onboarding');
+    }
+  };
+
+  const openForgotModal = () => {
+    setForgotEmail(email.trim());
+    setForgotSent(false);
+    setIsForgotOpen(true);
+  };
+
+  const closeForgotModal = () => {
+    if (forgotSending) return;
+    setIsForgotOpen(false);
+  };
+
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const emailCheck = validateEmail(forgotEmail);
+    if (!emailCheck.valid) {
+      showToast(emailCheck.error, 'error');
+      return;
+    }
+
+    setForgotSending(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/api/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailCheck.value }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Unable to process request right now.', 'error');
+        return;
+      }
+
+      setForgotSent(true);
+    } catch {
+      showToast('Network error. Please try again.', 'error');
+    } finally {
+      setForgotSending(false);
     }
   };
 
@@ -99,7 +156,13 @@ export default function Login() {
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
                 <label htmlFor="login-password" className={styles.label}>Password</label>
-                <Link href="#" className={styles.forgotLink}>Forgot password?</Link>
+                <button
+                  type="button"
+                  onClick={openForgotModal}
+                  className={styles.forgotLink}
+                >
+                  Forgot password?
+                </button>
               </div>
               <div className={styles.inputWrapper}>
                 <input
@@ -187,6 +250,98 @@ export default function Login() {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {isForgotOpen && (
+        <div className={styles.modalOverlay} onClick={closeForgotModal}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitleRow}>
+                <h2 className={styles.modalTitle}>Reset your password</h2>
+                <button
+                  type="button"
+                  onClick={closeForgotModal}
+                  className={styles.modalCloseBtn}
+                  aria-label="Close modal"
+                >
+                  <X size={19} />
+                </button>
+              </div>
+              {!forgotSent && (
+                <p className={styles.modalSubtitle}>
+                  Enter your account email and we will send you a secure reset link.
+                </p>
+              )}
+            </div>
+
+            {forgotSent ? (
+              <div className={styles.statusCard}>
+                <div className={styles.statusIconSuccess}>
+                  <CheckCircle2 size={20} />
+                </div>
+                <div className={styles.statusTitle}>Check your inbox</div>
+                <p className={styles.statusBody}>
+                  If an account with that email exists, a password reset link has been sent. The
+                  link expires in 15 minutes and can only be used once.
+                </p>
+                <button
+                  type="button"
+                  className={styles.submitBtn}
+                  onClick={closeForgotModal}
+                  style={{ marginTop: '0.35rem' }}
+                >
+                  Back to Log in
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotSubmit} noValidate>
+                <div className={styles.formGroup}>
+                  <div className={styles.labelWrapper}>
+                    <label htmlFor="forgot-email" className={styles.label}>
+                      Email address
+                    </label>
+                  </div>
+                  <input
+                    id="forgot-email"
+                    type="email"
+                    className={styles.input}
+                    placeholder="name@company.com"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    autoComplete="email"
+                    autoFocus
+                    required
+                  />
+                </div>
+
+                <div className={styles.modalActions}>
+                  <button
+                    type="button"
+                    className={styles.modalCancelBtn}
+                    onClick={closeForgotModal}
+                    disabled={forgotSending}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className={styles.modalSubmitBtn}
+                    disabled={forgotSending || !forgotEmail.trim()}
+                  >
+                    {forgotSending ? (
+                      'Sending link...'
+                    ) : (
+                      <>
+                        Send Reset Link <ArrowRight size={15} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,6 +6,13 @@ import { useAuth } from '@/src/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
 import { getApiUrl } from '@/src/utils/config';
 import { startGoogleOAuth } from '@/src/utils/googleOAuth';
+import {
+  validateConfirmPassword,
+  validateEmail,
+  validateFullName,
+  validatePassword,
+} from '@/src/utils/validation';
+import PasswordRules from '../../../components/PasswordRules';
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Linkedin } from 'lucide-react';
 import BrandLogo from '../../../components/BrandLogo';
 import styles from '../auth.module.css';
@@ -17,30 +24,53 @@ export default function Join() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 8) {
-      showToast('Password must be at least 8 characters long.', 'error');
+    const nameCheck = validateFullName(fullName);
+    if (!nameCheck.valid) {
+      showToast(nameCheck.error, 'error');
+      return;
+    }
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      showToast(emailCheck.error, 'error');
+      return;
+    }
+
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.valid) {
+      showToast(passwordCheck.error, 'error');
+      return;
+    }
+
+    const confirmCheck = validateConfirmPassword(password, confirmPassword);
+    if (!confirmCheck.valid) {
+      showToast(confirmCheck.error, 'error');
       return;
     }
 
     setLoading(true);
-
-    const [firstName, ...lastNames] = fullName.trim().split(/\s+/);
-    const lastName = lastNames.join(' ');
-    const normalizedEmail = email.trim().toLowerCase();
 
     try {
       const apiUrl = getApiUrl();
       const regRes = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail, password, firstName, lastName }),
+        body: JSON.stringify({
+          email: emailCheck.value,
+          password,
+          confirmPassword,
+          firstName: nameCheck.firstName,
+          lastName: nameCheck.lastName,
+        }),
       });
 
       if (!regRes.ok) {
@@ -50,7 +80,7 @@ export default function Join() {
         return;
       }
 
-      const result = await login(normalizedEmail, password);
+      const result = await login(emailCheck.value, password);
 
       if (!result.success) {
         showToast(result.error || 'Login failed after registration', 'error');
@@ -151,9 +181,10 @@ export default function Join() {
                   id="join-password"
                   type={showPassword ? 'text' : 'password'}
                   className={`${styles.input} ${styles.passwordInput}`}
-                  placeholder="At least 8 characters"
+                  placeholder="Create a strong password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
                   minLength={8}
                   maxLength={72}
                   required
@@ -168,6 +199,39 @@ export default function Join() {
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
+              <PasswordRules password={password} compact />
+            </div>
+
+            <div className={styles.formGroup}>
+              <div className={styles.labelWrapper}>
+                <label htmlFor="join-confirm-password" className={styles.label}>Confirm password</label>
+              </div>
+              <div className={styles.inputWrapper}>
+                <input
+                  id="join-confirm-password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  className={`${styles.input} ${styles.passwordInput}`}
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  maxLength={72}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  aria-pressed={showConfirmPassword}
+                >
+                  {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+              {confirmPassword.length > 0 && confirmPassword !== password && (
+                <p className={styles.fieldErrorText}>Passwords do not match.</p>
+              )}
             </div>
 
             <div className={styles.checkboxWrapper}>

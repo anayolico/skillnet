@@ -16,17 +16,28 @@ import prisma from './lib/prisma';
 import {
   BCRYPT_ROUNDS,
   DUMMY_PASSWORD_HASH,
+  PASSWORD_RESET_EXPIRY_MINUTES,
+  PASSWORD_RESET_PREFIX,
   PUBLIC_USER_SELECT,
   SAFE_USER_SELECT,
+  createPasswordCooldownData,
+  createPasswordResetToken,
   createSessionToken,
+  formatPasswordCooldownMessage,
   getAuthSecret,
+  getPasswordCooldownUntil,
+  hashResetToken,
   normalizeEmail,
   refreshSessionToken,
   revokeAllUserSessions,
+  revokeOtherUserSessions,
   revokeSession,
   sanitizeName,
+  sanitizeUser,
   validateNewPassword,
+  validateRegistrationName,
 } from './lib/auth';
+import { sendPasswordResetEmail } from './lib/mailer';
 import swaggerUi from 'swagger-ui-express';
 import * as swaggerDocument from './swagger.json';
 
@@ -185,6 +196,14 @@ const authRateLimiter = rateLimit({
   message: { error: 'Too many authentication attempts. Please wait 15 minutes and try again.' },
 });
 
+const forgotPasswordRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 6,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many password reset requests. Please wait 15 minutes and try again.' },
+});
+
 app.use('/api', apiRateLimiter);
 
 // Request logging
@@ -263,17 +282,25 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
  * @api {post} /api/auth/register Create a new email/password account
  */
 app.post('/api/auth/register', authRateLimiter, async (req: Request, res: Response) => {
+  const nameCheck = validateRegistrationName(req.body?.firstName, req.body?.lastName);
   const email = normalizeEmail(req.body?.email);
   const passwordCheck = validateNewPassword(req.body?.password);
-  const firstName = sanitizeName(req.body?.firstName);
-  const lastName = sanitizeName(req.body?.lastName);
+  const confirmPassword = req.body?.confirmPassword;
+
+  if (!nameCheck.valid) {
+    return res.status(400).json({ error: nameCheck.error });
+  }
 
   if (!email) {
-    return res.status(400).json({ error: 'Please enter a valid email address' });
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
   }
 
   if (!passwordCheck.valid) {
     return res.status(400).json({ error: passwordCheck.error });
+  }
+
+  if (confirmPassword !== undefined && confirmPassword !== passwordCheck.value) {
+    return res.status(400).json({ error: 'Passwords do not match.' });
   }
 
   try {
@@ -294,8 +321,8 @@ app.post('/api/auth/register', authRateLimiter, async (req: Request, res: Respon
       data: {
         email,
         password: hashedPassword,
-        firstName,
-        lastName,
+        firstName: nameCheck.firstName,
+        lastName: nameCheck.lastName,
       },
       select: SAFE_USER_SELECT,
     });
@@ -579,6 +606,277 @@ app.post('/api/auth/logout', verifySession, async (req: Request, res: Response) 
 });
 
 /**
+ * @api {post} /api/auth/change-password Change (or set) password for authenticated user
+ */
+app.post('/api/auth/change-password', authRateLimiter, requireAuth, async (req: Request, res: Response) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body || {};
+
+  const passwordCheck = validateNewPassword(newPassword);
+  if (!passwordCheck.valid) {
+    return res.status(400).json({ error: passwordCheck.error });
+  }
+
+  if (typeof confirmPassword !== 'string' || confirmPassword !== passwordCheck.value) {
+    return res.status(400).json({ error: 'Passwords do not match.' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.auth!.userId },
+      select: { id: true, password: true },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Account not found.' });
+    }
+
+    // Enforce 7-day password change cooldown (applies after any change or reset)
+    const cooldownUntil = await getPasswordCooldownUntil(user.id);
+    if (cooldownUntil) {
+      return res.status(429).json({
+        error: formatPasswordCooldownMessage(cooldownUntil),
+        passwordCooldownUntil: cooldownUntil.toISOString(),
+      });
+    }
+
+    if (user.password) {
+      if (typeof currentPassword !== 'string' || !currentPassword) {
+        return res.status(400).json({ error: 'Please enter your current password.' });
+      }
+      if (Buffer.byteLength(currentPassword, 'utf8') > 72) {
+        return res.status(401).json({ error: 'Current password is incorrect.' });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ error: 'Current password is incorrect.' });
+      }
+
+      if (currentPassword === passwordCheck.value) {
+        return res.status(400).json({
+          error: 'New password must be different from your current password.',
+        });
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(passwordCheck.value, BCRYPT_ROUNDS);
+    const cooldownData = createPasswordCooldownData(user.id);
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: { password: hashedPassword },
+      }),
+      prisma.verificationToken.deleteMany({
+        where: { identifier: cooldownData.identifier },
+      }),
+      prisma.verificationToken.create({
+        data: cooldownData,
+      }),
+    ]);
+
+    // Revoke all other sessions on other devices while keeping the current session signed in
+    await revokeOtherUserSessions(user.id, req.auth?.jti);
+
+    res.status(200).json({
+      success: true,
+      hasPassword: true,
+      passwordCooldownUntil: cooldownData.expires.toISOString(),
+      message: user.password
+        ? 'Password updated successfully.'
+        : 'Password set successfully. You can now sign in with email or Google.',
+    });
+  } catch (error) {
+    console.error('[change-password] Error:', error);
+    res.status(500).json({ error: 'Failed to update password.' });
+  }
+});
+
+/**
+ * @api {post} /api/auth/forgot-password Request an expiring password reset link (non-enumerating)
+ */
+app.post('/api/auth/forgot-password', forgotPasswordRateLimiter, async (req: Request, res: Response) => {
+  const email = normalizeEmail(req.body?.email);
+
+  if (!email) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+
+  const genericResponse = {
+    success: true,
+    message:
+      'If an account with that email exists, we have sent a password reset link. Please check your inbox and spam folder.',
+  };
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, firstName: true },
+    });
+
+    if (user && user.email) {
+      // Respect the 7-day password change cooldown silently (still returns neutral 200)
+      const cooldownUntil = await getPasswordCooldownUntil(user.id);
+      if (!cooldownUntil) {
+        const rawToken = await createPasswordResetToken(user.email);
+
+        const requestOrigin =
+          typeof req.headers.origin === 'string' ? req.headers.origin.replace(/\/+$/, '') : '';
+        const resetBaseUrl =
+          (requestOrigin && allowedOrigins.has(requestOrigin) ? requestOrigin : null) ||
+          normalizedFrontendUrl ||
+          'http://localhost:3000';
+
+        const resetUrl = `${resetBaseUrl}/reset-password?token=${encodeURIComponent(rawToken)}`;
+
+        await sendPasswordResetEmail({
+          to: user.email,
+          firstName: user.firstName,
+          resetUrl,
+          expiresInMinutes: PASSWORD_RESET_EXPIRY_MINUTES,
+        });
+      }
+    }
+
+    // Always return the exact same neutral response to prevent email enumeration
+    return res.status(200).json(genericResponse);
+  } catch (error) {
+    console.error('[forgot-password] Error:', error);
+    return res.status(200).json(genericResponse);
+  }
+});
+
+/**
+ * @api {get} /api/auth/reset-password/validate Check whether a password reset token is valid & unexpired
+ */
+app.get('/api/auth/reset-password/validate', authRateLimiter, async (req: Request, res: Response) => {
+  const rawToken = typeof req.query.token === 'string' ? req.query.token.trim() : '';
+
+  if (!rawToken || !/^[a-f0-9]{64}$/i.test(rawToken)) {
+    return res.status(400).json({
+      valid: false,
+      error: 'This password reset link is invalid or has expired.',
+    });
+  }
+
+  try {
+    const tokenHash = hashResetToken(rawToken);
+    const record = await prisma.verificationToken.findUnique({
+      where: { token: tokenHash },
+    });
+
+    if (
+      !record ||
+      !record.identifier.startsWith(PASSWORD_RESET_PREFIX) ||
+      record.expires <= new Date()
+    ) {
+      return res.status(400).json({
+        valid: false,
+        error: 'This password reset link is invalid or has expired.',
+      });
+    }
+
+    return res.status(200).json({ valid: true });
+  } catch (error) {
+    console.error('[reset-password/validate] Error:', error);
+    return res.status(500).json({ valid: false, error: 'Unable to verify reset link.' });
+  }
+});
+
+/**
+ * @api {post} /api/auth/reset-password Consume single-use token and set a new password
+ */
+app.post('/api/auth/reset-password', authRateLimiter, async (req: Request, res: Response) => {
+  const { token: rawToken, newPassword, confirmPassword } = req.body || {};
+
+  if (typeof rawToken !== 'string' || !/^[a-f0-9]{64}$/i.test(rawToken.trim())) {
+    return res.status(400).json({ error: 'This password reset link is invalid or has expired.' });
+  }
+
+  const passwordCheck = validateNewPassword(newPassword);
+  if (!passwordCheck.valid) {
+    return res.status(400).json({ error: passwordCheck.error });
+  }
+
+  if (typeof confirmPassword !== 'string' || confirmPassword !== passwordCheck.value) {
+    return res.status(400).json({ error: 'Passwords do not match.' });
+  }
+
+  try {
+    const tokenHash = hashResetToken(rawToken.trim());
+    const record = await prisma.verificationToken.findUnique({
+      where: { token: tokenHash },
+    });
+
+    if (
+      !record ||
+      !record.identifier.startsWith(PASSWORD_RESET_PREFIX) ||
+      record.expires <= new Date()
+    ) {
+      return res.status(400).json({
+        error: 'This password reset link is invalid or has expired. Please request a new one.',
+      });
+    }
+
+    const email = record.identifier.slice(PASSWORD_RESET_PREFIX.length);
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, emailVerified: true },
+    });
+
+    if (!user) {
+      await prisma.verificationToken.deleteMany({ where: { identifier: record.identifier } });
+      return res.status(400).json({
+        error: 'This password reset link is invalid or has expired. Please request a new one.',
+      });
+    }
+
+    // Enforce 7-day password change cooldown
+    const cooldownUntil = await getPasswordCooldownUntil(user.id);
+    if (cooldownUntil) {
+      return res.status(429).json({
+        error: formatPasswordCooldownMessage(cooldownUntil),
+        passwordCooldownUntil: cooldownUntil.toISOString(),
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(passwordCheck.value, BCRYPT_ROUNDS);
+    const cooldownData = createPasswordCooldownData(user.id);
+
+    // Atomically update password, mark email verified, consume token, set 7-day cooldown, and revoke all old sessions
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          emailVerified: user.emailVerified || new Date(),
+        },
+      }),
+      prisma.verificationToken.deleteMany({
+        where: { identifier: record.identifier },
+      }),
+      prisma.verificationToken.deleteMany({
+        where: { identifier: cooldownData.identifier },
+      }),
+      prisma.verificationToken.create({
+        data: cooldownData,
+      }),
+      prisma.session.deleteMany({
+        where: { userId: user.id },
+      }),
+    ]);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Your password has been reset. You can now sign in with your new password.',
+    });
+  } catch (error) {
+    console.error('[reset-password] Error:', error);
+    return res.status(500).json({ error: 'Unable to reset password. Please try again.' });
+  }
+});
+
+/**
  * @api {post} /api/onboarding Complete onboarding
  */
 app.post('/api/onboarding', requireAuth, async (req: Request, res: Response) => {
@@ -631,10 +929,19 @@ app.get('/api/me', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.auth!.userId },
-      select: { ...SAFE_USER_SELECT, profile: true }
+      select: { ...SAFE_USER_SELECT, password: true, profile: true }
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ success: true, user });
+    const hasPassword = Boolean(user.password);
+    const cooldownUntil = await getPasswordCooldownUntil(user.id);
+    res.json({
+      success: true,
+      user: {
+        ...sanitizeUser(user),
+        hasPassword,
+        passwordCooldownUntil: cooldownUntil ? cooldownUntil.toISOString() : null,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
@@ -647,10 +954,19 @@ app.get('/api/profile', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.auth!.userId },
-      select: { ...SAFE_USER_SELECT, profile: true }
+      select: { ...SAFE_USER_SELECT, password: true, profile: true }
     });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ success: true, user });
+    const hasPassword = Boolean(user.password);
+    const cooldownUntil = await getPasswordCooldownUntil(user.id);
+    res.json({
+      success: true,
+      user: {
+        ...sanitizeUser(user),
+        hasPassword,
+        passwordCooldownUntil: cooldownUntil ? cooldownUntil.toISOString() : null,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch profile' });
   }
