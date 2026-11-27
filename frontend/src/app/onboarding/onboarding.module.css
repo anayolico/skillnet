@@ -10,10 +10,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2.75rem 1.5rem 4rem;
+  padding: 2rem 1.5rem 4rem;
   max-width: 720px;
   margin: 0 auto;
   width: 100%;
+}
+
+.progressMeta {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.55rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .progressBar {
@@ -21,7 +33,7 @@
   height: 6px;
   background-color: #e2e8f0;
   border-radius: 9999px;
-  margin-bottom: 2.25rem;
+  margin-bottom: 1.75rem;
   overflow: hidden;
 }
 
@@ -184,7 +196,7 @@
 .nextBtn {
   background-color: #0a1f3c;
   color: #ffffff;
-  padding: 0.82rem 1.75rem;
+  padding: 0.78rem 1.5rem;
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.94rem;
@@ -193,7 +205,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
   margin-left: auto;
+  transition: background-color 0.18s ease, transform 0.15s ease;
 }
 
 .nextBtn:hover:not(:disabled) {
@@ -206,19 +220,24 @@
 }
 
 .backBtn {
-  background: transparent;
-  border: none;
-  color: #475569;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0a1f3c;
   font-weight: 600;
-  font-size: 0.94rem;
+  font-size: 0.92rem;
   cursor: pointer;
-  padding: 0.5rem 0.9rem;
-  border-radius: 8px;
+  padding: 0.78rem 1.25rem;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
 }
 
 .backBtn:hover {
-  background: #eef2f7;
-  color: #0a1f3c;
+  border-color: #0a1f3c;
+  background: #f7f9fc;
 }
 
 .errorText {

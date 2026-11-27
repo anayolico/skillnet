@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AppNav from '../../../components/AppNav';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import PublicHeader from '../../../components/landing/PublicHeader';
 import styles from './onboarding.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { DEFAULT_SKILLS } from '../../utils/skills';
@@ -87,11 +88,23 @@ export default function Onboarding() {
     }
   };
 
+  const handleBackFromStart = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
+
   return (
-    <div className={styles.onboardingRoot} style={{ paddingBottom: '6rem' }}>
-      <AppNav mode="public" />
+    <div className={styles.onboardingRoot}>
+      <PublicHeader forceGuestActions />
 
       <div className={styles.container}>
+        <div className={styles.progressMeta}>
+          <span>Step {step} of 4</span>
+          <span>{Math.round((step / 4) * 100)}%</span>
+        </div>
         <div className={styles.progressBar}>
           <div className={styles.progressFill} style={{ width: `${(step / 4) * 100}%` }}></div>
         </div>
@@ -124,12 +137,20 @@ export default function Onboarding() {
               </div>
 
               <div className={styles.actionRow}>
+                <button
+                  type="button"
+                  className={styles.backBtn}
+                  onClick={handleBackFromStart}
+                >
+                  <ArrowLeft size={16} /> Back
+                </button>
                 <button 
+                  type="button"
                   className={styles.nextBtn} 
                   disabled={!headline.trim()} 
                   onClick={() => setStep(2)}
                 >
-                  Continue →
+                  Continue <ArrowRight size={16} />
                 </button>
               </div>
             </div>
@@ -179,13 +200,16 @@ export default function Onboarding() {
               </div>
 
               <div className={styles.actionRow}>
-                <button className={styles.backBtn} onClick={() => setStep(1)}>← Back</button>
+                <button type="button" className={styles.backBtn} onClick={() => setStep(1)}>
+                  <ArrowLeft size={16} /> Back
+                </button>
                 <button 
+                  type="button"
                   className={styles.nextBtn} 
                   disabled={selectedGive.length === 0} 
                   onClick={() => setStep(3)}
                 >
-                  Continue →
+                  Continue <ArrowRight size={16} />
                 </button>
               </div>
             </div>
@@ -234,13 +258,16 @@ export default function Onboarding() {
               </div>
 
               <div className={styles.actionRow}>
-                <button className={styles.backBtn} onClick={() => setStep(2)}>← Back</button>
+                <button type="button" className={styles.backBtn} onClick={() => setStep(2)}>
+                  <ArrowLeft size={16} /> Back
+                </button>
                 <button 
+                  type="button"
                   className={styles.nextBtn} 
                   disabled={selectedGet.length === 0} 
                   onClick={() => setStep(4)}
                 >
-                  Continue →
+                  Continue <ArrowRight size={16} />
                 </button>
               </div>
             </div>
@@ -292,8 +319,11 @@ export default function Onboarding() {
               </div>
 
               <div className={styles.actionRow}>
-                <button className={styles.backBtn} onClick={() => setStep(3)}>← Back</button>
+                <button type="button" className={styles.backBtn} onClick={() => setStep(3)}>
+                  <ArrowLeft size={16} /> Back
+                </button>
                 <button 
+                  type="button"
                   className={styles.nextBtn} 
                   onClick={handleComplete}
                   disabled={loading || !experienceLevel || !availability}

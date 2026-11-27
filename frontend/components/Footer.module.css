@@ -1,9 +1,8 @@
 .footer {
-  position: relative;
   background-color: #ffffff;
   color: #0f172a;
-  padding: 4.5rem 0 2.5rem;
   border-top: 1px solid #e2e8f0;
+  padding: 2rem 0;
   font-family: var(--font-sans), sans-serif;
 }
 
@@ -14,86 +13,53 @@
   padding: 0 1.5rem;
 }
 
-.footerGrid {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 3rem;
-  margin-bottom: 3.5rem;
+.footerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem 2rem;
 }
 
-.brandColumn {
+.brandMeta {
   display: flex;
-  flex-direction: column;
-  gap: 1.1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
 }
 
 .logo {
   display: inline-flex;
   align-items: center;
-  width: fit-content;
 }
 
-.brandDesc {
-  font-size: 0.92rem;
-  line-height: 1.65;
-  color: #475569;
-  max-width: 340px;
-}
-
-.columnTitle {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #0a1f3c;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 1.25rem;
-}
-
-.linkList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.footerLink {
-  font-size: 0.9rem;
-  color: #475569;
-  text-decoration: none;
-  transition: color 0.15s ease;
-  font-weight: 500;
-}
-
-.footerLink:hover {
-  color: #0a1f3c;
-}
-
-.footerBottom {
-  border-top: 1px solid #eef2f7;
-  padding-top: 1.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+.divider {
+  width: 1px;
+  height: 16px;
+  background-color: #cbd5e1;
 }
 
 .copyright {
   font-family: var(--font-mono), monospace;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   color: #64748b;
+  line-height: 1.4;
 }
 
 .legalLinks {
   display: flex;
-  gap: 1.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.75rem;
 }
 
 .legalLink {
-  font-family: var(--font-mono), monospace;
-  font-size: 0.76rem;
-  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #475569;
   text-decoration: none;
-  transition: color 0.15s ease;
+  transition: color 0.16s ease;
+  white-space: nowrap;
 }
 
 .legalLink:hover {
@@ -106,35 +72,28 @@
   }
 }
 
-@media (max-width: 1024px) {
-  .footerGrid {
-    grid-template-columns: 1fr 1fr;
-    gap: 2.5rem;
-  }
-
-  .brandColumn {
-    grid-column: span 2;
-  }
-}
-
 @media (max-width: 640px) {
   .footer {
-    padding-top: 3.5rem;
+    padding: 1.75rem 0;
   }
 
-  .footerGrid {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-  }
-
-  .brandColumn {
-    grid-column: span 1;
-  }
-
-  .footerBottom {
+  .footerRow {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.15rem;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .brandMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .legalLinks {
+    gap: 0.75rem 1.25rem;
   }
 }

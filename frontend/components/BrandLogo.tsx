@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface BrandLogoProps {
   variant?: 'dark' | 'light';
   size?: 'sm' | 'md' | 'lg';

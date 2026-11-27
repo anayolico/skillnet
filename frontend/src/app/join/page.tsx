@@ -156,7 +156,15 @@ export default function Join() {
             <div className={styles.checkboxWrapper}>
               <input type="checkbox" className={styles.checkbox} required id="terms" />
               <label htmlFor="terms" className={styles.checkboxText}>
-                I agree to the <strong>Terms of Service</strong> and <strong>Privacy Policy</strong>.
+                I agree to the{' '}
+                <Link href="/terms" target="_blank" rel="noopener noreferrer">
+                  <strong>Terms of Service</strong>
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" target="_blank" rel="noopener noreferrer">
+                  <strong>Privacy Policy</strong>
+                </Link>
+                .
               </label>
             </div>
 

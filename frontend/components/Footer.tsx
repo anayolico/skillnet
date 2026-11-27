@@ -1,74 +1,45 @@
 'use client';
 
-import React from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import BrandLogo from './BrandLogo';
 import styles from './Footer.module.css';
 
-const footerLinks = {
-  Platform: [
-    { label: 'Skill Marketplace', href: '/marketplace' },
-    { label: 'Course Catalog', href: '/catalog' },
-    { label: 'Post a Skill Offer', href: '/create-listing' },
-    { label: 'Membership Plans', href: '/subscriptions' },
-  ],
-  Workspace: [
-    { label: 'Dashboard', href: '/dashboard' },
-    { label: 'Swap Requests & Escrow', href: '/escrow' },
-    { label: 'Live Swap Rooms', href: '/chats' },
-    { label: 'Member Profile', href: '/profile' },
-  ],
-  Account: [
-    { label: 'Start Swapping', href: '/join' },
-    { label: 'Log in', href: '/login' },
-    { label: 'Account Settings', href: '/settings' },
-    { label: 'How It Works', href: '/#how-it-works' },
-  ],
-};
+const policyLinks = [
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Trust & Safety', href: '/trust' },
+  { label: 'Contact', href: '/contact' },
+];
 
 export default function Footer() {
+  const [year, setYear] = useState<number>(() => new Date().getFullYear());
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className={styles.footer}>
       <div className={styles.footerContainer}>
-        <div className={styles.footerGrid}>
-          <div className={styles.brandColumn}>
+        <div className={styles.footerRow}>
+          <div className={styles.brandMeta}>
             <Link href="/" className={styles.logo} aria-label="SkillNet Home">
-              <BrandLogo variant="dark" size="md" />
+              <BrandLogo variant="dark" size="sm" />
             </Link>
-            <p className={styles.brandDesc}>
-              A peer-to-peer professional exchange built for structured knowledge transfer,
-              live mentoring sessions, and verified milestones.
+            <span className={styles.divider} aria-hidden="true" />
+            <p className={styles.copyright} suppressHydrationWarning>
+              © {year} SkillNet. All rights reserved.
             </p>
           </div>
 
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
-              <h4 className={styles.columnTitle}>{category}</h4>
-              <ul className={styles.linkList}>
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <Link href={link.href} className={styles.footerLink}>
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.footerBottom}>
-          <p className={styles.copyright}>
-            © {new Date().getFullYear()} SkillNet. All rights reserved.
-          </p>
-          <div className={styles.legalLinks}>
-            <Link href="/#escrow" className={styles.legalLink}>
-              Escrow Standard
-            </Link>
-            <Link href="/#pricing" className={styles.legalLink}>
-              Membership
-            </Link>
-          </div>
+          <nav className={styles.legalLinks} aria-label="Legal and policy navigation">
+            {policyLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={styles.legalLink}>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       </div>
     </footer>
