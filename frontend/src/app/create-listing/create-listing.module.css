@@ -168,17 +168,21 @@
   background: #122d54;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 639px) {
+  .container {
+    padding: 1.4rem 0.9rem 3rem;
+  }
+
   .skillsGrid {
     grid-template-columns: 1fr;
   }
 
   .formCard {
-    padding: 1.5rem;
+    padding: 1.25rem 1rem;
   }
 
   .actionRow {
-    flex-direction: column;
+    flex-direction: column-reverse;
   }
 
   .publishBtn,

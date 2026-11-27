@@ -44,17 +44,6 @@ export function middleware(request: NextRequest) {
     }
   }
   
-  // Optional: If user is logged in, prevent them from accessing /login or /register
-  const isAuthPath = path === '/login' || path === '/register';
-  if (isAuthPath) {
-    if (token) {
-      if (!isOnboarded) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
-      }
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-  }
-  
   return NextResponse.next();
 }
 

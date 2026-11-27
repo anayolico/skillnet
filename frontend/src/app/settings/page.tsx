@@ -189,8 +189,8 @@ export default function Settings() {
         <AppNav />
         <main className={styles.container}>
           <div className={styles.settingsContent}>
-            <Skeleton width="250px" height="36px" variant="text" style={{ marginBottom: '1rem' }} />
-            <Skeleton width="400px" height="20px" variant="text" style={{ marginBottom: '2rem' }} />
+            <Skeleton width="min(250px, 100%)" height="36px" variant="text" style={{ marginBottom: '1rem' }} />
+            <Skeleton width="min(400px, 100%)" height="20px" variant="text" style={{ marginBottom: '2rem' }} />
             <Skeleton height="280px" variant="rectangular" style={{ marginBottom: '2rem' }} />
             <Skeleton height="200px" variant="rectangular" />
           </div>
@@ -214,7 +214,7 @@ export default function Settings() {
             <div className={styles.settingsCard}>
               <h2 className={styles.cardTitle}>Personal Information</h2>
               
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className={styles.nameGrid}>
                 <div className={styles.formGroup}>
                   <label className={styles.label}>First Name</label>
                   <input

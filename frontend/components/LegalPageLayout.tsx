@@ -11,10 +11,9 @@ interface LegalSectionLink {
 }
 
 interface LegalPageLayoutProps {
-  category: string;
+  category?: string;
   title: string;
-  summary: string;
-  lastUpdated: string;
+  summary?: string;
   sections?: LegalSectionLink[];
   children: ReactNode;
 }
@@ -23,7 +22,6 @@ export default function LegalPageLayout({
   category,
   title,
   summary,
-  lastUpdated,
   sections = [],
   children,
 }: LegalPageLayoutProps) {
@@ -38,26 +36,23 @@ export default function LegalPageLayout({
           </Link>
 
           <header className={styles.header}>
-            <span className={styles.category}>{category}</span>
+            {category && <span className={styles.category}>{category}</span>}
             <h1 className={styles.title}>{title}</h1>
-            <p className={styles.summary}>{summary}</p>
-            <p className={styles.updated}>Last updated: {lastUpdated}</p>
+            {summary && <p className={styles.summary}>{summary}</p>}
           </header>
 
-          <div className={sections.length > 0 ? styles.bodyGrid : styles.bodySingle}>
+          <div className={styles.stack}>
             {sections.length > 0 && (
-              <aside className={styles.toc} aria-label="On this page">
-                <div className={styles.tocInner}>
-                  <div className={styles.tocTitle}>Contents</div>
-                  <nav className={styles.tocList}>
-                    {sections.map((sec) => (
-                      <a key={sec.id} href={`#${sec.id}`} className={styles.tocLink}>
-                        {sec.label}
-                      </a>
-                    ))}
-                  </nav>
+              <nav className={styles.tocCard} aria-label="On this page">
+                <span className={styles.tocTitle}>Contents</span>
+                <div className={styles.tocRow}>
+                  {sections.map((sec) => (
+                    <a key={sec.id} href={`#${sec.id}`} className={styles.tocLink}>
+                      {sec.label}
+                    </a>
+                  ))}
                 </div>
-              </aside>
+              </nav>
             )}
 
             <article className={styles.content}>{children}</article>

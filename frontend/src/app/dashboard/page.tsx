@@ -41,8 +41,8 @@ export default function Dashboard() {
           <main className={styles.mainContent}>
             <div className={styles.welcomeSection}>
               <Skeleton width="150px" height="20px" variant="text" style={{ marginBottom: '1rem' }} />
-              <Skeleton width="400px" height="40px" variant="rectangular" style={{ marginBottom: '1rem' }} />
-              <Skeleton width="600px" height="24px" variant="text" />
+              <Skeleton width="min(400px, 100%)" height="40px" variant="rectangular" style={{ marginBottom: '1rem' }} />
+              <Skeleton width="min(600px, 100%)" height="24px" variant="text" />
             </div>
             
             <div className={styles.statGrid} style={{ marginTop: '2rem' }}>
@@ -52,7 +52,7 @@ export default function Dashboard() {
             </div>
 
             <div style={{ marginTop: '4rem' }}>
-              <Skeleton width="300px" height="32px" variant="text" style={{ marginBottom: '2rem' }} />
+              <Skeleton width="min(300px, 100%)" height="32px" variant="text" style={{ marginBottom: '2rem' }} />
               <div className={styles.swapsGrid}>
                 <Skeleton height="250px" variant="rectangular" />
                 <Skeleton height="250px" variant="rectangular" />

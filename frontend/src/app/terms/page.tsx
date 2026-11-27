@@ -19,10 +19,9 @@ const SECTIONS = [
 export default function TermsOfServicePage() {
   return (
     <LegalPageLayout
-      category="Legal"
+      category=""
       title="Terms of Service"
       summary="Clear terms for participating in peer-to-peer skill exchanges, publishing offers, and maintaining a trusted SkillNet account."
-      lastUpdated="November 2026"
       sections={SECTIONS}
     >
       <section id="eligibility">

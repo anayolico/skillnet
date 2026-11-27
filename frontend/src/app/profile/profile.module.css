@@ -97,7 +97,7 @@
 
 .mainLayout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
   gap: 1.5rem;
 }
 
@@ -195,7 +195,7 @@
   color: #047857;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1023px) {
   .mainLayout {
     grid-template-columns: 1fr;
   }
@@ -209,5 +209,42 @@
     height: 92px;
     left: 1.25rem;
     bottom: -28px;
+  }
+}
+
+@media (max-width: 639px) {
+  .container {
+    padding: 1.25rem 0.9rem 3.5rem;
+  }
+
+  .coverImage {
+    height: 145px;
+    margin-bottom: 3rem;
+  }
+
+  .profileAvatar {
+    width: 80px;
+    height: 80px;
+    left: 1rem;
+    bottom: -26px;
+  }
+
+  .headerActions {
+    top: 0.85rem;
+    right: 0.85rem;
+    gap: 0.5rem;
+  }
+
+  .editBtn {
+    padding: 0.48rem 0.82rem;
+    font-size: 0.78rem;
+  }
+
+  .userName {
+    font-size: 1.6rem;
+  }
+
+  .card {
+    padding: 1.2rem;
   }
 }

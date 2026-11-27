@@ -37,8 +37,15 @@
 
 .mainLayout {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 240px minmax(0, 1fr);
   gap: 1.75rem;
+}
+
+@media (max-width: 1199px) {
+  .mainLayout {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 1.25rem;
+  }
 }
 
 .sidebar {
@@ -98,6 +105,12 @@
   flex-direction: column;
   gap: 0.45rem;
   margin-bottom: 1.25rem;
+}
+
+.nameGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 .label {
@@ -215,7 +228,7 @@
   margin-bottom: 1.5rem;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .header {
     flex-direction: column;
     align-items: flex-start;
@@ -228,6 +241,7 @@
   .sidebar {
     flex-direction: row;
     overflow-x: auto;
+    padding-bottom: 0.25rem;
   }
 
   .navItem {
@@ -236,6 +250,34 @@
 
   .formCard {
     padding: 1.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .container {
+    padding: 1.4rem 0.9rem;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .formCard {
+    padding: 1.2rem 1rem;
+  }
+
+  .nameGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer {
+    flex-direction: column-reverse;
+  }
+
+  .saveBtn,
+  .cancelBtn {
+    width: 100%;
+    justify-content: center;
   }
 }
 

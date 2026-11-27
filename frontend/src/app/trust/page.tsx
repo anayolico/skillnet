@@ -19,10 +19,9 @@ const SECTIONS = [
 export default function TrustAndSafetyPage() {
   return (
     <LegalPageLayout
-      category="Escrow & Trust Standard"
+      category=""
       title="Trust & Safety"
       summary="How SkillNet protects every peer-to-peer knowledge exchange through structured proposals, private rooms, and milestone accountability."
-      lastUpdated="November 2026"
       sections={SECTIONS}
     >
       <section id="profile-standards">

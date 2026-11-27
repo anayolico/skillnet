@@ -5,9 +5,8 @@ import {
   ArrowLeftRight,
   CheckCircle2,
   Clock,
-  ShieldCheck,
-  Video,
   Code2,
+  MessageSquare,
 } from 'lucide-react';
 import styles from './SwapExplorer.module.css';
 
@@ -47,7 +46,7 @@ const SWAP_TRACKS: SwapTrack[] = [
     partnerRole: 'Cloud Infrastructure Lead',
     offering: ['Kubernetes', 'AWS', 'Terraform'],
     seeking: ['Financial Analysis', 'Venture Capital'],
-    format: 'Live Video Call',
+    format: '1-on-1 Peer Session',
     duration: '5 Hour Mini-Course',
     milestones: ['Cluster resilience workshop complete', 'Unit economics model walkthrough'],
     completedMilestones: 1,
@@ -60,7 +59,7 @@ const SWAP_TRACKS: SwapTrack[] = [
     partnerRole: 'Applied ML Engineer',
     offering: ['AI Engineering', 'Python', 'Machine Learning'],
     seeking: ['Product Management', 'Strategic Planning'],
-    format: 'Live Video Call',
+    format: 'Guided Workshop',
     duration: '2 Hour Deep Dive',
     milestones: ['Evaluation pipeline session complete', 'Roadmap prioritization review'],
     completedMilestones: 1,
@@ -119,18 +118,13 @@ export default function SwapExplorer() {
                 <div className={styles.partnerRole}>{track.partnerRole}</div>
               </div>
             </div>
-
-            <span className={styles.verifiedTag}>
-              <ShieldCheck size={14} />
-              Escrow Protected
-            </span>
           </div>
 
           <div className={styles.titleBlock}>
             <h3 className={styles.listingTitle}>{track.listingTitle}</h3>
             <div className={styles.metaStrip}>
               <span className={styles.metaItem}>
-                {track.format.includes('Video') ? <Video size={14} /> : <Code2 size={14} />}
+                {track.format.includes('Review') ? <Code2 size={14} /> : <MessageSquare size={14} />}
                 {track.format}
               </span>
               <span className={styles.metaDot} aria-hidden="true" />

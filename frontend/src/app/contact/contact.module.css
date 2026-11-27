@@ -1,20 +1,20 @@
 .layout {
   display: flex;
   flex-direction: column;
-  gap: 2.25rem;
+  gap: 1.5rem;
 }
 
 .channels {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .channelCard {
   background: #f7f9fc;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 1.25rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -56,7 +56,7 @@
 
 .formBox {
   border-top: 1px solid #eef2f7;
-  padding-top: 2rem;
+  padding-top: 1.5rem;
 }
 
 .form {
@@ -109,7 +109,7 @@
 }
 
 .submitBtn {
-  align-self: flex-start;
+  width: 100%;
   background: #0a1f3c;
   color: #ffffff;
   padding: 0.82rem 1.65rem;
@@ -161,12 +161,30 @@
   font-weight: 600;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
+  .layout {
+    gap: 2.25rem;
+  }
+
   .channels {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .channelCard {
+    padding: 1.25rem;
+  }
+
+  .formBox {
+    padding-top: 2rem;
   }
 
   .row {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .submitBtn {
+    width: auto;
+    align-self: flex-start;
   }
 }

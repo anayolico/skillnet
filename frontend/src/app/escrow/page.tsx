@@ -120,7 +120,7 @@ export default function Escrow() {
           </div>
         </div>
 
-        <div className="reveal" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+        <div className="reveal" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '2rem' }}>
           <div className={styles.tabContainer}>
             <button 
               className={`${styles.tabBtn} ${activeTab === 'received' ? styles.activeTab : ''}`}
@@ -205,10 +205,10 @@ export default function Escrow() {
 
                   <div className={styles.contractFooter}>
                     {activeTab === 'received' && isPending ? (
-                      <div style={{ display: 'flex', gap: '0.75rem', width: '100%' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', width: '100%' }}>
                         <button 
                           className={`${styles.secondaryBtn} click-scale`} 
-                          style={{ flex: 1, borderColor: '#ef4444', color: '#ef4444' }}
+                          style={{ flex: '1 1 130px', borderColor: '#ef4444', color: '#ef4444' }}
                           onClick={() => handleUpdateStatus(req.id, 'declined')}
                           disabled={!!processingAction}
                         >
@@ -216,7 +216,7 @@ export default function Escrow() {
                         </button>
                         <button 
                           className={`${styles.actionBtn} click-scale`} 
-                          style={{ flex: 1, background: '#047857', color: '#ffffff' }}
+                          style={{ flex: '1 1 130px', background: '#047857', color: '#ffffff' }}
                           onClick={() => handleUpdateStatus(req.id, 'accepted')}
                           disabled={!!processingAction}
                         >
@@ -224,7 +224,7 @@ export default function Escrow() {
                         </button>
                       </div>
                     ) : isAccepted ? (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', width: '100%' }}>
                          <span style={{ fontSize: '0.85rem', color: '#059669', display: 'flex', alignItems: 'center', gap: '4px' }}>
                            <Check size={14} /> Protocol Established
                          </span>

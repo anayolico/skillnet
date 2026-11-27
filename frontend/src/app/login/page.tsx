@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { Shield, Linkedin, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Shield, Linkedin, Eye, EyeOff, ArrowRight, ArrowLeft } from 'lucide-react';
 import BrandLogo from '../../../components/BrandLogo';
 import styles from '../auth.module.css';
 
@@ -70,6 +70,9 @@ export default function Login() {
 
       {/* Main Form Side */}
       <div className={styles.authContent}>
+        <Link href="/" className={styles.backHomeLink}>
+          <ArrowLeft size={15} /> Back
+        </Link>
         <div className={styles.authCard}>
           <div className={styles.logo}>
             <Link href="/" aria-label="SkillNet Home">
@@ -77,11 +80,7 @@ export default function Login() {
             </Link>
           </div>
 
-          <span className={styles.headerTag}>Member Access</span>
           <h1 className={styles.title}>Welcome back.</h1>
-          <p className={styles.subtitle}>
-            Sign in to access your marketplace listings, escrow requests, and live rooms.
-          </p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
             {error && <div className={styles.errorAlert} role="alert">{error}</div>}

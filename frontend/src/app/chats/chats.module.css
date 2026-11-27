@@ -306,10 +306,27 @@
   font-size: 0.9rem;
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .sidebar {
+    width: 270px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .messagesRoot {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+
+  .chatContainer {
+    border-left: none;
+    border-right: none;
+  }
+
   .sidebar,
-  .chatMain {
+  .chatMain,
+  .mainChat {
     width: 100%;
+    border-right: none;
   }
 
   .mobileHidden {
@@ -319,5 +336,45 @@
   .backBtn {
     display: flex;
     align-items: center;
+  }
+}
+
+@media (max-width: 639px) {
+  .sidebarHeader {
+    padding: 1rem 1.1rem;
+  }
+
+  .chatItem {
+    padding: 0.9rem 1.1rem;
+  }
+
+  .chatHeader {
+    padding: 0.8rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .proposeBtn {
+    padding: 0.48rem 0.8rem;
+    font-size: 0.78rem;
+  }
+
+  .chatsArea,
+  .messageList {
+    padding: 1rem;
+  }
+
+  .message {
+    max-width: 85%;
+    font-size: 0.9rem;
+  }
+
+  .inputArea {
+    padding: 0.75rem 0.9rem;
+    gap: 0.55rem;
+  }
+
+  .inputField {
+    padding: 0.68rem 0.9rem;
+    font-size: 0.9rem;
   }
 }

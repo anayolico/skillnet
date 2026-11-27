@@ -19,11 +19,11 @@ import styles from './landing.module.css';
 
 const DISCIPLINES = [
   { label: 'Engineering & Systems', icon: Code2 },
-  { label: 'Product & UI Design', icon: Palette },
-  { label: 'AI & Machine Learning', icon: Cpu },
+  { label: 'Product & UI', icon: Palette },
+  { label: 'AI Engineering', icon: Cpu },
   { label: 'Cloud & DevOps', icon: Server },
   { label: 'Financial Strategy', icon: LineChart },
-  { label: 'Growth & Operations', icon: Layers },
+  { label: 'Growth & Ops', icon: Layers },
 ];
 
 const WORKFLOW_STEPS = [
@@ -86,7 +86,7 @@ export default function Home() {
                   Master what&apos;s next.
                 </h1>
                 <p className={styles.heroSubtext}>
-                  Swap live sessions and portfolio reviews with vetted peers. Zero tuition,
+                  Swap 1-on-1 sessions and portfolio reviews with vetted peers. Zero tuition,
                   verified milestones.
                 </p>
                 <div className={styles.heroActions}>
@@ -188,8 +188,8 @@ export default function Home() {
                 <div className={styles.bentoCopy}>
                   <h3 className={styles.bentoTitleLight}>Milestone-gated completion</h3>
                   <p className={styles.bentoBodyLight}>
-                    Both partners agree on deliverables upfront across live calls or code and design
-                    reviews. Completion is logged only when both sides confirm.
+                    Both partners agree on deliverables upfront across 1-on-1 sessions or code and
+                    design reviews. Completion is logged only when both sides confirm.
                   </p>
                 </div>
               </ScrollReveal>

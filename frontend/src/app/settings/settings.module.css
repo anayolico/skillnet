@@ -58,6 +58,12 @@
   margin-bottom: 1.25rem;
 }
 
+.nameGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 .label {
   display: block;
   font-size: 0.84rem;
@@ -303,7 +309,7 @@ input:checked + .slider:before {
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .container {
     flex-direction: column;
     padding-top: 1.75rem;
@@ -312,5 +318,39 @@ input:checked + .slider:before {
   .settingsCard,
   .modalCard {
     padding: 1.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .container {
+    padding: 1.4rem 0.9rem 3.5rem;
+    gap: 1.25rem;
+  }
+
+  .pageTitle {
+    font-size: 1.6rem;
+  }
+
+  .settingsCard,
+  .modalCard {
+    padding: 1.2rem 1rem;
+  }
+
+  .nameGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .saveBtn {
+    width: 100%;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelModalBtn,
+  .deleteDangerBtn {
+    width: 100%;
+    text-align: center;
   }
 }

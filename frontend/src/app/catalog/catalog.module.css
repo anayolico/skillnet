@@ -7,12 +7,18 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem;
+  padding: 1.5rem 0.9rem 3rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    padding: 2.25rem 1.5rem 4rem;
+  }
 }
 
 @media (min-width: 768px) {
   .container {
-    padding: 3rem 2rem;
+    padding: 3rem 2rem 4.5rem;
   }
 }
 
@@ -105,8 +111,16 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
-  width: max-content;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .sortDropdown {
+    width: max-content;
+    justify-content: center;
+  }
 }
 
 .filterPills {
@@ -147,15 +161,15 @@
   margin-top: 2.25rem;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .coursesGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   .coursesGrid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

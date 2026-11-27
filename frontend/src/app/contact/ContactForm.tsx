@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { CheckCircle2, Mail, ShieldCheck, CreditCard } from 'lucide-react';
+import { CheckCircle2, Mail, ShieldCheck } from 'lucide-react';
 import styles from './contact.module.css';
 
 export default function ContactForm() {
@@ -35,16 +35,7 @@ export default function ContactForm() {
           </div>
           <h3>Swap &amp; Trust Mediation</h3>
           <p>Report conduct issues or request review on an active exchange milestone.</p>
-          <span className={styles.channelMeta}>trust@skillnet.app</span>
-        </div>
-
-        <div className={styles.channelCard}>
-          <div className={styles.channelIcon}>
-            <CreditCard size={18} />
-          </div>
-          <h3>Billing &amp; Professional Tier</h3>
-          <p>Assistance with Flutterwave receipts, plan upgrades, or team access.</p>
-          <span className={styles.channelMeta}>billing@skillnet.app</span>
+          <span className={styles.channelMeta}>support@skillnet.app</span>
         </div>
       </div>
 

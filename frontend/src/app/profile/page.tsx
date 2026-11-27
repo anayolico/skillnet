@@ -133,7 +133,7 @@ export default function Profile() {
             </div>
 
             <div className={styles.card}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
                 <h2 className={styles.sectionTitle} style={{ margin: 0 }}>
                   <History size={20} style={{ marginRight: '8px' }} /> Verified Exchange History
                 </h2>

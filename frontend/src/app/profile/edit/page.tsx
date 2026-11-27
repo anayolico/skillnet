@@ -192,7 +192,7 @@ export default function EditProfile() {
               {activeTab === 'profile' && (
                 <div className="animate-fade-in">
                   <h2 className={styles.sectionTitle}>Basic Information</h2>
-                  <div className={styles.nameGrid} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                  <div className={styles.nameGrid}>
                     <div className={styles.formGroup}>
 
                       <label className={styles.label}>First Name</label>

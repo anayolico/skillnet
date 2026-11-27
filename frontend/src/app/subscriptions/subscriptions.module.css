@@ -37,7 +37,7 @@
 
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.75rem;
   align-items: stretch;
 }
@@ -205,7 +205,7 @@
 
 .trustGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2.25rem;
 }
 
@@ -228,13 +228,60 @@
   line-height: 1.6;
 }
 
-@media (max-width: 900px) {
-  .pricingGrid,
-  .trustGrid {
-    grid-template-columns: 1fr;
+@media (min-width: 1024px) and (max-width: 1240px) {
+  .pricingGrid {
+    gap: 1.25rem;
   }
 
   .priceCard {
     padding: 1.75rem;
+  }
+}
+
+@media (max-width: 899px) {
+  .pricingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .trustGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .priceCard {
+    padding: 1.75rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .container {
+    padding: 1.5rem 0.9rem 3.5rem;
+  }
+
+  .hero {
+    margin-bottom: 2rem;
+  }
+
+  .priceCard {
+    padding: 1.4rem 1.15rem;
+  }
+
+  .featuredBadge {
+    position: static;
+    align-self: flex-start;
+    margin-bottom: 0.75rem;
+  }
+
+  .amount {
+    font-size: 2.45rem;
+  }
+
+  .trustSection {
+    margin-top: 3rem;
+    padding-top: 2rem;
+  }
+
+  .trustGrid {
+    grid-template-columns: 1fr;
   }
 }

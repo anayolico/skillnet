@@ -10,12 +10,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <LegalPageLayout
-      category="Support"
-      title="Contact SkillNet"
-      summary="Reach our team directly for account questions, swap mediation, billing support, or privacy inquiries."
-      lastUpdated="November 2026"
-    >
+    <LegalPageLayout title="Contact SkillNet">
       <ContactForm />
     </LegalPageLayout>
   );

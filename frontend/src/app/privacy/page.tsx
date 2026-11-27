@@ -20,10 +20,9 @@ const SECTIONS = [
 export default function PrivacyPolicyPage() {
   return (
     <LegalPageLayout
-      category="Legal"
+      category=""
       title="Privacy Policy"
       summary="How SkillNet handles your profile data, skill listings, real-time swap messages, and membership billing with clarity and restraint."
-      lastUpdated="November 2026"
       sections={SECTIONS}
     >
       <section id="information-collected">

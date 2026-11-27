@@ -248,16 +248,47 @@
   font-weight: 500;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 639px) {
+  .container {
+    padding: 1.25rem 0.85rem 2.5rem;
+  }
+
+  .progressBar {
+    margin-bottom: 1.2rem;
+  }
+
   .content {
-    padding: 1.75rem 1.25rem;
+    padding: 1.35rem 1.1rem;
+    min-height: auto;
+    border-radius: 14px;
   }
 
   .title {
-    font-size: 1.65rem;
+    font-size: 1.55rem;
+  }
+
+  .subtitle {
+    font-size: 0.92rem;
+    margin-bottom: 1.35rem;
+  }
+
+  .tagBtn {
+    padding: 0.45rem 0.82rem;
+    font-size: 0.8rem;
   }
 
   .optionsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .actionRow {
+    gap: 0.65rem;
+    padding-top: 1.25rem;
+  }
+
+  .backBtn,
+  .nextBtn {
+    padding: 0.7rem 1rem;
+    font-size: 0.86rem;
   }
 }

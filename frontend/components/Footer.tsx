@@ -23,15 +23,15 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.footerContainer}>
         <div className={styles.footerRow}>
-          <div className={styles.brandMeta}>
-            <Link href="/" className={styles.logo} aria-label="SkillNet Home">
-              <BrandLogo variant="dark" size="sm" />
-            </Link>
-            <span className={styles.divider} aria-hidden="true" />
-            <p className={styles.copyright} suppressHydrationWarning>
-              © {year} SkillNet. All rights reserved.
-            </p>
-          </div>
+          <Link href="/" className={styles.logo} aria-label="SkillNet Home">
+            <BrandLogo variant="dark" size="sm" />
+          </Link>
+
+          <span className={styles.divider} aria-hidden="true" />
+
+          <p className={styles.copyright} suppressHydrationWarning>
+            © {year} SkillNet. All rights reserved.
+          </p>
 
           <nav className={styles.legalLinks} aria-label="Legal and policy navigation">
             {policyLinks.map((link) => (

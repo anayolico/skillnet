@@ -30,7 +30,7 @@
 
 .welcomeSection > div {
   flex: 1;
-  min-width: 280px;
+  min-width: 0;
 }
 
 .welcomeSubtitle {
@@ -434,14 +434,81 @@
   color: #ffffff;
 }
 
-@media (max-width: 1024px) {
+/* Tablet & Small Desktop (with 268px sidebar at 1024px-1279px) */
+@media (max-width: 1279px) {
   .mainContent {
-    padding: 1.75rem 1.25rem 3rem;
+    padding: 2rem 1.75rem 3.5rem;
+  }
+
+  .statGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .momentumCard {
+    grid-column: span 2;
+  }
+
+  .swapsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .coursesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tablet Portrait (640px - 1023px, no left sidebar) */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .mainContent {
+    padding: 1.75rem 1.5rem 3rem;
+  }
+
+  .swapsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile (< 640px) */
+@media (max-width: 639px) {
+  .mainContent {
+    padding: 1.25rem 0.9rem 2.5rem;
+  }
+
+  .welcomeSection {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ctaBtn {
+    width: 100%;
+    text-align: center;
   }
 
   .statGrid,
   .swapsGrid,
   .coursesGrid {
     grid-template-columns: 1fr;
+  }
+
+  .momentumCard {
+    grid-column: span 1;
+  }
+
+  .card,
+  .swapCard {
+    padding: 1.2rem;
+  }
+
+  .swapHeader {
+    flex-wrap: wrap;
+  }
+
+  .swapData {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .swapActions {
+    flex-direction: column;
   }
 }

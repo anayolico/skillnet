@@ -39,6 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${plusJakarta.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className={dmSans.className}>
