@@ -1,22 +1,47 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+import {
+  buildContactNotificationEmail,
+  buildPasswordChangedEmail,
+  buildPasswordResetEmail,
+  buildSwapAcceptedEmail,
+  buildSwapRequestEmail,
+  buildWelcomeEmail,
+} from './emailTemplates';
 
-interface SendPasswordResetParams {
+export interface SendEmailPayload {
   to: string;
-  firstName?: string | null;
-  resetUrl: string;
-  expiresInMinutes: number;
+  subject: string;
+  text: string;
+  html: string;
+  replyTo?: string;
 }
 
-function getTransporter() {
+export interface SendEmailResult {
+  delivered: boolean;
+  provider: 'resend' | 'smtp' | 'terminal-only';
+  id?: string;
+}
+
+let cachedResend: Resend | null = null;
+
+function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) return null;
+  if (!cachedResend) {
+    cachedResend = new Resend(apiKey);
+  }
+  return cachedResend;
+}
+
+function getSmtpTransporter() {
   const host = process.env.SMTP_HOST?.trim();
   const user = process.env.SMTP_USER?.trim();
   const pass = process.env.SMTP_PASS?.trim();
   const port = Number(process.env.SMTP_PORT || 587);
   const secure = process.env.SMTP_SECURE === 'true' || port === 465;
 
-  if (!host || !user || !pass) {
-    return null;
-  }
+  if (!host || !user || !pass) return null;
 
   return nodemailer.createTransport({
     host,
@@ -26,90 +51,167 @@ function getTransporter() {
   });
 }
 
-export async function sendPasswordResetEmail({
-  to,
-  firstName,
-  resetUrl,
-  expiresInMinutes,
-}: SendPasswordResetParams): Promise<{ delivered: boolean; mode: 'smtp' | 'dev-log' | 'unconfigured' }> {
-  const greetingName = firstName?.trim() ? `Hi ${firstName.trim()},` : 'Hi there,';
-  const from = process.env.MAIL_FROM?.trim() || 'SkillNet Security <no-reply@skillnet.app>';
-  const subject = 'Reset your SkillNet password';
+function shouldPrintToTerminal(): boolean {
+  if (process.env.EMAIL_DEV_LOG === 'false') return false;
+  if (process.env.EMAIL_DEV_LOG === 'true') return true;
+  return process.env.NODE_ENV !== 'production';
+}
 
-  const text = [
-    greetingName,
-    '',
-    'We received a request to reset your SkillNet password.',
-    `Use the link below within ${expiresInMinutes} minutes to set a new password:`,
-    '',
-    resetUrl,
-    '',
-    'If you did not request a password reset, you can safely ignore this email. Your password will remain unchanged.',
-    '',
-    '— SkillNet Security',
-  ].join('\n');
+function logEmailToTerminal(
+  payload: SendEmailPayload,
+  from: string,
+  statusLabel: string
+) {
+  console.log('\n==================== [SKILLNET EMAIL] ====================');
+  console.log(`Status  : ${statusLabel}`);
+  console.log(`From    : ${from}`);
+  console.log(`To      : ${payload.to}`);
+  if (payload.replyTo) console.log(`Reply-To: ${payload.replyTo}`);
+  console.log(`Subject : ${payload.subject}`);
+  console.log('----------------------------------------------------------');
+  console.log(payload.text);
+  console.log('==========================================================\n');
+}
 
-  const html = `
-<!doctype html>
-<html lang="en">
-  <body style="margin:0;padding:0;background-color:#f7f9fc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
-      <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border:1px solid #e2e8f0;border-top:3px solid #047857;border-radius:14px;padding:32px;">
-            <tr>
-              <td>
-                <div style="font-size:18px;font-weight:800;color:#0a1f3c;letter-spacing:-0.02em;margin-bottom:20px;">
-                  SkillNet
-                </div>
-                <h1 style="margin:0 0 12px;font-size:22px;line-height:1.25;color:#0a1f3c;">
-                  Reset your password
-                </h1>
-                <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#334155;">
-                  ${greetingName} We received a request to reset the password on your SkillNet account.
-                </p>
-                <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#334155;">
-                  Click the button below to choose a new password. This link expires in <strong>${expiresInMinutes} minutes</strong> and can only be used once.
-                </p>
-                <a href="${resetUrl}" style="display:inline-block;background-color:#0a1f3c;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:10px;">
-                  Reset Password
-                </a>
-                <p style="margin:24px 0 8px;font-size:13px;line-height:1.5;color:#64748b;">
-                  Or copy and paste this link into your browser:
-                </p>
-                <p style="margin:0 0 24px;font-size:12px;line-height:1.5;word-break:break-all;color:#047857;">
-                  ${resetUrl}
-                </p>
-                <hr style="border:none;border-top:1px solid #eef2f7;margin:20px 0;" />
-                <p style="margin:0;font-size:12px;line-height:1.5;color:#64748b;">
-                  If you did not request this reset, you can safely ignore this email. Your account stays protected.
-                </p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>
-  `.trim();
+/**
+ * Unified email dispatcher:
+ * 1. Uses Resend HTTPS API when RESEND_API_KEY is configured (ideal for Render hosting).
+ * 2. Falls back to SMTP (nodemailer) if SMTP_* vars are configured.
+ * 3. Prints every email (including reset links) cleanly in the terminal in dev / when EMAIL_DEV_LOG=true.
+ */
+export async function sendEmail(payload: SendEmailPayload): Promise<SendEmailResult> {
+  const from =
+    process.env.MAIL_FROM?.trim() ||
+    (process.env.RESEND_API_KEY ? 'SkillNet <onboarding@resend.dev>' : 'SkillNet <no-reply@skillnet.app>');
 
-  const transporter = getTransporter();
+  const resend = getResendClient();
+  if (resend) {
+    try {
+      const { data, error } = await resend.emails.send({
+        from,
+        to: [payload.to],
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+        ...(payload.replyTo ? { replyTo: payload.replyTo } : {}),
+      });
 
+      if (error) {
+        console.warn('[mail][resend] Delivery warning:', error.message);
+        if (shouldPrintToTerminal()) {
+          logEmailToTerminal(payload, from, `RESEND FALLBACK (${error.message})`);
+        }
+        return { delivered: false, provider: 'terminal-only' };
+      }
+
+      if (shouldPrintToTerminal()) {
+        logEmailToTerminal(payload, from, `SENT VIA RESEND (id: ${data?.id || 'ok'})`);
+      }
+      return { delivered: true, provider: 'resend', id: data?.id };
+    } catch (err: any) {
+      console.error('[mail][resend] Error:', err?.message || err);
+      if (shouldPrintToTerminal()) {
+        logEmailToTerminal(payload, from, 'RESEND ERROR — TERMINAL PREVIEW');
+      }
+      return { delivered: false, provider: 'terminal-only' };
+    }
+  }
+
+  const transporter = getSmtpTransporter();
   if (transporter) {
-    await transporter.sendMail({ from, to, subject, text, html });
-    return { delivered: true, mode: 'smtp' };
+    try {
+      const info = await transporter.sendMail({
+        from,
+        to: payload.to,
+        subject: payload.subject,
+        text: payload.text,
+        html: payload.html,
+        ...(payload.replyTo ? { replyTo: payload.replyTo } : {}),
+      });
+      if (shouldPrintToTerminal()) {
+        logEmailToTerminal(payload, from, `SENT VIA SMTP (id: ${info.messageId})`);
+      }
+      return { delivered: true, provider: 'smtp', id: info.messageId };
+    } catch (err: any) {
+      console.error('[mail][smtp] Error:', err?.message || err);
+      if (shouldPrintToTerminal()) {
+        logEmailToTerminal(payload, from, 'SMTP ERROR — TERMINAL PREVIEW');
+      }
+      return { delivered: false, provider: 'terminal-only' };
+    }
   }
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.log('\n============================================================');
-    console.log(`[mail][dev] Password reset requested for: ${to}`);
-    console.log(`[mail][dev] Reset link (valid ${expiresInMinutes} min):`);
-    console.log(resetUrl);
-    console.log('============================================================\n');
-    return { delivered: true, mode: 'dev-log' };
-  }
+  // No provider configured yet (local dev before domain/API setup)
+  logEmailToTerminal(payload, from, 'LOCAL TERMINAL PREVIEW (no RESEND_API_KEY set yet)');
+  return { delivered: process.env.NODE_ENV !== 'production', provider: 'terminal-only' };
+}
 
-  console.warn('[mail] SMTP is not configured in production; password reset email was not sent.');
-  return { delivered: false, mode: 'unconfigured' };
+export async function sendPasswordResetEmail(params: {
+  to: string;
+  firstName?: string | null;
+  resetUrl: string;
+  expiresInMinutes: number;
+}) {
+  const content = buildPasswordResetEmail(params);
+  return sendEmail({ to: params.to, ...content });
+}
+
+export async function sendPasswordChangedEmail(params: {
+  to: string;
+  firstName?: string | null;
+  loginUrl: string;
+}) {
+  const content = buildPasswordChangedEmail({
+    firstName: params.firstName,
+    changedAt: new Date(),
+    loginUrl: params.loginUrl,
+  });
+  return sendEmail({ to: params.to, ...content });
+}
+
+export async function sendWelcomeEmail(params: {
+  to: string;
+  firstName?: string | null;
+  onboardingUrl: string;
+}) {
+  const content = buildWelcomeEmail(params);
+  return sendEmail({ to: params.to, ...content });
+}
+
+export async function sendSwapRequestEmail(params: {
+  to: string;
+  recipientName?: string | null;
+  requesterName: string;
+  listingTitle: string;
+  message?: string | null;
+  escrowUrl: string;
+}) {
+  const content = buildSwapRequestEmail(params);
+  return sendEmail({ to: params.to, ...content });
+}
+
+export async function sendSwapAcceptedEmail(params: {
+  to: string;
+  requesterName?: string | null;
+  partnerName: string;
+  listingTitle: string;
+  chatUrl: string;
+}) {
+  const content = buildSwapAcceptedEmail(params);
+  return sendEmail({ to: params.to, ...content });
+}
+
+export async function sendContactSupportEmail(params: {
+  name: string;
+  email: string;
+  topic: string;
+  message: string;
+}) {
+  const supportInbox = process.env.SUPPORT_INBOX_EMAIL?.trim() || 'support@skillnet.app';
+  const content = buildContactNotificationEmail(params);
+  return sendEmail({
+    to: supportInbox,
+    replyTo: params.email,
+    ...content,
+  });
 }

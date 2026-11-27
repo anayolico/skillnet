@@ -2,19 +2,66 @@
 
 import { useState, type FormEvent } from 'react';
 import { CheckCircle2, Mail, ShieldCheck } from 'lucide-react';
+import { useToast } from '@/components/Toast';
+import { getApiUrl } from '@/src/utils/config';
+import { validateEmail, validateFullName } from '@/src/utils/validation';
 import styles from './contact.module.css';
 
 export default function ContactForm() {
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [topic, setTopic] = useState('General Support');
   const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !message.trim()) return;
-    setSubmitted(true);
+
+    const nameCheck = validateFullName(name);
+    if (!nameCheck.valid) {
+      showToast(nameCheck.error, 'error');
+      return;
+    }
+
+    const emailCheck = validateEmail(email);
+    if (!emailCheck.valid) {
+      showToast(emailCheck.error, 'error');
+      return;
+    }
+
+    if (message.trim().length < 10) {
+      showToast('Please enter a message of at least 10 characters.', 'error');
+      return;
+    }
+
+    setSending(true);
+    try {
+      const res = await fetch(`${getApiUrl()}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${nameCheck.firstName} ${nameCheck.lastName}`.trim(),
+          email: emailCheck.value,
+          topic,
+          message: message.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showToast(data.error || 'Could not send message. Please try again.', 'error');
+        return;
+      }
+
+      setSubmitted(true);
+      showToast('Message sent to SkillNet Support.', 'success');
+    } catch {
+      showToast('Network error while sending message.', 'error');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -60,7 +107,7 @@ export default function ContactForm() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className={styles.form}>
+          <form onSubmit={handleSubmit} className={styles.form} noValidate>
             <div className={styles.row}>
               <div className={styles.field}>
                 <label htmlFor="contact-name" className={styles.label}>
@@ -121,12 +168,13 @@ export default function ContactForm() {
                 placeholder="Share context, listing title, or account details so we can help quickly..."
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                maxLength={3000}
                 required
               />
             </div>
 
-            <button type="submit" className={styles.submitBtn}>
-              Send message
+            <button type="submit" className={styles.submitBtn} disabled={sending}>
+              {sending ? 'Sending...' : 'Send message'}
             </button>
           </form>
         )}

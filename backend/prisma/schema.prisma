@@ -172,3 +172,17 @@ model Transaction {
   @@index([userId])
   @@index([txRef])
 }
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  topic     String   @default("General Support")
+  message   String
+  source    String   @default("contact_form")
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+}
