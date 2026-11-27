@@ -1,121 +1,316 @@
-/* Nav is handled globally by AppNav component */
-
 .settingsRoot {
-  min-height: 100vh;
-  background-color: #f1f5f9;
-  font-family: var(--font-inter), sans-serif;
+  min-height: 100dvh;
+  background-color: #f7f9fc;
   color: #0f172a;
 }
 
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 3rem 1.5rem 8rem;
+  padding: 2.75rem 1.5rem 5rem;
   display: flex;
-  gap: 3rem;
+  gap: 2.5rem;
 }
 
-@media (min-width: 1024px) {
-  .container {
-    max-width: none;
-    margin: 0;
-    padding: 3rem 3rem 8rem;
-  }
+.settingsContent {
+  flex: 1;
+  min-width: 0;
 }
 
-/* Settings Side Menu */
-.sideMenu {
-  width: 250px;
+.pageHeader {
+  margin-bottom: 2rem;
+}
+
+.pageTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0a1f3c;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.35rem;
+}
+
+.pageSubtitle {
+  color: #475569;
+  font-size: 0.96rem;
+}
+
+.settingsCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.cardTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0a1f3c;
+  margin-bottom: 1.35rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.45rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.8rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.94rem;
+  color: #0f172a;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: #0a1f3c;
+  box-shadow: 0 0 0 3px rgba(10, 31, 60, 0.08);
+}
+
+.toggleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.toggleRow:last-child {
+  border-bottom: none;
+}
+
+.toggleInfo {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.2rem;
+}
+
+.toggleTitle {
+  font-weight: 700;
+  color: #0a1f3c;
+  font-size: 0.94rem;
+}
+
+.toggleDesc {
+  font-size: 0.84rem;
+  color: #475569;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
   flex-shrink: 0;
 }
 
-.menuItem {
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  color: #64748b;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  user-select: none;
-}
-.menuItem:hover { background: #e2e8f0; }
-.menuItem.active { background: white; color: #0c2b54; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-
-.settingsContent { flex: 1; min-width: 0; }
-
-.pageHeader { margin-bottom: 2rem; }
-.pageTitle { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
-.pageSubtitle { color: #64748b; font-size: 1rem; }
-
-.settingsCard {
-  background: white;
-  border-radius: 16px;
-  padding: 2.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-  margin-bottom: 2rem;
-}
-.cardTitle {
-  font-size: 1.25rem; font-weight: 800; margin-bottom: 1.5rem;
-  padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.formGroup { margin-bottom: 1.5rem; }
-.label {
-  display: block; font-size: 0.85rem; font-weight: 700; color: #0c2b54;
-  text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;
-}
-.input {
-  width: 100%;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  outline: none;
-  font-family: inherit;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-.input:focus { border-color: #0c2b54; }
-
-.toggleRow {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 1rem 0; border-bottom: 1px solid #f1f5f9;
-}
-.toggleRow:last-child { border-bottom: none; }
-.toggleInfo { display: flex; flex-direction: column; gap: 0.25rem; }
-.toggleTitle { font-weight: 700; }
-.toggleDesc { font-size: 0.85rem; color: #64748b; }
-
-/* Custom toggle switch */
-.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-.switch input { opacity: 0; width: 0; height: 0; }
 .slider {
-  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #cbd5e1; transition: .4s; border-radius: 24px;
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #cbd5e1;
+  transition: 0.25s;
+  border-radius: 9999px;
 }
+
 .slider:before {
-  position: absolute; content: ""; height: 18px; width: 18px;
-  left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
+  position: absolute;
+  content: '';
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: 0.25s;
+  border-radius: 9999px;
 }
-input:checked + .slider { background-color: #4ade80; }
-input:checked + .slider:before { transform: translateX(20px); }
+
+input:checked + .slider {
+  background-color: #047857;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
 
 .saveBtn {
-  background: #0c2b54; color: white; border: none;
-  padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600;
-  cursor: pointer; transition: opacity 0.2s;
+  background: #0a1f3c;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.65rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  cursor: pointer;
 }
-.saveBtn:hover { opacity: 0.9; }
+
+.saveBtn:hover:not(:disabled) {
+  background: #122d54;
+}
+
+/* Delete Account Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 31, 60, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1.25rem;
+}
+
+.modalCard {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 520px;
+  width: 100%;
+  padding: 2rem;
+  box-shadow: 0 24px 48px -12px rgba(10, 31, 60, 0.28);
+}
+
+.modalHeader {
+  margin-bottom: 1.25rem;
+}
+
+.modalTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modalSubtitle {
+  font-size: 0.92rem;
+  color: #475569;
+  margin-top: 0.45rem;
+  line-height: 1.55;
+}
+
+.surveyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 1.25rem 0;
+}
+
+.reasonOption {
+  display: flex;
+  align-items: center;
+  padding: 0.78rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 500;
+  background: #f7f9fc;
+  color: #0f172a;
+}
+
+.reasonOption:hover {
+  border-color: #cbd5e1;
+}
+
+.reasonOptionActive {
+  background: #fef2f2;
+  border-color: #f87171;
+  color: #991b1b;
+  font-weight: 600;
+}
+
+.confirmBox {
+  background: #f7f9fc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.25rem 0;
+}
+
+.confirmNotice {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.55;
+  margin-bottom: 0.85rem;
+}
+
+.confirmNotice strong {
+  color: #0a1f3c;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.cancelModalBtn {
+  background: #eef2f7;
+  color: #334155;
+  border: none;
+  padding: 0.72rem 1.25rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.deleteDangerBtn {
+  background: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 0.72rem 1.4rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.deleteDangerBtn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.deleteDangerBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
 @media (max-width: 768px) {
-  .container { flex-direction: column; padding-top: 2rem; gap: 2rem; }
-  .sideMenu { width: 100%; flex-direction: row; overflow-x: auto; padding-bottom: 1rem; }
-  .menuItem { white-space: nowrap; }
-  .settingsCard { padding: 1.5rem; }
+  .container {
+    flex-direction: column;
+    padding-top: 1.75rem;
+  }
+
+  .settingsCard,
+  .modalCard {
+    padding: 1.5rem;
+  }
 }

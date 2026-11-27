@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { getApiUrl } from '@/src/utils/config';
-import { Shield, Eye, EyeOff, ArrowRight, User } from 'lucide-react';
+import { Shield, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import BrandLogo from '../../../components/BrandLogo';
 import styles from '../auth.module.css';
 
 export default function Join() {
@@ -30,7 +31,7 @@ export default function Join() {
       const regRes = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, firstName, lastName })
+        body: JSON.stringify({ email, password, firstName, lastName }),
       });
 
       if (!regRes.ok) {
@@ -40,7 +41,6 @@ export default function Join() {
         return;
       }
 
-      // Automatically sign in
       const result = await login(email, password);
 
       if (!result.success) {
@@ -49,7 +49,7 @@ export default function Join() {
       } else {
         router.push('/onboarding');
       }
-    } catch (err) {
+    } catch {
       setError('System error during registration');
       setLoading(false);
     }
@@ -59,40 +59,50 @@ export default function Join() {
     <div className={styles.pageWrapper}>
       {/* Desktop Visual Side */}
       <div className={styles.authVisual}>
-        <div className={styles.authVisualBg}></div>
+        <img
+          src="/images/live-session.jpg"
+          alt="Modern workspace ready for peer skill exchange"
+          className={styles.authVisualImg}
+        />
+        <div className={styles.authVisualOverlay} />
         <div className={styles.authVisualLogo}>
-          <Shield className={styles.authVisualLucideShield} size={32} fill="white" strokeWidth={1} />
-          <a href='/'>SkillNet</a>
+          <Link href="/" aria-label="SkillNet Home">
+            <BrandLogo variant="light" size="md" />
+          </Link>
         </div>
         <div className={styles.authVisualContent}>
-          <h2 className={styles.authVisualTitle}>Elevate your professional trajectory.</h2>
-          <p className={styles.authVisualSubtitle}>Our escrow trust protocol guarantees 100% secure skill swaps without compromise.</p>
+          <h2 className={styles.authVisualTitle}>Trade what you know for what comes next.</h2>
+          <p className={styles.authVisualSubtitle}>
+            Build your peer profile, list your core expertise, and start milestone-verified skill
+            exchanges on Essential for free.
+          </p>
         </div>
       </div>
 
-      {/* Main Form Content Side */}
-      <div className={styles.authContent} style={{ paddingBottom: '6rem' }}>
-
+      {/* Main Form Side */}
+      <div className={styles.authContent}>
         <div className={styles.authCard}>
           <div className={styles.logo}>
-            <Shield className={styles.authVisualLucideShield} size={28} fill="#0c2b54" strokeWidth={1} style={{ marginRight: '0.5rem' }} />
-            SkillNet
+            <Link href="/" aria-label="SkillNet Home">
+              <BrandLogo variant="dark" size="md" />
+            </Link>
           </div>
 
-          <span className={styles.headerTag}>Join The Movement</span>
-          <h1 className={styles.title} style={{ fontSize: '2.4rem' }}>Create your<br />professional<br />profile.</h1>
+          <span className={styles.headerTag}>Create Account</span>
+          <h1 className={styles.title}>Create your profile.</h1>
           <p className={styles.subtitle}>
-            Join 12,000+ Professionals sharing insights<br />and opportunities across the globe.
+            Set up your account in under two minutes and list your first skill offer.
           </p>
 
-          <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '0 0.5rem 1rem 0', borderRadius: '16px', marginBottom: '1.5rem', marginTop: '1.5rem' }}>
-            {error && <div style={{ color: 'red', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>}
+          <form onSubmit={handleSubmit} className={styles.form}>
+            {error && <div className={styles.errorAlert} role="alert">{error}</div>}
 
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
-                <label className={styles.label}>Full Name</label>
+                <label htmlFor="join-name" className={styles.label}>Full name</label>
               </div>
               <input
+                id="join-name"
                 type="text"
                 className={styles.input}
                 placeholder="Enter your full name"
@@ -104,12 +114,13 @@ export default function Join() {
 
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
-                <label className={styles.label}>Email Address</label>
+                <label htmlFor="join-email" className={styles.label}>Email address</label>
               </div>
               <input
+                id="join-email"
                 type="email"
                 className={styles.input}
-                placeholder="you@professional.com"
+                placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -118,10 +129,11 @@ export default function Join() {
 
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
-                <label className={styles.label}>Password</label>
+                <label htmlFor="join-password" className={styles.label}>Password</label>
               </div>
               <div className={styles.inputWrapper}>
                 <input
+                  id="join-password"
                   type={showPassword ? 'text' : 'password'}
                   className={`${styles.input} ${styles.passwordInput}`}
                   placeholder="Create a strong password"
@@ -136,7 +148,7 @@ export default function Join() {
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
             </div>
@@ -149,32 +161,24 @@ export default function Join() {
             </div>
 
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Creating Profile...' : (
-                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                  Join Network <ArrowRight size={18} />
-                </span>
+              {loading ? (
+                'Creating profile...'
+              ) : (
+                <>
+                  Start Swapping <ArrowRight size={16} />
+                </>
               )}
             </button>
           </form>
 
-          <div className={styles.secureBadgeText} style={{ textAlign: 'center', opacity: 0.6, fontSize: '0.8rem', marginTop: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            <Shield size={14} /> Escrow Trust Secured
+          <div className={styles.secureBadgeText}>
+            <Shield size={14} /> Protected by SkillNet Escrow Trust
           </div>
-
-          <div className={styles.avatarGroup}>
-            {[1, 2, 3].map(i => (
-              <div key={i} className={`${styles.avatar} styles.avatarBg${i}`}>
-                <User size={16} color="white" />
-              </div>
-            ))}
-            <div className={styles.avatar} style={{ backgroundColor: '#f1f5f9', color: '#0f3d7b', fontSize: '10px' }}>+12k</div>
-          </div>
-          <p className={styles.avatarSubtext}>Join the verified community today.</p>
 
           <div className={styles.authFooter}>
             Already have an account?
             <Link href="/login" className={styles.authFooterLink}>
-              Sign In
+              Log in
             </Link>
           </div>
         </div>

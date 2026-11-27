@@ -1,125 +1,134 @@
 .subscriptionsRoot {
-  min-height: 100vh;
-  background-color: #f8fafc;
+  min-height: 100dvh;
+  background-color: #f7f9fc;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 0 auto;
-  padding: clamp(2rem, 5vh, 3rem) 1.5rem 4rem;
+  padding: clamp(2.5rem, 5vh, 4rem) 1.5rem 5rem;
   flex: 1;
 }
 
 .hero {
-  text-align: center;
-  margin-bottom: clamp(2rem, 4vh, 3rem);
-}
-
-.tag {
-  display: inline-block;
-  background: #0c2b54;
-  color: #4ade80;
-  padding: 0.5rem 1rem;
-  border-radius: 100px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
+  max-width: 640px;
+  margin-bottom: 3rem;
 }
 
 .title {
-  font-size: clamp(2.4rem, 4.6vw, 3.4rem);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(2.1rem, 4vw, 3rem);
   font-weight: 800;
-  color: #1e293b;
-  margin-bottom: 1rem;
+  color: #0a1f3c;
+  margin-bottom: 0.9rem;
   line-height: 1.1;
+  letter-spacing: -0.03em;
 }
 
 .subtitle {
-  font-size: clamp(1rem, 1.6vw, 1.16rem);
-  color: #64748b;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.55;
+  font-size: 1.05rem;
+  color: #475569;
+  line-height: 1.65;
 }
 
 .pricingGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin-top: 0;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
+  gap: 1.75rem;
+  align-items: stretch;
 }
 
 .priceCard {
-  background: white;
-  border-radius: 8px;
-  padding: clamp(2rem, 3vw, 2.6rem);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2.25rem;
   display: flex;
   flex-direction: column;
   border: 1px solid #e2e8f0;
   position: relative;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.priceCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 36px -14px rgba(10, 31, 60, 0.12);
 }
 
 .featuredCard {
-  background: #0c2b54;
-  color: white;
-  border: none;
-  transform: scale(1.05);
-  box-shadow: 0 25px 50px -12px rgba(12, 43, 84, 0.25);
-  z-index: 2;
+  background: #0a1f3c;
+  color: #ffffff;
+  border: 1px solid #0a1f3c;
+  box-shadow: 0 24px 48px -16px rgba(10, 31, 60, 0.28);
 }
 
 .featuredBadge {
   position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #4ade80;
-  color: #0c2b54;
-  padding: 0.4rem 1rem;
-  border-radius: 100px;
-  font-size: 0.7rem;
-  font-weight: 800;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #6ee7b7;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .tierName {
+  font-family: var(--font-display), sans-serif;
   font-size: 1.5rem;
   font-weight: 800;
-  margin-bottom: 1rem;
+  color: #0a1f3c;
+  margin-bottom: 0.65rem;
 }
 
-.featuredCard .tierName { color: white; }
+.featuredCard .tierName {
+  color: #ffffff;
+}
 
 .priceRow {
   display: flex;
   align-items: baseline;
   gap: 0.25rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .amount {
-  font-size: clamp(2.5rem, 4vw, 3rem);
+  font-family: var(--font-display), sans-serif;
+  font-size: 3rem;
   font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 .currency {
-  font-size: 1.25rem;
-  font-weight: 600;
-  opacity: 0.6;
+  font-size: 1.35rem;
+  font-weight: 700;
+  opacity: 0.75;
 }
 
 .period {
-  font-size: 1rem;
-  opacity: 0.6;
+  font-size: 0.95rem;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.description {
+  color: #475569;
+  font-size: 0.94rem;
+  line-height: 1.55;
+  margin-bottom: 1.75rem;
+}
+
+.featuredCard .description {
+  color: #cbd5e1;
 }
 
 .featureList {
@@ -134,133 +143,98 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.95rem;
+  font-size: 0.94rem;
+  font-weight: 500;
 }
 
 .checkIcon {
-  color: #4ade80;
-  font-weight: bold;
+  color: #047857;
   flex: 0 0 auto;
+}
+
+.featuredCard .checkIcon {
+  color: #34d399;
 }
 
 .ctaBtn {
   width: 100%;
-  padding: 1rem 1.25rem;
-  border-radius: 8px;
+  padding: 0.9rem 1.25rem;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 1rem;
-  border: 1px solid #e2e8f0;
-  background: white;
-  color: #1e293b;
+  font-size: 0.96rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.18s ease, transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .ctaBtnPrimary {
-  background: #4ade80;
-  color: #0c2b54;
-  border: none;
+  background: #eef2f7;
+  color: #475569;
+  border: 1px solid #e2e8f0;
 }
 
 .ctaBtnWhite {
-  background: white;
-  color: #0c2b54;
+  background: #047857;
+  color: #ffffff;
   border: none;
 }
 
-.ctaBtn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
+.ctaBtnWhite:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
 }
 
 .trustSection {
-  margin-top: clamp(4rem, 8vh, 6rem);
-  text-align: center;
+  margin-top: 4.5rem;
+  padding-top: 3rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 .trustTitle {
-  font-size: 0.9rem;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.74rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #94a3b8;
-  margin-bottom: 3rem;
+  letter-spacing: 0.12em;
+  color: #047857;
+  font-weight: 700;
+  margin-bottom: 2rem;
 }
 
 .trustGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4rem;
+  gap: 2.25rem;
 }
 
 .trustItem {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.trustIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background: #ecfdf5;
-  color: #0c2b54;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.8;
+  gap: 0.5rem;
 }
 
 .trustItem h4 {
-  font-size: 1.1rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #0a1f3c;
 }
 
 .trustItem p {
-  font-size: 0.9rem;
-  color: #64748b;
-  line-height: 1.5;
+  font-size: 0.92rem;
+  color: #475569;
+  line-height: 1.6;
 }
 
-@media (max-width: 1024px) {
-  .container {
-    padding-top: 2rem;
-  }
-
-  .pricingGrid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-    gap: 3rem;
-  }
-  .featuredCard {
-    transform: none;
-  }
+@media (max-width: 900px) {
+  .pricingGrid,
   .trustGrid {
     grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-  .title {
-    font-size: 2.5rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .container {
-    padding: 1.5rem 1rem 7rem;
-  }
-
-  .hero {
-    margin-bottom: 2rem;
-  }
-
-  .title {
-    font-size: 2.2rem;
   }
 
   .priceCard {
-    padding: 1.5rem;
+    padding: 1.75rem;
   }
 }

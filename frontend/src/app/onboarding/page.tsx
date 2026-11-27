@@ -1,11 +1,12 @@
-import { getApiUrl } from '../../utils/config';
 'use client';
+
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AppNav from '../../../components/AppNav';
 import styles from './onboarding.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { DEFAULT_SKILLS } from '../../utils/skills';
+import { getApiUrl } from '../../utils/config';
 
 export default function Onboarding() {
   const router = useRouter();
@@ -38,7 +39,6 @@ export default function Onboarding() {
       setCustomGet('');
     }
   };
-
 
   const toggleGiveSkill = (skill: string) => {
     setSelectedGive(prev => prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]);

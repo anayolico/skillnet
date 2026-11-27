@@ -1,5 +1,5 @@
-import { getApiUrl } from '@/src/utils/config';
 'use client';
+
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
@@ -8,6 +8,7 @@ import { User, FileText, Check, X, Clock, ArrowRight } from 'lucide-react';
 import styles from './escrow.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useToast } from '@/components/Toast';
+import { getApiUrl } from '@/src/utils/config';
 
 export default function Escrow() {
   const { user, getToken } = useAuth();
@@ -87,7 +88,6 @@ export default function Escrow() {
       setProcessingAction(null);
     }
   };
-
 
   const currentRequests = activeTab === 'received' ? receivedRequests : sentRequests;
 
@@ -216,7 +216,7 @@ export default function Escrow() {
                         </button>
                         <button 
                           className={`${styles.actionBtn} click-scale`} 
-                          style={{ flex: 1, background: '#4ade80', color: '#0c2b54' }}
+                          style={{ flex: 1, background: '#047857', color: '#ffffff' }}
                           onClick={() => handleUpdateStatus(req.id, 'accepted')}
                           disabled={!!processingAction}
                         >

@@ -1,93 +1,74 @@
 /* =============================================
-   AppNav – Unified Navigation
-   Desktop: sticky top bar
-   Mobile:  fixed bottom bar
-============================================= */
+   AppNav — Unified Navigation System
+   ============================================= */
 
-/* ---- Shared ---- */
 .logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 800;
-  color: #0c2b54;
-  font-size: 1.25rem;
   text-decoration: none;
-  font-family: var(--font-inter), sans-serif;
 }
 
-.logoShield {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, #0c2b54, #1e40af);
-  border-radius: 6px;
-  clip-path: polygon(50% 100%, 100% 80%, 100% 0, 0 0, 0 80%);
-  flex-shrink: 0;
-}
-
-/* ---- Desktop Top Nav ---- */
 .desktopNav {
   display: none;
 }
-
 
 /* ---- Mobile Top Bar ---- */
 .mobileTopBar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.875rem 1.5rem;
-  background: white;
+  padding: 0.85rem 1.25rem;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid #e2e8f0;
   position: sticky;
   top: 0;
   z-index: 50;
-  animation: revealIn 0.5s var(--anim-ease) forwards;
 }
 
 .mobileTopActions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .iconBtn {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  background: #f1f5f9;
+  border-radius: 10px;
+  background: #f7f9fc;
+  border: 1px solid #e2e8f0;
+  color: #0a1f3c;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
   text-decoration: none;
-  border: none;
   cursor: pointer;
-  transition: transform 0.2s var(--anim-ease), background 0.2s;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .iconBtn:hover {
-  transform: scale(1.1);
-  background: #e2e8f0;
+  background: #eef2f7;
+  border-color: #cbd5e1;
 }
 
 .avatarBtn {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0c2b54, #1e40af);
+  border-radius: 10px;
+  background: #0a1f3c;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  text-decoration: none;
-  color: white;
+  font-size: 0.9rem;
+  font-family: var(--font-display), sans-serif;
+  color: #ffffff;
   font-weight: 700;
-  transition: transform 0.2s var(--anim-ease);
+  transition: background-color 0.18s ease;
 }
 
 .avatarBtn:hover {
-  transform: scale(1.1);
+  background: #122d54;
 }
 
 /* ---- Profile Dropdown ---- */
@@ -99,35 +80,30 @@
 
 .dropdownOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   z-index: 55;
-  background: rgba(0, 0, 0, 0.02);
 }
 
 .profileDropdown {
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% + 10px);
   right: 0;
-  width: 180px;
-  background: white;
+  width: 196px;
+  background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 14px 32px -8px rgba(10, 31, 60, 0.16);
   border: 1px solid #e2e8f0;
-  padding: 0.5rem;
+  padding: 0.45rem;
   z-index: 60;
-  animation: dropdownIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: dropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transform-origin: top right;
 }
 
 @keyframes dropdownIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-10px);
+    transform: scale(0.96) translateY(-6px);
   }
-
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -135,27 +111,31 @@
 }
 
 .dropdownHeader {
-  padding: 0.5rem 0.875rem 0.25rem;
+  padding: 0.5rem 0.75rem;
   margin-bottom: 0.25rem;
+  border-bottom: 1px solid #eef2f7;
 }
 
 .dropdownHeader p {
+  font-family: var(--font-mono), monospace;
   font-size: 0.7rem;
   text-transform: uppercase;
-  color: #94a3b8;
-  font-weight: 800;
+  color: #64748b;
+  font-weight: 600;
   letter-spacing: 0.08em;
-  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dropdownItem {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.625rem 0.875rem;
-  color: #475569;
+  gap: 0.65rem;
+  padding: 0.6rem 0.75rem;
+  color: #334155;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 600;
   border-radius: 8px;
   background: transparent;
@@ -163,56 +143,44 @@
   width: 100%;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: var(--font-inter), sans-serif;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .dropdownItem:hover {
-  background: #f1f5f9;
-  color: #0c2b54;
+  background: #f7f9fc;
+  color: #0a1f3c;
 }
 
 .logoutItem {
-  color: #ef4444;
-  margin-top: 0.25rem;
-  border-top: 1px solid #f1f5f9;
+  color: #b91c1c;
+  margin-top: 0.2rem;
+  border-top: 1px solid #eef2f7;
   border-radius: 0 0 8px 8px;
-  padding-top: 0.75rem;
+  padding-top: 0.65rem;
 }
 
 .logoutItem:hover {
   background: #fef2f2;
-  color: #b91c1c;
+  color: #991b1b;
 }
 
 /* ---- Mobile Bottom Nav ---- */
-@keyframes slideUpNav {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
 .mobileBottomNav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: white;
-  padding: 0.55rem max(0.5rem, env(safe-area-inset-left)) calc(0.65rem + env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-right));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  padding: 0.45rem max(0.5rem, env(safe-area-inset-left))
+    calc(0.55rem + env(safe-area-inset-bottom)) max(0.5rem, env(safe-area-inset-right));
   border-top: 1px solid #e2e8f0;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 0.15rem;
   align-items: center;
   z-index: 50;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.07);
-  animation: slideUpNav 0.6s var(--anim-ease) forwards;
+  box-shadow: 0 -8px 24px -8px rgba(10, 31, 60, 0.08);
 }
 
 .navItem {
@@ -222,40 +190,31 @@
   justify-content: center;
   gap: 0.25rem;
   min-width: 0;
-  min-height: 52px;
+  min-height: 50px;
   text-decoration: none;
-  color: #94a3b8;
-  font-size: 0.64rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0;
+  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 600;
   line-height: 1;
-  padding: 0.4rem 0.25rem;
-  border-radius: 8px;
-  transition: all 0.3s var(--anim-ease);
-  font-family: var(--font-inter), sans-serif;
+  padding: 0.35rem 0.25rem;
+  border-radius: 10px;
+  transition: background-color 0.18s ease, color 0.18s ease;
   position: relative;
   text-align: center;
 }
 
 .navItem:hover {
-  color: #0c2b54;
-  background: #f1f5f9;
+  color: #0a1f3c;
+  background: #f7f9fc;
 }
 
 .navItem.active {
-  color: #0c2b54;
-  background: #eff6ff;
-}
-
-.navItem.active .navIcon {
-  transform: translateY(-2px);
+  color: #0a1f3c;
+  background: #eef3fa;
+  font-weight: 700;
 }
 
 .navIcon {
-  font-size: 1.25rem;
-  line-height: 1;
-  transition: transform 0.3s var(--anim-ease);
   position: relative;
   display: flex;
   align-items: center;
@@ -273,83 +232,82 @@
   white-space: nowrap;
 }
 
-.notificationDot {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background-color: #ef4444;
-  border: 2px solid white;
-  border-radius: 50%;
-}
-
 .countBadge {
   position: absolute;
-  top: -8px;
+  top: -7px;
   right: -8px;
-  background-color: #ef4444;
-  color: white;
+  background-color: #dc2626;
+  color: #ffffff;
   font-size: 10px;
-  font-weight: 800;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 50%;
+  font-weight: 700;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 2px solid #ffffff;
   line-height: 1;
   z-index: 10;
 }
 
 .proBadge {
-  background-color: #4ade80;
-  color: #0c2b54;
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  margin-left: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+  border-radius: 9999px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  text-decoration: none;
-}
-
-.proBadge:hover {
-  background-color: #22c55e;
+  letter-spacing: 0.06em;
 }
 
 .freeBadge {
-  background-color: #94a3b8;
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  margin-left: 0.75rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
+  background-color: #eef2f7;
+  color: #475569;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+  border-radius: 9999px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .freeBadge:hover {
-  background-color: #64748b;
+  background-color: #e2e8f0;
+  color: #0a1f3c;
 }
 
-/* ---- Desktop Override ---- */
-@media (min-width: 1024px) {
+.postBtn {
+  background: #0a1f3c;
+  color: #ffffff;
+  border: none;
+  padding: 0.58rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background-color 0.18s ease, transform 0.15s ease;
+  white-space: nowrap;
+}
 
+.postBtn:hover {
+  background: #122d54;
+  transform: translateY(-1px);
+}
+
+/* ---- Desktop ---- */
+@media (min-width: 1024px) {
   .mobileTopBar,
   .mobileBottomNav {
     display: none;
@@ -357,19 +315,18 @@
 
   .desktopNav {
     display: flex;
-    background: white;
-    font-family: var(--font-inter), sans-serif;
+    background: #ffffff;
   }
 
-  /* --- App Sidebar Nav (Vertical) --- */
+  /* App Sidebar Nav */
   .desktopNav.desktopAppNav {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 1.5rem;
-    padding: 2rem 1.25rem;
-    width: 280px;
-    height: 100vh;
+    padding: 1.5rem 1rem;
+    width: 268px;
+    height: 100dvh;
     overflow-y: auto;
     border-right: 1px solid #e2e8f0;
     position: fixed;
@@ -379,155 +336,199 @@
     background-color: #ffffff;
   }
 
+  .sidebarBrand {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem 1.25rem;
+  }
+
+  .tierPanel {
+    margin: 0 0.25rem 1.25rem;
+    padding: 0.85rem 0.95rem;
+    border-radius: 12px;
+    background: #f7f9fc;
+    border: 1px solid #e2e8f0;
+  }
+
   .desktopAppNav .hubLabel {
     font-family: var(--font-mono), monospace;
-    font-size: 0.7rem;
-    color: #94a3b8;
+    font-size: 0.66rem;
+    color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    margin-bottom: 0.5rem;
-    padding: 0 1rem;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
   }
 
   .desktopAppNav .hubTier {
-    font-family: var(--font-inter), sans-serif;
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #0c2b54;
-    margin-bottom: 2.5rem;
-    padding: 0 1rem;
+    font-family: var(--font-display), sans-serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #0a1f3c;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.5rem;
   }
-
-
 
   .desktopAppNav .sideLinks {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 
   .desktopAppNav .sideLink {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    border-radius: 12px;
-    color: #64748b;
+    gap: 0.7rem;
+    padding: 0.72rem 0.85rem;
+    border-radius: 10px;
+    color: #475569;
     text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color 0.16s ease, color 0.16s ease;
+    position: relative;
+  }
+
+  .desktopAppNav .sideLink .countBadge {
+    position: static;
+    margin-left: auto;
+    border: none;
   }
 
   .desktopAppNav .sideLink:hover {
-    background-color: #f1f5f9;
-    color: #0c2b54;
+    background-color: #f7f9fc;
+    color: #0a1f3c;
   }
 
   .desktopAppNav .sideLink.active {
-    background-color: #0c2b54;
+    background-color: #0a1f3c;
     color: #ffffff;
   }
 
   .desktopAppNav .sidebarBottom {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
     width: 100%;
+  }
+
+  .bottomActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #eef2f7;
+  }
+
+  .logoutSideBtn {
+    width: 100%;
+    text-align: left;
+    color: #b91c1c !important;
+  }
+
+  .logoutSideBtn:hover {
+    background-color: #fef2f2 !important;
+    color: #991b1b !important;
   }
 
   .desktopAppNav .upgradeBox {
-    background: linear-gradient(135deg, #0c2b54, #1e293b);
-    padding: 1.5rem;
-    border-radius: 16px;
-    color: white;
-    margin-bottom: 2rem;
+    background: #0a1f3c;
+    padding: 1.15rem;
+    border-radius: 12px;
+    color: #ffffff;
     text-align: left;
+    margin: 0 0.25rem;
   }
 
   .desktopAppNav .upgradeTitle {
-    font-size: 0.75rem;
+    font-family: var(--font-mono), monospace;
+    font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-    opacity: 0.8;
+    margin-bottom: 0.4rem;
+    color: #6ee7b7;
   }
 
   .desktopAppNav .upgradeText {
-    font-size: 0.85rem;
-    line-height: 1.4;
-    margin-bottom: 1rem;
-    opacity: 0.7;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    margin-bottom: 0.9rem;
+    color: #cbd5e1;
   }
 
   .desktopAppNav .upgradeBtn {
+    display: block;
     width: 100%;
-    padding: 0.75rem;
-    background: #4ade80;
-    color: #0c2b54;
+    padding: 0.62rem;
+    background: #047857;
+    color: #ffffff;
     border: none;
     border-radius: 8px;
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: 600;
+    font-size: 0.84rem;
     cursor: pointer;
     text-align: center;
+    text-decoration: none;
+    transition: background-color 0.18s ease;
   }
 
-  /* --- Public Top Nav (Horizontal) --- */
+  .desktopAppNav .upgradeBtn:hover {
+    background: #059669;
+  }
+
+  /* Public Top Nav */
   .desktopNav.desktopPublicNav {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4rem;
+    padding: 0 2.5rem;
     width: 100%;
     height: 72px;
-    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    border-bottom: 1px solid #e2e8f0;
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(16px);
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02);
+    backdrop-filter: blur(14px);
+    background: rgba(247, 249, 252, 0.9);
   }
 
   .desktopPublicNav .desktopLeft {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 3rem;
+    gap: 2.5rem;
   }
 
   .desktopPublicNav .desktopLinks {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.5rem;
   }
 
   .desktopPublicNav .desktopLink {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
+    gap: 0.45rem;
+    padding: 0.5rem 0.9rem;
     border-radius: 8px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #475569;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: background-color 0.16s ease, color 0.16s ease;
     white-space: nowrap;
   }
 
   .desktopPublicNav .desktopLink:hover {
-    color: #0c2b54;
-    background: rgba(12, 43, 84, 0.04);
+    color: #0a1f3c;
+    background: rgba(10, 31, 60, 0.05);
   }
 
   .desktopPublicNav .desktopLink.active {
-    color: #0c2b54;
-    background: rgba(12, 43, 84, 0.06);
+    color: #0a1f3c;
+    background: #eef3fa;
     font-weight: 700;
   }
 
@@ -535,166 +536,39 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.85rem;
   }
 
-  .desktopPublicNav .profileDropdownWrapper {
-    position: relative;
-  }
-
-  .desktopPublicNav .profileDropdown.desktopDropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    bottom: auto;
-    left: auto;
-    margin-bottom: 0;
-    margin-top: 0;
-    display: block;
-  }
-
-  /* --- Common Items & Elements --- */
   .desktopLinkIcon {
-    font-size: 1.25rem;
-    line-height: 1;
-    position: relative;
     display: flex;
     align-items: center;
-  }
-
-  .desktopCenter {
-    width: 100%;
-  }
-
-  .searchBar {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #f1f5f9;
-    border-radius: 100px;
-    padding: 0.6rem 1.25rem;
-    width: 100%;
-  }
-
-  .searchBar input {
-    border: none;
-    background: transparent;
-    outline: none;
-    font-size: 0.875rem;
-    width: 100%;
-    font-family: var(--font-inter), sans-serif;
-    color: #0f172a;
-  }
-
-  .searchBar input::placeholder {
-    color: #94a3b8;
-  }
-
-  .dropdownOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 99;
-  }
-
-  .postBtn {
-    background: #0c2b54;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.5rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 700;
-    cursor: pointer;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    transition: all 0.2s var(--anim-ease);
-    font-family: var(--font-inter), sans-serif;
-    box-shadow: 0 4px 12px rgba(12, 43, 84, 0.15);
-  }
-
-  .postBtn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(12, 43, 84, 0.2);
-  }
-
-  .notifBtn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #f1f5f9;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    text-decoration: none;
-    transition: background 0.15s;
-  }
-
-  .notifBtn:hover {
-    background: #e2e8f0;
   }
 
   .avatarDesktop {
     width: 38px;
     height: 38px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0c2b54, #1e40af);
+    border-radius: 10px;
+    background: #0a1f3c;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    text-decoration: none;
-    color: white;
+    font-family: var(--font-display), sans-serif;
+    font-size: 0.92rem;
+    color: #ffffff;
     font-weight: 700;
     cursor: pointer;
     border: none;
-    outline: none;
-    transition: transform 0.2s var(--anim-ease);
+    transition: background-color 0.18s ease;
   }
 
   .avatarDesktop:hover {
-    transform: scale(1.05);
+    background: #122d54;
   }
 
-  .profileDropdown {
+  .desktopPublicNav .profileDropdown.desktopDropdown {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 10px);
     right: 0;
-    margin-top: 0.5rem;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 0.5rem;
-    width: 200px;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    display: none;
-    z-index: 100;
-  }
-
-  .profileDropdown.show {
     display: block;
-  }
-
-  .dropdownItem {
-    display: block;
-    padding: 0.6rem 0.75rem;
-    color: #64748b;
-    text-decoration: none;
-    font-size: 0.875rem;
-    border-radius: 6px;
-    transition: all 0.15s;
-  }
-
-  .dropdownItem:hover {
-    background: #f8fafc;
-    color: #0f172a;
   }
 }

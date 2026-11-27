@@ -166,12 +166,12 @@ export default function Dashboard() {
                   <div style={{ color: '#cbd5e1', fontSize: '1.2rem' }}>⇄</div>
                   <div className={styles.swapCol} style={{ textAlign: 'right' }}>
                     <span className={styles.swapLabel}>RECEIVING</span>
-                    <span className={styles.swapValue} style={{ color: '#4ade80' }}>Risk Analysis</span>
+                    <span className={styles.swapValue} style={{ color: '#047857' }}>Risk Analysis</span>
                   </div>
                 </div>
                 <div className={styles.swapActions}>
                   <Link href="/chats" className={`${styles.btnSecondary} click-scale`}>Secure Inbox</Link>
-                  <button className={`${styles.btnPrimary} click-scale`}>Release Milestone</button>
+                  <Link href="/escrow" className={`${styles.btnPrimary} click-scale`}>Release Milestone</Link>
                 </div>
               </div>
 
@@ -193,10 +193,10 @@ export default function Dashboard() {
                     <span className={styles.swapLabel}>OFFERING</span>
                     <span className={styles.swapValue}>UI Systems</span>
                   </div>
-                  <div style={{ color: '#cbd5e1', fontSize: '1.2rem' }}>⇄</div>
+                  <div style={{ color: '#94a3b8', fontSize: '1.1rem' }}>⇄</div>
                   <div className={styles.swapCol} style={{ textAlign: 'right' }}>
                     <span className={styles.swapLabel}>RECEIVING</span>
-                    <span className={styles.swapValue} style={{ color: '#4ade80' }}>Kubernetes Core</span>
+                    <span className={styles.swapValue} style={{ color: '#047857' }}>Kubernetes Core</span>
                   </div>
                 </div>
                 <div className={styles.swapActions}>

@@ -1,5 +1,5 @@
-import { getApiUrl } from '@/src/utils/config';
 'use client';
+
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import AppNav from '../../../components/AppNav';
@@ -17,6 +17,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiUrl } from '@/src/utils/config';
 import styles from './profile.module.css';
 
 export default function Profile() {
@@ -106,7 +107,7 @@ export default function Profile() {
             <Link href="/profile/edit" className={styles.editBtn}>
               <Settings size={16} /> Edit Profile
             </Link>
-            <Link href="/create-listing" className={styles.editBtn} style={{ background: '#4ade80', color: '#0c2b54', border: 'none' }}>
+            <Link href="/create-listing" className={styles.editBtn} style={{ background: '#047857', color: '#ffffff', border: 'none' }}>
               <Plus size={16} /> New Listing
             </Link>
           </div>

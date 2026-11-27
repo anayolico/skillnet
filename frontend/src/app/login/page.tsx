@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/src/contexts/AuthContext';
-import { Shield, Linkedin, Eye, EyeOff } from 'lucide-react';
+import { Shield, Linkedin, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import BrandLogo from '../../../components/BrandLogo';
 import styles from '../auth.module.css';
 
 export default function Login() {
@@ -47,40 +48,50 @@ export default function Login() {
     <div className={styles.pageWrapper}>
       {/* Desktop Visual Side */}
       <div className={styles.authVisual}>
-        <div className={styles.authVisualBg}></div>
+        <img
+          src="/images/hero-exchange.jpg"
+          alt="SkillNet peer collaboration session"
+          className={styles.authVisualImg}
+        />
+        <div className={styles.authVisualOverlay} />
         <div className={styles.authVisualLogo}>
-          <Shield className={styles.authVisualLucideShield} size={32} fill="white" strokeWidth={1} />
-          <a href="/">SkillNet</a>
+          <Link href="/" aria-label="SkillNet Home">
+            <BrandLogo variant="light" size="md" />
+          </Link>
         </div>
         <div className={styles.authVisualContent}>
-          <h2 className={styles.authVisualTitle}>Architect your next career move.</h2>
-          <p className={styles.authVisualSubtitle}>Join thousands of professionals trading expertise in the world's most secure knowledge exchange.</p>
+          <h2 className={styles.authVisualTitle}>Step back into your active skill swaps.</h2>
+          <p className={styles.authVisualSubtitle}>
+            Manage pending proposals, open live workspace rooms, and continue verified peer
+            exchanges from your dashboard.
+          </p>
         </div>
       </div>
 
-      {/* Main Form Content Side */}
-      <div className={styles.authContent} style={{ paddingBottom: '6rem' }}>
-
+      {/* Main Form Side */}
+      <div className={styles.authContent}>
         <div className={styles.authCard}>
           <div className={styles.logo}>
-            <Shield className={styles.authVisualLucideShield} size={28} fill="#0c2b54" strokeWidth={1} style={{ marginRight: '0.5rem' }} />
-            SkillNet
+            <Link href="/" aria-label="SkillNet Home">
+              <BrandLogo variant="dark" size="md" />
+            </Link>
           </div>
 
-          <span className={styles.headerTag}>Architecting Careers</span>
-          <h1 className={styles.title}>Welcome<br />Back.</h1>
+          <span className={styles.headerTag}>Member Access</span>
+          <h1 className={styles.title}>Welcome back.</h1>
           <p className={styles.subtitle}>
-            Access your professional ledger and<br />continue building your expert network.
+            Sign in to access your marketplace listings, escrow requests, and live rooms.
           </p>
 
-          <form onSubmit={handleSubmit} style={{ marginTop: '2rem' }}>
-            {error && <div style={{ color: 'red', marginBottom: '1rem', fontSize: '0.9rem' }}>{error}</div>}
+          <form onSubmit={handleSubmit} className={styles.form}>
+            {error && <div className={styles.errorAlert} role="alert">{error}</div>}
 
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
-                <label className={styles.label}>Email Address</label>
+                <label htmlFor="login-email" className={styles.label}>Email address</label>
               </div>
               <input
+                id="login-email"
                 type="email"
                 className={styles.input}
                 placeholder="name@company.com"
@@ -92,14 +103,15 @@ export default function Login() {
 
             <div className={styles.formGroup}>
               <div className={styles.labelWrapper}>
-                <label className={styles.label}>Password</label>
-                <Link href="#" className={styles.forgotLink}>FORGOT?</Link>
+                <label htmlFor="login-password" className={styles.label}>Password</label>
+                <Link href="#" className={styles.forgotLink}>Forgot password?</Link>
               </div>
               <div className={styles.inputWrapper}>
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   className={`${styles.input} ${styles.passwordInput}`}
-                  placeholder="Password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -111,56 +123,81 @@ export default function Login() {
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                   aria-pressed={showPassword}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
             </div>
 
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Authenticating...' : 'Login to SkillNet'}
+              {loading ? (
+                'Signing in...'
+              ) : (
+                <>
+                  Sign in to SkillNet <ArrowRight size={16} />
+                </>
+              )}
             </button>
           </form>
 
           <div className={styles.divider}>
-            <span className={styles.dividerText}>Or secure entry with</span>
+            <span className={styles.dividerText}>Or continue with</span>
           </div>
 
           <div className={styles.ssoGrid}>
-            <button 
-              className={styles.ssoBtn} 
+            <button
+              type="button"
+              className={styles.ssoBtn}
               onClick={() => {
                 const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
                 if (!clientId) {
                   setError('Google login not configured');
                   return;
                 }
-                const oauth2Url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/google/callback')}&response_type=code&scope=openid%20email%20profile`;
+                const oauth2Url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+                  window.location.origin + '/api/auth/google/callback'
+                )}&response_type=code&scope=openid%20email%20profile`;
                 window.location.href = oauth2Url;
               }}
               disabled={googleLoading}
             >
               <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  fill="#EA4335"
+                />
               </svg>
               {googleLoading ? 'Connecting...' : 'Google'}
             </button>
-            <button className={styles.ssoBtn} onClick={() => alert('Social login coming soon')}>
+            <button
+              type="button"
+              className={styles.ssoBtn}
+              onClick={() => alert('Social login coming soon')}
+            >
               <Linkedin size={18} color="#0A66C2" />
               LinkedIn
             </button>
           </div>
 
-          <div className={styles.secureBadgeText} style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.6, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-            <Shield size={14} /> Encrypted & Secure Session
+          <div className={styles.secureBadgeText}>
+            <Shield size={14} /> Encrypted session protection
           </div>
 
           <div className={styles.authFooter}>
             New to SkillNet?
             <Link href="/join" className={styles.authFooterLink}>
-              Join Now
+              Start Swapping
             </Link>
           </div>
         </div>

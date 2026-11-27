@@ -7,19 +7,19 @@ import styles from './catalog.module.css';
 
 export default function Catalog() {
   const courses = [
-    { id: 1, tag: 'Verified Expert', title: 'Fintech Architecture', desc: 'Structural principles for high-scale financial ledgers and escrow systems.', instructor: 'Marcus Thorne, PhD', rating: '4.9', reviews: '2k', price: '$249', bgType: 'blue', avatar: '👨‍💼' },
-    { id: 2, tag: 'Verified Expert', title: 'System Governance', desc: 'Scale your design operations without losing creative soul or brand integrity.', instructor: 'Elena Rodriguez', rating: '4.8', reviews: '1.2k', price: '$189', bgType: 'dark', avatar: '👩‍💻' },
-    { id: 3, tag: 'Verified Expert', title: 'Business Logic', desc: 'Deconstructing enterprise revenue models through the lens of architectural logic.', instructor: 'Sarah Chen', rating: '5.0', reviews: '3.4k', price: '$320', bgType: 'gray', avatar: '👩🏻‍💼' },
-    { id: 4, tag: 'Development', title: 'Cloud Infrastructure for Modern DevOps', desc: 'Building resilient deployment pipelines for enterprise architecture.', instructor: 'Alex Rivera', rating: '4.9', reviews: '890', price: '$215.00', bgType: 'darkBlue', avatar: '🧑🏽‍💻' },
+    { id: 1, tag: 'Verified Expert', title: 'Fintech Architecture', desc: 'Structural principles for high-scale financial ledgers and escrow systems.', instructor: 'Marcus Thorne, PhD', rating: '4.9', reviews: '2k', price: '$249', bgType: 'blue' },
+    { id: 2, tag: 'Verified Expert', title: 'System Governance', desc: 'Scale your design operations without losing creative clarity or brand integrity.', instructor: 'Elena Rodriguez', rating: '4.8', reviews: '1.2k', price: '$189', bgType: 'dark' },
+    { id: 3, tag: 'Verified Expert', title: 'Business Logic', desc: 'Deconstructing enterprise revenue models through the lens of architectural logic.', instructor: 'Sarah Chen', rating: '5.0', reviews: '3.4k', price: '$320', bgType: 'gray' },
+    { id: 4, tag: 'Development', title: 'Cloud Infrastructure for Modern DevOps', desc: 'Building resilient deployment pipelines for enterprise architecture.', instructor: 'Alex Rivera', rating: '4.9', reviews: '890', price: '$215', bgType: 'darkBlue' },
   ];
 
   const getBgStyle = (type: string) => {
     switch (type) {
-      case 'blue': return { background: 'linear-gradient(135deg, #1e3b8a, #3b82f6)' };
-      case 'dark': return { background: 'linear-gradient(135deg, #0f172a, #334155)' };
-      case 'gray': return { background: 'linear-gradient(135deg, #334155, #64748b)' };
-      case 'darkBlue': return { background: 'linear-gradient(135deg, #172554, #1e3a8a)' };
-      default: return { background: '#1e3a8a' };
+      case 'blue': return { background: 'linear-gradient(135deg, #0a1f3c, #163a6b)' };
+      case 'dark': return { background: 'linear-gradient(135deg, #0f172a, #1e293b)' };
+      case 'gray': return { background: 'linear-gradient(135deg, #1e293b, #334155)' };
+      case 'darkBlue': return { background: 'linear-gradient(135deg, #061428, #0a1f3c)' };
+      default: return { background: '#0a1f3c' };
     }
   };
 
@@ -93,9 +93,9 @@ export default function Catalog() {
           ))}
 
           <div className={`${styles.promoCard} reveal-in`}>
-            <h3 className={styles.promoTitle}>Can't find what you're looking for?</h3>
-            <p className={styles.promoDesc}>Request a specific online behavior from our network. We add 10+ professional courses weekly.</p>
-            <Link href="/create-listing"><button className={`${styles.promoBtn} click-scale`}>Request a Course</button></Link>
+            <h3 className={styles.promoTitle}>Looking for a specific skill track?</h3>
+            <p className={styles.promoDesc}>Publish a skill request in the marketplace and pair directly with a practitioner who teaches it.</p>
+            <Link href="/create-listing"><button className={`${styles.promoBtn} click-scale`}>Post a Skill Offer</button></Link>
           </div>
 
           {courses.slice(2).map(course => (

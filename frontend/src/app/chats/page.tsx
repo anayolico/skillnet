@@ -1,5 +1,5 @@
-import { getApiUrl, getWsUrl } from '../../utils/config';
 'use client';
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import Skeleton from '../../../components/Skeleton';
 import { User, Send, Shield, Lock, ChevronLeft } from 'lucide-react';
 import styles from './chats.module.css';
 import { useAuth } from '../../contexts/AuthContext';
+import { getApiUrl, getWsUrl } from '../../utils/config';
 
 export default function Chats() {
   const { user, getToken } = useAuth();

@@ -1,9 +1,7 @@
-import { getApiUrl } from '../utils/config';
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-const API_URL = getApiUrl();
+import { getApiUrl } from '../utils/config';
 
 interface User {
   id: string;

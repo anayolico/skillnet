@@ -1,294 +1,405 @@
 import React from 'react';
 import Link from 'next/link';
-import Footer from '../../components/Footer';
 import {
-  Zap,
-  BookOpen,
-  ArrowLeftRight,
-  TrendingUp,
-  ShieldCheck,
-  Lock,
-  Scale,
-  ChevronRight,
   ArrowRight,
+  Check,
+  Code2,
+  Cpu,
+  Layers,
+  LineChart,
+  Lock,
+  MessageSquare,
+  Palette,
+  Server,
+  ShieldCheck,
+  Sparkles,
+  Users,
 } from 'lucide-react';
+import PublicHeader from '../../components/landing/PublicHeader';
+import SwapExplorer from '../../components/landing/SwapExplorer';
+import ScrollReveal from '../../components/landing/ScrollReveal';
+import Footer from '../../components/Footer';
+import styles from './landing.module.css';
+
+const DISCIPLINES = [
+  { label: 'Engineering & Systems', icon: Code2 },
+  { label: 'Product & UI Design', icon: Palette },
+  { label: 'AI & Machine Learning', icon: Cpu },
+  { label: 'Cloud & DevOps', icon: Server },
+  { label: 'Financial Strategy', icon: LineChart },
+  { label: 'Growth & Operations', icon: Layers },
+];
+
+const WORKFLOW_STEPS = [
+  {
+    title: 'Publish your skill offer',
+    description:
+      'Set what you teach, what you want to learn, your session format, and realistic time value.',
+    href: '/create-listing',
+    linkLabel: 'Post an offer',
+  },
+  {
+    title: 'Match and formalize the swap',
+    description:
+      'Browse vetted peers in the marketplace and send a clear exchange proposal with your goals.',
+    href: '/marketplace',
+    linkLabel: 'Browse marketplace',
+  },
+  {
+    title: 'Collaborate inside a live room',
+    description:
+      'Once accepted, a dedicated real-time swap channel opens so both partners deliver and verify milestones.',
+    href: '/escrow',
+    linkLabel: 'See how escrow works',
+  },
+];
+
+const ESSENTIAL_FEATURES = [
+  '1 active skill listing in the marketplace',
+  'Send up to 2 peer swap requests',
+  'Dedicated real-time chat with swap partners',
+  'Full access to public marketplace discovery',
+  'Structured profile with offered and sought skills',
+];
+
+const PRO_FEATURES = [
+  'Unlimited active skill listings',
+  'Unlimited swap requests and active pairs',
+  'Priority ranking in marketplace partner discovery',
+  'Verified Pro badge on your public listings',
+  'Direct real-time rooms with all swap partners',
+  '24/7 priority member support',
+];
+
+const TESTIMONIALS = [
+  {
+    quote:
+      'I traded two Next.js architecture reviews for a full design-system audit. Both sessions were focused, structured, and immediately useful in production.',
+    name: 'Nadia Okafor',
+    role: 'Staff Frontend Architect, Lagos',
+    swap: 'Next.js Architecture for Design Systems',
+    initials: 'NO',
+  },
+  {
+    quote:
+      'Having a clear request, milestone check-in, and private swap room turns informal networking into real skill transfer that both sides follow through on.',
+    name: 'Daniel Mensah',
+    role: 'Cloud Infrastructure Lead, London',
+    swap: 'Kubernetes Scaling for Financial Modeling',
+    initials: 'DM',
+  },
+  {
+    quote:
+      'Instead of watching generic courses, I paired directly with a senior ML engineer and exchanged product strategy workshops for hands-on Python automation.',
+    name: 'Priya Subramanian',
+    role: 'Principal Product Manager, Toronto',
+    swap: 'Product Strategy for AI Engineering',
+    initials: 'PS',
+  },
+];
 
 export default function Home() {
   return (
-    <>
-      {/* ── PUBLIC MARKETING NAV ── */}
-      <header className="public-nav">
-        <div className="public-nav-inner">
-          <Link href="/" className="public-nav-logo">
-            <div className="public-nav-shield" />
-            SkillNet
-          </Link>
-
-          <nav className="public-nav-links" aria-label="Main navigation">
-            <Link href="/catalog" className="public-nav-link">Courses</Link>
-            <Link href="/marketplace" className="public-nav-link">Marketplace</Link>
-            <Link href="/join" className="public-nav-link">Pricing</Link>
-          </nav>
-
-          <div className="public-nav-actions">
-            <Link href="/login" className="public-nav-login">Log in</Link>
-            <Link href="/join" className="public-nav-cta">
-              Get Started <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className={styles.page}>
+      <PublicHeader />
 
       <main>
-        {/* ── HERO ── */}
-        <section className="lp-hero">
-          <div className="lp-hero-inner">
-            <div className="lp-hero-content">
-              <div className="lp-eyebrow">
-                <span className="lp-eyebrow-dot" />
-                The Knowledge Exchange Protocol
-              </div>
-              <h1 className="lp-h1">
-                Master the Art of<br />
-                <span>the Exchange.</span>
-              </h1>
-              <p className="lp-hero-desc">
-                A sophisticated peer-to-peer ecosystem where professionals architect their expertise through high-fidelity knowledge transfer — no currency, just pure intellectual arbitrage.
-              </p>
-              <div className="lp-hero-actions">
-                <Link href="/join" className="lp-btn-primary">
-                  Join the Network <ArrowRight size={16} />
-                </Link>
-                <Link href="/marketplace" className="lp-btn-secondary">
-                  Find a Swap Partner
-                </Link>
-              </div>
-              <div className="lp-hero-stats">
-                <div>
-                  <span className="lp-hero-stat-value">12,482+</span>
-                  <span className="lp-hero-stat-label">Verified Experts</span>
-                </div>
-                <div>
-                  <span className="lp-hero-stat-value">98%</span>
-                  <span className="lp-hero-stat-label">Swap Success Rate</span>
-                </div>
-                <div>
-                  <span className="lp-hero-stat-value">340+</span>
-                  <span className="lp-hero-stat-label">Skill Domains</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="lp-hero-visual animate-fade-in">
-              <div className="lp-hero-image-wrap">
-                <img src="/images/hero.png" alt="SkillNet platform preview" />
-              </div>
-              <div className="lp-floating-card animate-float">
-                <div className="lp-floating-card-icon">
-                  <Zap size={22} fill="white" color="white" strokeWidth={1} />
-                </div>
-                <div>
-                  <h4>12,482+</h4>
-                  <p>Professionals exchanging high-value skillsets right now.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── TRUSTED BY ── */}
-        <div className="lp-trusted">
-          <div className="lp-trusted-inner">
-            <p className="lp-trusted-label">Trusted by professionals from</p>
-            <div className="lp-trusted-logos">
-              <span>Fintech Corp</span>
-              <span>Nexus Arch</span>
-              <span>Global Ledger</span>
-              <span>Tech Mint</span>
-              <span>Valuation Pro</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ── HOW IT WORKS ── */}
-        <section className="lp-section">
-          <div className="lp-section-inner">
-            <span className="lp-section-tag">Our Framework</span>
-            <h2 className="lp-section-title">How SkillNet Operates</h2>
-            <p className="lp-section-subtitle">
-              Three precise steps to transform your professional trajectory through the power of knowledge exchange.
-            </p>
-
-            <div className="lp-steps">
-              <div className="lp-step">
-                <div className="lp-step-number">Step 01</div>
-                <div className="lp-step-icon">
-                  <BookOpen size={26} color="#0c2b54" strokeWidth={2} />
-                </div>
-                <h3>Learn</h3>
-                <p>Access a curriculum designed by industry architects. Deep-dive into technical taxonomies and professional methodologies curated for real-world application.</p>
-                <Link href="/catalog" className="lp-step-link">
-                  Explore Curriculum <ChevronRight size={15} />
-                </Link>
-              </div>
-
-              <div className="lp-step">
-                <div className="lp-step-number">Step 02</div>
-                <div className="lp-step-icon">
-                  <ArrowLeftRight size={26} color="#0c2b54" strokeWidth={2} />
-                </div>
-                <h3>Swap</h3>
-                <p>Engage in peer-to-peer knowledge arbitrage. Trade your technical mastery for another professional's expertise in a secure, milestoned sandbox.</p>
-                <Link href="/marketplace" className="lp-step-link">
-                  Find a Partner <ChevronRight size={15} />
-                </Link>
-              </div>
-
-              <div className="lp-step">
-                <div className="lp-step-number">Step 03</div>
-                <div className="lp-step-icon">
-                  <TrendingUp size={26} color="#0c2b54" strokeWidth={2} />
-                </div>
-                <h3>Grow</h3>
-                <p>Validate your growth through our architectural ledger. Build a verifiable portfolio of skills backed by real professional exchanges.</p>
-                <Link href="/join" className="lp-step-link">
-                  Build Your Portfolio <ChevronRight size={15} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── ESCROW PROTOCOL ── */}
-        <section className="lp-protocol">
-          <div className="lp-protocol-inner">
-            <div className="lp-protocol-content">
-              <span className="lp-protocol-tag">Secure Exchange Protocol</span>
-              <h2>The Escrow<br />Trust Protocol</h2>
-              <p className="lead">
-                Institutional-grade security for every intellectual exchange. Our ledger ensures value transfers only when professional milestones are verified and met.
-              </p>
-
-              <div className="lp-protocol-items">
-                <div className="lp-protocol-item">
-                  <div className="lp-protocol-item-icon">
-                    <ShieldCheck size={22} color="#6bf0a5" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h4>Identity Verification</h4>
-                    <p>Every member undergoes a multi-layer professional vetting process to ensure network integrity and trust.</p>
-                  </div>
-                </div>
-                <div className="lp-protocol-item">
-                  <div className="lp-protocol-item-icon">
-                    <Lock size={22} color="#6bf0a5" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h4>Milestone-based Release</h4>
-                    <p>Credits and certifications are released proportionally as specific learning outcomes are documented and validated.</p>
-                  </div>
-                </div>
-                <div className="lp-protocol-item">
-                  <div className="lp-protocol-item-icon">
-                    <Scale size={22} color="#6bf0a5" strokeWidth={2.5} />
-                  </div>
-                  <div>
-                    <h4>Conflict Resolution</h4>
-                    <p>Our dedicated architectural board provides expert mediation for any discrepancies in knowledge transfer quality.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lp-protocol-visual animate-fade-in">
-              <img src="/images/protocol.png" alt="Secure Escrow Protocol" />
-              <div className="lp-protocol-badge animate-pulse-glow">
-                100%
-                <span>Secure Delivery</span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── TESTIMONIALS ── */}
-        <section className="lp-testimonials">
-          <div className="lp-testimonials-inner">
-            <div className="lp-testimonials-header">
-              <span className="lp-section-tag">Professional Outcomes</span>
-              <h2 className="lp-section-title">Trusted by Industry Leaders</h2>
-              <p className="lp-section-subtitle" style={{ margin: '0 auto' }}>
-                Real professionals. Real exchanges. Real results.
-              </p>
-            </div>
-
-            <div className="lp-testimonials-grid">
-              <div className="lp-testimonial-card">
-                <div className="lp-testimonial-stars">★★★★★</div>
-                <p className="lp-testimonial-quote">
-                  "SkillNet allowed me to trade my quantitative analysis mastery for expert-level Python automation. The structured exchange felt like a true professional collaboration."
+        {/* 1. ASYMMETRIC SPLIT HERO */}
+        <section className={styles.hero}>
+          <div className={styles.container}>
+            <div className={styles.heroGrid}>
+              <div className={styles.heroCopy}>
+                <span className={styles.eyebrow}>Peer-to-Peer Skill Exchange</span>
+                <h1 className={styles.heroTitle}>
+                  Trade your expertise.
+                  <br />
+                  Master what comes next.
+                </h1>
+                <p className={styles.heroSubtext}>
+                  Swap live sessions and portfolio reviews directly with vetted engineers,
+                  designers, and operators. Zero tuition, verified milestones.
                 </p>
-                <div className="lp-testimonial-author">
-                  <div className="lp-testimonial-avatar">EV</div>
-                  <div>
-                    <div className="lp-testimonial-name">Elena Vance</div>
-                    <div className="lp-testimonial-role">Senior Financial Architect</div>
-                  </div>
+                <div className={styles.heroActions}>
+                  <Link href="/join" className={styles.btnPrimary}>
+                    Start Swapping <ArrowRight size={16} />
+                  </Link>
+                  <Link href="/marketplace" className={styles.btnSecondary}>
+                    Explore Marketplace
+                  </Link>
                 </div>
               </div>
 
-              <div className="lp-testimonial-card">
-                <div className="lp-testimonial-stars">★★★★★</div>
-                <p className="lp-testimonial-quote">
-                  "Having a swap partner who understands the nuances of enterprise-grade DevOps was a game changer. The Escrow Protocol gives me complete peace of mind."
-                </p>
-                <div className="lp-testimonial-author">
-                  <div className="lp-testimonial-avatar">MT</div>
-                  <div>
-                    <div className="lp-testimonial-name">Marcus Thorne</div>
-                    <div className="lp-testimonial-role">Cloud Infrastructure Lead</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lp-testimonial-card">
-                <div className="lp-testimonial-stars">★★★★★</div>
-                <p className="lp-testimonial-quote">
-                  "The knowledge taxonomy here is unprecedented. I've architected a completely new skillset in strategic operations through high-fidelity swaps that actually stick."
-                </p>
-                <div className="lp-testimonial-author">
-                  <div className="lp-testimonial-avatar">JR</div>
-                  <div>
-                    <div className="lp-testimonial-name">Julian Rossi</div>
-                    <div className="lp-testimonial-role">Head of Product Strategy</div>
-                  </div>
-                </div>
+              <div className={styles.heroMedia}>
+                <img
+                  src="/images/hero-exchange.jpg"
+                  alt="Two professionals collaborating over a laptop and grid notebook during a peer skill exchange session"
+                  className={styles.heroImg}
+                />
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <section className="lp-cta">
-          <div className="lp-cta-inner">
-            <div className="lp-cta-card">
-              <h2>Ready to architect<br />your expertise?</h2>
-              <p>
-                Join 12,000+ professionals already exchanging high-value skillsets on the world's most trusted knowledge exchange network.
-              </p>
-              <div className="lp-cta-actions">
-                <Link href="/join" className="lp-cta-btn-primary">
-                  Join the Network <ArrowRight size={16} />
-                </Link>
-                <Link href="/catalog" className="lp-cta-btn-secondary">
-                  Explore Courses
-                </Link>
-              </div>
+        {/* 2. DISCIPLINES STRIP (directly below hero) */}
+        <section className={styles.disciplineStrip} aria-label="Skill exchange disciplines">
+          <div className={styles.container}>
+            <div className={styles.disciplineGrid}>
+              {DISCIPLINES.map(({ label, icon: Icon }) => (
+                <div key={label} className={styles.disciplineItem}>
+                  <Icon size={17} strokeWidth={1.8} className={styles.disciplineIcon} />
+                  <span>{label}</span>
+                </div>
+              ))}
             </div>
+          </div>
+        </section>
+
+        {/* 3. INTERACTIVE EXCHANGE ARCHITECTURE + WORKFLOW */}
+        <section id="how-it-works" className={styles.section}>
+          <div className={styles.container}>
+            <ScrollReveal>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>How a direct skill exchange works</h2>
+                <p className={styles.sectionLead}>
+                  Publish what you teach, match with a complementary practitioner, and work
+                  through structured milestones inside a private room.
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <div className={styles.workflowGrid}>
+              <ScrollReveal delayMs={60}>
+                <SwapExplorer />
+              </ScrollReveal>
+
+              <ScrollReveal delayMs={140} className={styles.workflowRight}>
+                <div className={styles.stepList}>
+                  {WORKFLOW_STEPS.map((step, index) => (
+                    <div key={step.title} className={styles.stepRow}>
+                      <span className={styles.stepIndex}>0{index + 1}</span>
+                      <div className={styles.stepBody}>
+                        <h3 className={styles.stepTitle}>{step.title}</h3>
+                        <p className={styles.stepDesc}>{step.description}</p>
+                        <Link href={step.href} className={styles.stepLink}>
+                          {step.linkLabel} <ArrowRight size={14} />
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollReveal>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. ESCROW TRUST STANDARD (4-CELL ASYMMETRIC BENTO ON TONAL BAND) */}
+        <section id="escrow" className={styles.tonalBand}>
+          <div className={styles.container}>
+            <ScrollReveal>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>Structured trust for every session</h2>
+                <p className={styles.sectionLead}>
+                  Every exchange follows an explicit lifecycle from request approval to live
+                  collaboration and mutual milestone confirmation.
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <div className={styles.bentoGrid}>
+              {/* Cell 1: Wide Visual */}
+              <ScrollReveal className={`${styles.bentoCell} ${styles.bentoVisual}`}>
+                <img
+                  src="/images/live-session.jpg"
+                  alt="Minimal architectural studio workspace prepared for a structured 1-on-1 skill exchange session"
+                  className={styles.bentoImg}
+                />
+              </ScrollReveal>
+
+              {/* Cell 2: Deep Navy Anchor Tile */}
+              <ScrollReveal delayMs={80} className={`${styles.bentoCell} ${styles.bentoNavy}`}>
+                <div className={styles.bentoIconNavy}>
+                  <Lock size={20} strokeWidth={2} />
+                </div>
+                <h3 className={styles.bentoTitleLight}>Milestone-gated completion</h3>
+                <p className={styles.bentoBodyLight}>
+                  Both partners define deliverables upfront across Live Video Calls or Code and
+                  Design Reviews. Completion is logged only when both sides confirm the exchange.
+                </p>
+                <div className={styles.bentoMetaLight}>
+                  <span>Equitable time-value pairing</span>
+                </div>
+              </ScrollReveal>
+
+              {/* Cell 3: Soft Emerald Accent Tile */}
+              <ScrollReveal delayMs={120} className={`${styles.bentoCell} ${styles.bentoEmerald}`}>
+                <div className={styles.bentoIconEmerald}>
+                  <MessageSquare size={20} strokeWidth={2} />
+                </div>
+                <h3 className={styles.bentoTitleEmerald}>Instant private swap rooms</h3>
+                <p className={styles.bentoBodyEmerald}>
+                  Accepting a swap request automatically creates a persistent real-time WebSocket
+                  channel with read tracking and instant notifications.
+                </p>
+                <div className={styles.bentoMetaEmerald}>
+                  <span>Direct 1-on-1 workspace</span>
+                </div>
+              </ScrollReveal>
+
+              {/* Cell 4: Crisp White Structured Capabilities Tile */}
+              <ScrollReveal delayMs={160} className={`${styles.bentoCell} ${styles.bentoLight}`}>
+                <div className={styles.bentoLightTop}>
+                  <div className={styles.bentoIconLight}>
+                    <ShieldCheck size={20} strokeWidth={2} />
+                  </div>
+                  <div>
+                    <h3 className={styles.bentoTitleDark}>Vetted peer profiles and clear fit</h3>
+                    <p className={styles.bentoBodyDark}>
+                      Onboarding captures every member&apos;s headline, skills offered, skills
+                      sought, seniority level, and weekly availability before they enter the
+                      marketplace.
+                    </p>
+                  </div>
+                </div>
+                <div className={styles.capabilityGrid}>
+                  <div className={styles.capabilityItem}>
+                    <Users size={16} />
+                    <span>Matched by seniority &amp; timezone</span>
+                  </div>
+                  <div className={styles.capabilityItem}>
+                    <Sparkles size={16} />
+                    <span>40+ curated technical &amp; strategy domains</span>
+                  </div>
+                </div>
+              </ScrollReveal>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. TRANSPARENT MEMBERSHIP PLANS (MATCHING REAL BACKEND TIERS) */}
+        <section id="pricing" className={styles.section}>
+          <div className={styles.container}>
+            <ScrollReveal>
+              <div className={styles.sectionHeader}>
+                <span className={styles.eyebrow}>Simple Membership</span>
+                <h2 className={styles.sectionTitle}>Start free, upgrade as your network grows</h2>
+                <p className={styles.sectionLead}>
+                  Begin exchanging skills on Essential at zero cost, or move to Professional for
+                  unlimited listings and priority placement.
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <div className={styles.pricingGrid}>
+              <ScrollReveal className={styles.planCard}>
+                <div className={styles.planHeader}>
+                  <h3 className={styles.planName}>Essential</h3>
+                  <p className={styles.planTagline}>
+                    For professionals starting their first structured peer swaps.
+                  </p>
+                </div>
+                <div className={styles.planPrice}>
+                  <span className={styles.priceFigure}>$0</span>
+                  <span className={styles.pricePeriod}>/ month</span>
+                </div>
+                <ul className={styles.planList}>
+                  {ESSENTIAL_FEATURES.map((feat) => (
+                    <li key={feat} className={styles.planListItem}>
+                      <Check size={16} className={styles.planCheck} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/join" className={styles.planBtnSecondary}>
+                  Start Swapping
+                </Link>
+              </ScrollReveal>
+
+              <ScrollReveal delayMs={90} className={`${styles.planCard} ${styles.planCardFeatured}`}>
+                <div className={styles.planHeaderRow}>
+                  <h3 className={styles.planName}>Professional</h3>
+                  <span className={styles.planPill}>Recommended</span>
+                </div>
+                <p className={styles.planTagline}>
+                  For active practitioners scaling multiple concurrent exchanges.
+                </p>
+                <div className={styles.planPrice}>
+                  <span className={styles.priceFigure}>$49</span>
+                  <span className={styles.pricePeriod}>/ month</span>
+                </div>
+                <ul className={styles.planList}>
+                  {PRO_FEATURES.map((feat) => (
+                    <li key={feat} className={styles.planListItem}>
+                      <Check size={16} className={styles.planCheckFeatured} />
+                      <span>{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/subscriptions" className={styles.planBtnPrimary}>
+                  Upgrade to Pro <ArrowRight size={15} />
+                </Link>
+              </ScrollReveal>
+            </div>
+          </div>
+        </section>
+
+        {/* 6. MEMBER PERSPECTIVES (EDITORIAL HAIRLINE COLUMNS) */}
+        <section className={styles.quotesSection}>
+          <div className={styles.container}>
+            <ScrollReveal>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>Built for practitioners who ship</h2>
+                <p className={styles.sectionLead}>
+                  Direct 1-on-1 transfers replace passive video lectures with actionable peer
+                  feedback.
+                </p>
+              </div>
+            </ScrollReveal>
+
+            <div className={styles.quotesGrid}>
+              {TESTIMONIALS.map((item, idx) => (
+                <ScrollReveal key={item.name} delayMs={idx * 80} className={styles.quoteCol}>
+                  <p className={styles.quoteText}>“{item.quote}”</p>
+                  <div className={styles.quoteMeta}>
+                    <div className={styles.quoteAvatar}>{item.initials}</div>
+                    <div>
+                      <div className={styles.quoteName}>{item.name}</div>
+                      <div className={styles.quoteRole}>{item.role}</div>
+                      <div className={styles.quoteSwap}>{item.swap}</div>
+                    </div>
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 7. CLOSING ACTION BAND */}
+        <section className={styles.closingSection}>
+          <div className={styles.container}>
+            <ScrollReveal>
+              <div className={styles.closingBox}>
+                <h2 className={styles.closingTitle}>
+                  Ready to trade what you know for what you need?
+                </h2>
+                <p className={styles.closingDesc}>
+                  Create your SkillNet profile in two minutes, list your core strength, and send
+                  your first swap proposal today.
+                </p>
+                <div className={styles.closingActions}>
+                  <Link href="/join" className={styles.btnPrimary}>
+                    Start Swapping <ArrowRight size={16} />
+                  </Link>
+                  <Link href="/catalog" className={styles.btnSecondary}>
+                    Browse Catalog
+                  </Link>
+                </div>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }

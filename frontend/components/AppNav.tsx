@@ -1,4 +1,3 @@
-import { getApiUrl, getWsUrl } from '@/src/utils/config';
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -18,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { useToast } from './Toast';
+import BrandLogo from './BrandLogo';
+import { getApiUrl, getWsUrl } from '@/src/utils/config';
 import styles from './AppNav.module.css';
 
 type NavItem = {
@@ -33,7 +34,7 @@ const appNavItems: NavItem[] = [
   { href: '/marketplace', label: 'Marketplace', mobileLabel: 'Market', icon: ArrowLeftRight },
   { href: '/escrow', label: 'Swap Requests', mobileLabel: 'Swaps', icon: ShieldCheck, type: 'swaps' },
   { href: '/chats', label: 'Messages', mobileLabel: 'Messages', icon: MessageSquare, type: 'messages' },
-  { href: '/create-listing', label: 'Post Expert Skill', mobileLabel: 'Post', icon: PlusSquare },
+  { href: '/create-listing', label: 'Post Skill Offer', mobileLabel: 'Post', icon: PlusSquare },
 ];
 
 const publicNavItems: NavItem[] = [
@@ -64,15 +65,12 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      
-
       const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/api/notifications/counts`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (data.success && data.counts) {
-        console.log('[AppNav] Notifications updated:', data.counts);
         setCounts(data.counts);
       }
     } catch (err) {
@@ -84,77 +82,78 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      
 
       const apiUrl = getApiUrl();
       await fetch(`${apiUrl}/api/notifications/mark-swaps-viewed`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setCounts(prev => ({ ...prev, swapRequests: 0 }));
-    } catch { }
+      setCounts((prev) => ({ ...prev, swapRequests: 0 }));
+    } catch {}
   };
 
   useEffect(() => {
     if (isApp) {
       fetchCounts();
-      const interval = setInterval(fetchCounts, 15000); // Slower polling as fallback
+      const interval = setInterval(fetchCounts, 15000);
 
-      // Setup Real-time Notifications via WebSocket
       let socket: WebSocket | null = null;
+      let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+      let unmounted = false;
 
       async function setupWS() {
+        if (unmounted) return;
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        // Need our DB userId
-        const apiUrl = getApiUrl();
-        const meRes = await fetch(`${apiUrl}/api/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const meData = await meRes.json();
-        if (!meData.success) return;
+        try {
+          const apiUrl = getApiUrl();
+          const meRes = await fetch(`${apiUrl}/api/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const meData = await meRes.json();
+          if (!meData.success || unmounted) return;
 
-        const baseWsUrl = getWsUrl();
-        const wsUrl = getWsUrl();
+          const wsUrl = getWsUrl();
+          socket = new WebSocket(wsUrl);
 
-        console.log('[AppNav] Connecting to WebSocket:', wsUrl);
-        socket = new WebSocket(wsUrl);
+          socket.onopen = () => {
+            socket?.send(JSON.stringify({ type: 'subscribe', userId: meData.user.id }));
+          };
 
-        socket.onopen = () => {
-          console.log('[AppNav] WebSocket Connected');
-          socket?.send(JSON.stringify({ type: 'subscribe', userId: meData.user.id }));
-        };
+          socket.onmessage = (event) => {
+            try {
+              const msg = JSON.parse(event.data);
+              if (msg.type === 'notification') {
+                fetchCounts();
 
-        socket.onmessage = (event) => {
-          try {
-            const msg = JSON.parse(event.data);
-            if (msg.type === 'notification') {
-              fetchCounts();
+                if (msg.subType === 'swap_request_received') {
+                  showToast('New swap request received!', 'info');
+                } else if (msg.subType === 'swap_request_sent') {
+                  showToast('Swap request sent successfully!', 'success');
+                }
 
-              if (msg.subType === 'swap_request_received') {
-                showToast('New swap request received!', 'info');
-              } else if (msg.subType === 'swap_request_sent') {
-                showToast('Swap request sent successfully!', 'success');
+                window.dispatchEvent(new CustomEvent('new-notification', { detail: msg }));
               }
-
-              window.dispatchEvent(new CustomEvent('new-notification', { detail: msg }));
+            } catch (err) {
+              console.error('[ws] Message error:', err);
             }
-          } catch (err) {
-            console.error('[ws] Message error:', err);
-          }
-        };
+          };
 
-        socket.onclose = () => {
-          // Attempt reconnect after delay
-          setTimeout(setupWS, 5000);
-        };
+          socket.onclose = () => {
+            if (!unmounted) {
+              reconnectTimer = setTimeout(setupWS, 5000);
+            }
+          };
+        } catch {}
       }
 
       setupWS();
 
       return () => {
+        unmounted = true;
         clearInterval(interval);
+        if (reconnectTimer) clearTimeout(reconnectTimer);
         socket?.close();
       };
     }
@@ -175,7 +174,11 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
     const rawCount = type === 'swaps' ? counts.swapRequests : counts.messages;
     const count = Number(rawCount) || 0;
     if (count > 0) {
-      return <span className={styles.countBadge} key={type}>{count > 9 ? '9+' : count}</span>;
+      return (
+        <span className={styles.countBadge} key={type}>
+          {count > 9 ? '9+' : count}
+        </span>
+      );
     }
     return null;
   };
@@ -184,21 +187,19 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
 
   return (
     <>
-      {/* -------- MOBILE: sticky top bar -------- */}
+      {/* MOBILE: sticky top bar */}
       <header className={styles.mobileTopBar}>
-        <Link href="/" className={styles.logo}>
-          <div className={styles.logoShield} />
-          SkillNet
+        <Link href="/" className={styles.logo} aria-label="SkillNet Home">
+          <BrandLogo variant="dark" size="sm" />
         </Link>
         <div className={styles.mobileTopActions}>
-          {(isApp || user) ? (
+          {isApp || user ? (
             <>
               {isApp && (
-                <Link href="/chats" className={styles.iconBtn} aria-label="Inbox">
-                  <MessageSquare size={20} strokeWidth={2.5} />
+                <Link href="/chats" className={styles.iconBtn} aria-label="Messages">
+                  <MessageSquare size={18} strokeWidth={2} />
                 </Link>
               )}
-
 
               <div className={styles.profileDropdownWrapper}>
                 <button
@@ -206,24 +207,41 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                   aria-label="Profile actions"
                   onClick={() => setIsMobileProfileOpen(!isMobileProfileOpen)}
                 >
-                  {user?.firstName?.[0] || user?.email?.[0] || 'A'}
+                  {(user?.firstName?.[0] || user?.email?.[0] || 'S').toUpperCase()}
                 </button>
 
                 {isMobileProfileOpen && (
                   <>
-                    <div className={styles.dropdownOverlay} onClick={() => setIsMobileProfileOpen(false)} />
+                    <div
+                      className={styles.dropdownOverlay}
+                      onClick={() => setIsMobileProfileOpen(false)}
+                    />
                     <div className={styles.profileDropdown}>
                       <div className={styles.dropdownHeader}>
-                        <p className="font-bold">{user?.firstName || user?.email || 'Account'}</p>
+                        <p>{user?.firstName || user?.email || 'Account'}</p>
                       </div>
-                      <Link href="/profile" className={styles.dropdownItem} onClick={() => setIsMobileProfileOpen(false)}>
-                        <User size={18} /> Profile
+                      <Link
+                        href="/profile"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsMobileProfileOpen(false)}
+                      >
+                        <User size={16} /> Profile
                       </Link>
-                      <Link href="/settings" className={styles.dropdownItem} onClick={() => setIsMobileProfileOpen(false)}>
-                        <Settings size={18} /> Settings
+                      <Link
+                        href="/settings"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsMobileProfileOpen(false)}
+                      >
+                        <Settings size={16} /> Settings
                       </Link>
-                      <button className={`${styles.dropdownItem} ${styles.logoutItem}`} onClick={() => { setIsMobileProfileOpen(false); handleLogout(); }}>
-                        <LogOut size={18} /> Logout
+                      <button
+                        className={`${styles.dropdownItem} ${styles.logoutItem}`}
+                        onClick={() => {
+                          setIsMobileProfileOpen(false);
+                          handleLogout();
+                        }}
+                      >
+                        <LogOut size={16} /> Logout
                       </button>
                     </div>
                   </>
@@ -231,54 +249,76 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
               </div>
             </>
           ) : (
-            <Link href="/login" className={styles.postBtn} style={{ padding: '0.4rem 1rem' }}>Login</Link>
+            <Link href="/login" className={styles.postBtn} style={{ padding: '0.45rem 1rem' }}>
+              Log in
+            </Link>
           )}
         </div>
       </header>
 
-      {/* -------- MOBILE: fixed bottom bar -------- */}
+      {/* MOBILE: fixed bottom bar */}
       <nav
         className={styles.mobileBottomNav}
         aria-label="Mobile navigation"
-        style={{ gridTemplateColumns: `repeat(${currentItems.length + (!isApp ? 1 : 0)}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns: `repeat(${currentItems.length + (!isApp ? 1 : 0)}, minmax(0, 1fr))`,
+        }}
       >
         {currentItems.map(({ href, label, mobileLabel, icon: Icon, type }) => (
           <Link
             key={href}
             href={href}
-            className={`${styles.navItem} ${active === href || (href !== '/' && href !== '/dashboard' && active.startsWith(href)) ? styles.active : ''}`}
+            className={`${styles.navItem} ${
+              active === href || (href !== '/' && href !== '/dashboard' && active.startsWith(href))
+                ? styles.active
+                : ''
+            }`}
             aria-label={label}
           >
             <span className={styles.navIcon}>
-              <Icon size={20} strokeWidth={2.5} />
+              <Icon size={19} strokeWidth={2} />
               {type && renderBadge(type)}
             </span>
             <span className={styles.navLabel}>{mobileLabel ?? label}</span>
           </Link>
         ))}
         {!isApp && (
-          <Link href="/join" className={styles.navItem} aria-label="Join Network">
+          <Link href="/join" className={styles.navItem} aria-label="Start Swapping">
             <span className={styles.navIcon}>
-              <Sparkles size={20} strokeWidth={2.5} />
+              <Sparkles size={19} strokeWidth={2} />
             </span>
             <span className={styles.navLabel}>Join</span>
           </Link>
         )}
       </nav>
 
-      {/* -------- DESKTOP -------- */}
+      {/* DESKTOP */}
       {isApp ? (
-        /* -------- DESKTOP: App Sidebar (Vertical) -------- */
-        <aside className={`${styles.desktopNav} ${styles.desktopAppNav}`} aria-label="App sidebar navigation">
-          <div className="reveal stagger">
-            <div className={styles.hubLabel}>Professional Ledger</div>
-            <div className={styles.hubTier}>
-              {user?.subscriptionTier ? user.subscriptionTier.charAt(0).toUpperCase() + user.subscriptionTier.slice(1) : 'Essential'} Tier
-              {user?.subscriptionTier !== 'professional' ? (
-                <Link href="/subscriptions" className={styles.freeBadge}>FREE</Link>
-              ) : (
-                <span className={styles.proBadge}>PRO</span>
-              )}
+        <aside
+          className={`${styles.desktopNav} ${styles.desktopAppNav}`}
+          aria-label="App sidebar navigation"
+        >
+          <div>
+            <Link href="/" className={styles.sidebarBrand} aria-label="SkillNet Home">
+              <BrandLogo variant="dark" size="sm" />
+            </Link>
+
+            <div className={styles.tierPanel}>
+              <div className={styles.hubLabel}>Workspace Tier</div>
+              <div className={styles.hubTier}>
+                <span>
+                  {user?.subscriptionTier
+                    ? user.subscriptionTier.charAt(0).toUpperCase() + user.subscriptionTier.slice(1)
+                    : 'Essential'}
+                </span>
+                {user?.subscriptionTier !== 'professional' ? (
+                  <Link href="/subscriptions" className={styles.freeBadge}>
+                    FREE
+                  </Link>
+                ) : (
+                  <span className={styles.proBadge}>PRO</span>
+                )}
+              </div>
             </div>
 
             <div className={styles.sideLinks}>
@@ -286,12 +326,14 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                 <Link
                   key={href}
                   href={href}
-                  className={`${styles.sideLink} ${active === href || (href !== '/' && href !== '/dashboard' && active.startsWith(href))
+                  className={`${styles.sideLink} ${
+                    active === href ||
+                    (href !== '/' && href !== '/dashboard' && active.startsWith(href))
                       ? styles.active
                       : ''
-                    }`}
+                  }`}
                 >
-                  <Icon size={18} strokeWidth={2.5} />
+                  <Icon size={18} strokeWidth={2} />
                   <span>{label}</span>
                   {type && renderBadge(type)}
                 </Link>
@@ -299,45 +341,58 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
             </div>
           </div>
 
-          <div className={`${styles.sidebarBottom} reveal`} style={{ animationDelay: '0.4s' }}>
-            <div className={styles.upgradeBox}>
-              <div className={styles.upgradeTitle}>PREMIUM NETWORK</div>
-              <div className={styles.upgradeText}>Unlock the Titan&apos;s exchange and C-level mentoring.</div>
-              <Link href="/subscriptions">
-                <button className={`${styles.upgradeBtn} click-scale`}>View Plans</button>
+          <div className={styles.sidebarBottom}>
+            {user?.subscriptionTier !== 'professional' && (
+              <div className={styles.upgradeBox}>
+                <div className={styles.upgradeTitle}>PROFESSIONAL TIER</div>
+                <div className={styles.upgradeText}>
+                  Unlock unlimited skill listings, swap requests, and priority discovery.
+                </div>
+                <Link href="/subscriptions" className={styles.upgradeBtn}>
+                  View Plans
+                </Link>
+              </div>
+            )}
+
+            <div className={styles.bottomActions}>
+              <Link
+                href="/profile"
+                className={`${styles.sideLink} ${active.startsWith('/profile') ? styles.active : ''}`}
+              >
+                <User size={18} strokeWidth={2} /> <span>Profile</span>
               </Link>
+              <Link
+                href="/settings"
+                className={`${styles.sideLink} ${active === '/settings' ? styles.active : ''}`}
+              >
+                <Settings size={18} strokeWidth={2} /> <span>Settings</span>
+              </Link>
+              <button onClick={handleLogout} className={`${styles.sideLink} ${styles.logoutSideBtn}`}>
+                <LogOut size={18} strokeWidth={2} /> <span>Logout</span>
+              </button>
             </div>
-
-            <Link href="/settings" className={styles.sideLink}>
-              <Settings size={18} strokeWidth={2.5} /> <span>Settings</span>
-            </Link>
-
-            <button
-              onClick={handleLogout}
-              className={styles.sideLink}
-              style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}
-            >
-              <LogOut size={18} strokeWidth={2.5} /> <span>Logout</span>
-            </button>
           </div>
         </aside>
       ) : (
-        /* -------- DESKTOP: Public Top Nav (Horizontal) -------- */
-        <nav className={`${styles.desktopNav} ${styles.desktopPublicNav}`} aria-label="Public desktop navigation">
+        <nav
+          className={`${styles.desktopNav} ${styles.desktopPublicNav}`}
+          aria-label="Public desktop navigation"
+        >
           <div className={styles.desktopLeft}>
-            <Link href="/" className={styles.logo}>
-              <div className={styles.logoShield} />
-              SkillNet
+            <Link href="/" className={styles.logo} aria-label="SkillNet Home">
+              <BrandLogo variant="dark" size="md" />
             </Link>
             <div className={styles.desktopLinks}>
               {currentItems.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}
-                  className={`${styles.desktopLink} ${active === href || (href !== '/' && active.startsWith(href)) ? styles.active : ''}`}
+                  className={`${styles.desktopLink} ${
+                    active === href || (href !== '/' && active.startsWith(href)) ? styles.active : ''
+                  }`}
                 >
                   <span className={styles.desktopLinkIcon}>
-                    <Icon size={18} strokeWidth={2.5} />
+                    <Icon size={17} strokeWidth={2} />
                   </span>
                   {label}
                 </Link>
@@ -353,24 +408,41 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
                   aria-label="View Profile"
                   onClick={() => setIsDesktopProfileOpen(!isDesktopProfileOpen)}
                 >
-                  {user.firstName?.[0] || user.email?.[0] || 'A'}
+                  {(user.firstName?.[0] || user.email?.[0] || 'S').toUpperCase()}
                 </button>
 
                 {isDesktopProfileOpen && (
                   <>
-                    <div className={styles.dropdownOverlay} onClick={() => setIsDesktopProfileOpen(false)} />
+                    <div
+                      className={styles.dropdownOverlay}
+                      onClick={() => setIsDesktopProfileOpen(false)}
+                    />
                     <div className={`${styles.profileDropdown} ${styles.desktopDropdown}`}>
                       <div className={styles.dropdownHeader}>
-                        <p className="font-bold">{user.firstName || user.email || 'Account'}</p>
+                        <p>{user.firstName || user.email || 'Account'}</p>
                       </div>
-                      <Link href="/profile" className={styles.dropdownItem} onClick={() => setIsDesktopProfileOpen(false)}>
-                        <User size={18} /> Profile
+                      <Link
+                        href="/profile"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsDesktopProfileOpen(false)}
+                      >
+                        <User size={16} /> Profile
                       </Link>
-                      <Link href="/settings" className={styles.dropdownItem} onClick={() => setIsDesktopProfileOpen(false)}>
-                        <Settings size={18} /> Settings
+                      <Link
+                        href="/settings"
+                        className={styles.dropdownItem}
+                        onClick={() => setIsDesktopProfileOpen(false)}
+                      >
+                        <Settings size={16} /> Settings
                       </Link>
-                      <button className={`${styles.dropdownItem} ${styles.logoutItem}`} onClick={() => { setIsDesktopProfileOpen(false); handleLogout(); }}>
-                        <LogOut size={18} /> Logout
+                      <button
+                        className={`${styles.dropdownItem} ${styles.logoutItem}`}
+                        onClick={() => {
+                          setIsDesktopProfileOpen(false);
+                          handleLogout();
+                        }}
+                      >
+                        <LogOut size={16} /> Logout
                       </button>
                     </div>
                   </>
@@ -378,8 +450,12 @@ export default function AppNav({ activePage, mode = 'app' }: AppNavProps) {
               </div>
             ) : (
               <>
-                <Link href="/login" className={styles.desktopLink}>Login</Link>
-                <Link href="/join" className={styles.postBtn}>Join Network</Link>
+                <Link href="/login" className={styles.desktopLink}>
+                  Log in
+                </Link>
+                <Link href="/join" className={styles.postBtn}>
+                  Start Swapping
+                </Link>
               </>
             )}
           </div>

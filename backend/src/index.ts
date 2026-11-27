@@ -483,6 +483,93 @@ app.get('/api/me', requireAuth, async (req: Request, res: Response) => {
 });
 
 /**
+ * @api {get} /api/profile Get current user profile (alias)
+ */
+app.get('/api/profile', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.auth!.userId },
+      include: { profile: true }
+    });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+/**
+ * @api {post} /api/profile Update user profile and settings
+ */
+app.post('/api/profile', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const { firstName, lastName, headline, bio, skillsOffered, skillsSought, experienceLevel, availability, timezone, matchAlerts, publicProfile, escrowReceipts } = req.body;
+    
+    await prisma.$transaction([
+      prisma.profile.upsert({
+        where: { userId: req.auth!.userId },
+        update: {
+          ...(headline !== undefined && { headline }),
+          ...(bio !== undefined && { bio }),
+          ...(skillsOffered !== undefined && { skillsOffered }),
+          ...(skillsSought !== undefined && { skillsSought }),
+          ...(experienceLevel !== undefined && { experienceLevel }),
+          ...(availability !== undefined && { availability }),
+          ...(timezone !== undefined && { timezone }),
+          ...(matchAlerts !== undefined && { matchAlerts: Boolean(matchAlerts) }),
+          ...(publicProfile !== undefined && { publicProfile: Boolean(publicProfile) }),
+          ...(escrowReceipts !== undefined && { escrowReceipts: Boolean(escrowReceipts) })
+        },
+        create: {
+          userId: req.auth!.userId,
+          headline: headline || '',
+          bio: bio || '',
+          skillsOffered: skillsOffered || [],
+          skillsSought: skillsSought || [],
+          experienceLevel,
+          availability,
+          timezone,
+          matchAlerts: matchAlerts !== undefined ? Boolean(matchAlerts) : true,
+          publicProfile: publicProfile !== undefined ? Boolean(publicProfile) : true,
+          escrowReceipts: escrowReceipts !== undefined ? Boolean(escrowReceipts) : true
+        }
+      }),
+      prisma.user.update({
+        where: { id: req.auth!.userId },
+        data: {
+          ...(firstName !== undefined && { firstName }),
+          ...(lastName !== undefined && { lastName })
+        }
+      })
+    ]);
+
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: req.auth!.userId },
+      include: { profile: true }
+    });
+
+    res.json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
+/**
+ * @api {delete} /api/user Delete account
+ */
+app.delete('/api/user', requireAuth, async (req: Request, res: Response) => {
+  try {
+    await prisma.user.delete({
+      where: { id: req.auth!.userId }
+    });
+    res.json({ success: true, message: 'Account deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
+});
+
+/**
  * @api {get} /api/marketplace/partners Retrieve user profiles
  */
 app.get('/api/marketplace/partners', requireAuth, async (req: Request, res: Response) => {
@@ -590,6 +677,17 @@ app.post('/api/marketplace/listings', requireAuth, async (req: Request, res: Res
     const caller = await prisma.user.findUnique({ where: { id: req.auth!.userId } });
     if (!caller) return res.status(404).json({ error: 'Caller not found' });
 
+    if (caller.subscriptionTier === 'essential') {
+      const activeListingsCount = await prisma.listing.count({
+        where: { userId: caller.id, isActive: true }
+      });
+      if (activeListingsCount >= 1) {
+        return res.status(403).json({
+          error: 'Essential plan allows only 1 active skill listing. Upgrade to Professional for unlimited listings.'
+        });
+      }
+    }
+
     const { title, description, skillsOffered, skillsSought, category, sessionFormat, timeValue } = req.body;
 
     const listing = await prisma.listing.create({
@@ -614,8 +712,8 @@ app.post('/api/marketplace/swap-requests', requireAuth, async (req: Request, res
       const requestsSentCount = await prisma.swapRequest.count({
         where: { requesterId: caller.id }
       });
-      if (requestsSentCount >= 1) {
-        return res.status(403).json({ error: 'Essential plan limits you to 1 swap request. Upgrade to Professional for unlimited requests.' });
+      if (requestsSentCount >= 2) {
+        return res.status(403).json({ error: 'Essential plan allows up to 2 swap requests. Upgrade to Professional for unlimited requests.' });
       }
     }
 

@@ -65,7 +65,8 @@ export default function CreateListing() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to create listing');
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to create listing');
       }
 
       router.push('/marketplace');

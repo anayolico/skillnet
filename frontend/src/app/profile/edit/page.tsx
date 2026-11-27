@@ -1,12 +1,14 @@
-import { getApiUrl } from '@/src/utils/config';
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { User, Sparkles, SlidersHorizontal, CheckCircle2 } from 'lucide-react';
 import AppNav from '../../../../components/AppNav';
 import styles from './edit.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
 import { DEFAULT_SKILLS } from '../../../utils/skills';
+import { getApiUrl } from '@/src/utils/config';
 
 export default function EditProfile() {
   const router = useRouter();
@@ -156,8 +158,12 @@ export default function EditProfile() {
           <Link href="/profile" className={styles.cancelBtn}>View Public Profile</Link>
         </div>
 
-        {success && <div className={styles.successMsg}>✅ Profile updated successfully!</div>}
-        {error && <div className={styles.errorText} style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+        {success && (
+          <div className={styles.successMsg}>
+            <CheckCircle2 size={16} /> Profile updated successfully.
+          </div>
+        )}
+        {error && <div className={styles.errorText} style={{ color: '#b91c1c', marginBottom: '1rem' }}>{error}</div>}
 
         <div className={styles.mainLayout}>
           <aside className={styles.sidebar}>
@@ -165,19 +171,19 @@ export default function EditProfile() {
               className={`${styles.navItem} ${activeTab === 'profile' ? styles.navActive : ''}`}
               onClick={() => setActiveTab('profile')}
             >
-              <span>👤</span> Public Identity
+              <User size={16} /> Public Identity
             </button>
             <button 
               className={`${styles.navItem} ${activeTab === 'skills' ? styles.navActive : ''}`}
               onClick={() => setActiveTab('skills')}
             >
-              <span>📜</span> Expertise & Learning
+              <Sparkles size={16} /> Expertise &amp; Learning
             </button>
             <button 
               className={`${styles.navItem} ${activeTab === 'preferences' ? styles.navActive : ''}`}
               onClick={() => setActiveTab('preferences')}
             >
-              <span>⚙️</span> Match Preferences
+              <SlidersHorizontal size={16} /> Match Preferences
             </button>
           </aside>
 

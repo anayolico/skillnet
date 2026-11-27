@@ -1,5 +1,5 @@
-import { getApiUrl } from '@/src/utils/config';
 'use client';
+
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -7,43 +7,49 @@ import { Check, LockKeyhole, Scale, ShieldCheck } from 'lucide-react';
 import AppNav from '../../../components/AppNav';
 import styles from './subscriptions.module.css';
 import { useAuth } from '@/src/contexts/AuthContext';
+import { getApiUrl } from '@/src/utils/config';
 
 export default function Subscriptions() {
-  const tiers = [
-    {
-      name: 'Essential',
-      price: '0',
-      description: 'Ideal for those just starting their professional knowledge exchange journey.',
-      features: [
-        '1 swap request',
-        'Messaging only who you swap with',
-        'Access to Public Marketplace',
-        'Standard Search Visibility',
-        'Email Support'
-      ],
-      cta: 'Get Started',
-      featured: false
-    },
-    {
-      name: 'Professional',
-      price: '49',
-      description: 'Designed for architects and executives scaling their technical mastery.',
-      features: [
-        'Unlimited swap requests',
-        'Unlimited messaging',
-        'Priority Partner Matching',
-        'Verified "Expert" Badge',
-        '24/7 Priority Support'
-      ],
-      cta: 'Go Professional',
-      featured: true
-    }
-  ];
-
   const { user, getToken } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const API_URL = getApiUrl();
+
+  const isPro = user?.subscriptionTier === 'professional';
+
+  const tiers = [
+    {
+      name: 'Essential',
+      price: '0',
+      description: 'Ideal for professionals starting their peer knowledge exchange journey.',
+      features: [
+        '1 Active Skill Listing',
+        'Swap with up to 2 partners',
+        'Direct messaging with swap partners',
+        'Access to Public Marketplace',
+        'Standard Search Visibility'
+      ],
+      cta: isPro ? 'Included' : 'Current Plan',
+      featured: false,
+      disabled: true
+    },
+    {
+      name: 'Professional',
+      price: '49',
+      description: 'Designed for high-impact experts scaling their technical network and mastery.',
+      features: [
+        'Unlimited Skill Listings',
+        'Unlimited Swaps & Requests',
+        'Direct messaging with all swap partners',
+        'Priority Partner Matching',
+        'Verified "Expert" Badge',
+        '24/7 Priority Support'
+      ],
+      cta: isPro ? 'Current Plan' : 'Go Professional',
+      featured: true,
+      disabled: isPro
+    }
+  ];
 
   const config = {
     public_key: process.env.NEXT_PUBLIC_FLW_PUBLIC_KEY || 'FLWPUBK_TEST-placeholder',
@@ -67,7 +73,7 @@ export default function Subscriptions() {
       router.push('/login');
       return;
     }
-    if (user.subscriptionTier === 'professional') {
+    if (isPro) {
       alert("You are already on the Professional tier!");
       return;
     }
@@ -115,9 +121,27 @@ export default function Subscriptions() {
         FlutterwaveCheckout({
           ...config,
           tx_ref: data.txRef,
-          callback: (response: any) => {
+          callback: async (response: any) => {
              console.log("Payment response:", response);
-             alert("Payment successful! Your account is being upgraded. Please wait a moment.");
+             
+             // Verify transaction with backend immediately
+             try {
+               await fetch(`${API_URL}/api/subscriptions/verify`, {
+                 method: 'POST',
+                 headers: {
+                   'Content-Type': 'application/json',
+                   'Authorization': `Bearer ${getToken()}`
+                 },
+                 body: JSON.stringify({
+                   txRef: data.txRef,
+                   flutterwaveId: response.transaction_id || response.id
+                 })
+               });
+             } catch (e) {
+               console.error("Verification error:", e);
+             }
+
+             alert("Payment successful! You are now upgraded to the Professional tier.");
              setIsProcessing(false);
              window.location.href = '/dashboard';
           },
@@ -142,7 +166,6 @@ export default function Subscriptions() {
 
       <main className={styles.container}>
         <section className={`${styles.hero} reveal`}>
-          <span className={styles.tag}>Network Access Protocol</span>
           <h1 className={styles.title}>Refine your Edge. <br /> Architect your Future.</h1>
           <p className={styles.subtitle}>
             Choose the tier that aligns with your professional velocity. 
@@ -180,17 +203,20 @@ export default function Subscriptions() {
               {tier.name === 'Professional' ? (
                 <button 
                   onClick={handleUpgradeClick}
-                  disabled={isProcessing}
+                  disabled={isProcessing || isPro}
                   className={`${styles.ctaBtn} ${tier.featured ? styles.ctaBtnWhite : styles.ctaBtnPrimary} click-scale`}
+                  style={isPro ? { opacity: 0.7, cursor: 'default' } : {}}
                 >
-                  {isProcessing ? 'Processing...' : tier.cta}
+                  {isProcessing ? 'Processing...' : isPro ? 'Current Plan' : tier.cta}
                 </button>
               ) : (
-                <Link href="/join">
-                  <button className={`${styles.ctaBtn} ${tier.featured ? styles.ctaBtnWhite : styles.ctaBtnPrimary} click-scale`}>
-                    {tier.cta}
-                  </button>
-                </Link>
+                <button 
+                  className={`${styles.ctaBtn} ${styles.ctaBtnPrimary}`}
+                  disabled={true}
+                  style={{ opacity: 0.7, cursor: 'default' }}
+                >
+                  {tier.cta}
+                </button>
               )}
             </div>
           ))}
@@ -200,17 +226,14 @@ export default function Subscriptions() {
           <h3 className={styles.trustTitle}>The SkillNet Security Standard</h3>
           <div className={styles.trustGrid}>
             <div className={styles.trustItem}>
-              <div className={styles.trustIcon}><ShieldCheck size={26} strokeWidth={2.4} aria-hidden="true" /></div>
               <h4>Identity Governance</h4>
               <p>Every member is professionally vetted to maintain network integrity.</p>
             </div>
             <div className={styles.trustItem}>
-              <div className={styles.trustIcon}><Scale size={26} strokeWidth={2.4} aria-hidden="true" /></div>
               <h4>Equity Arbitrage</h4>
               <p>Our ledger ensures equitable time-value exchange for both partners.</p>
             </div>
             <div className={styles.trustItem}>
-              <div className={styles.trustIcon}><LockKeyhole size={26} strokeWidth={2.4} aria-hidden="true" /></div>
               <h4>Ledger Stability</h4>
               <p>Skill credits are held in trust until outcomes are verified.</p>
             </div>
